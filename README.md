@@ -58,6 +58,7 @@ pnpm dev
 2. Drugi igrač unese kod → uđe u sobu.
 3. Kad su svi spremni, host pokrene igru.
 4. Server drži stanje, validira svaki potez i svakom igraču šalje samo njegov pogled.
+5. Ako veza pukne, klijent se automatski ponovo poveže i vrati u sobu. Nakon partije host može pokrenuti **revanš** bez napuštanja sobe.
 
 ## Dodavanje nove igre (ukratko)
 

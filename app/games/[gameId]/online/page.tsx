@@ -34,6 +34,7 @@ function OnlineRunner({ gameId }: { gameId: string }) {
 
   if (!user) return null
   const status = room.lobby?.status ?? 'lobby'
+  const isHost = room.lobby?.hostId === user.id
   const backToMenu = () => {
     room.leave()
     router.push(`/games/${gameId}`)
@@ -42,7 +43,10 @@ function OnlineRunner({ gameId }: { gameId: string }) {
   return (
     <>
       {room.error && <p className={styles.error}>{room.error}</p>}
-      {!room.connected && !room.error && (
+      {room.reconnecting && (
+        <p className={styles.reconnect}>Veza prekinuta — ponovno povezivanje…</p>
+      )}
+      {!room.connected && !room.reconnecting && !room.error && (
         <p className={styles.muted}>Povezivanje sa serverom…</p>
       )}
 
@@ -69,9 +73,18 @@ function OnlineRunner({ gameId }: { gameId: string }) {
                     ? 'Pobijedio si! 🎉'
                     : 'Izgubio si.'}
               </p>
-              <Button variant="outline" onClick={backToMenu}>
-                Nazad u meni
-              </Button>
+              <div className={styles.resultActions}>
+                {isHost ? (
+                  <Button onClick={() => room.start()} className="neon-glow-cyan">
+                    Revanš
+                  </Button>
+                ) : (
+                  <span className={styles.muted}>Čeka se revanš od hosta…</span>
+                )}
+                <Button variant="outline" onClick={backToMenu}>
+                  Nazad u meni
+                </Button>
+              </div>
             </div>
           )}
         </div>

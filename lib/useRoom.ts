@@ -24,16 +24,21 @@ export interface LobbyState {
 
 interface AckResponse {
   error?: string
+  code?: string
   [key: string]: unknown
 }
 
 /**
  * Client side of the authoritative online room. Connects with the auth token,
- * relays room/game events, and exposes actions that round-trip to the server.
+ * relays room/game events, exposes actions that round-trip to the server, and
+ * automatically re-joins the room after a dropped connection.
  */
 export function useRoom(gameId: string) {
   const socketRef = useRef<Socket | null>(null)
+  const joinedCodeRef = useRef<string>('')
+  const everConnectedRef = useRef(false)
   const [connected, setConnected] = useState(false)
+  const [reconnecting, setReconnecting] = useState(false)
   const [lobby, setLobby] = useState<LobbyState | null>(null)
   const [view, setView] = useState<unknown>(null)
   const [result, setResult] = useState<GameResult | null>(null)
@@ -48,8 +53,19 @@ export function useRoom(gameId: string) {
     const socket = createSocket(token)
     socketRef.current = socket
 
-    socket.on('connect', () => setConnected(true))
-    socket.on('disconnect', () => setConnected(false))
+    socket.on('connect', () => {
+      setConnected(true)
+      // On a reconnect, re-link this socket to the room we were in.
+      if (everConnectedRef.current && joinedCodeRef.current) {
+        socket.emit('room:join', { code: joinedCodeRef.current }, () => {})
+      }
+      setReconnecting(false)
+      everConnectedRef.current = true
+    })
+    socket.on('disconnect', () => {
+      setConnected(false)
+      if (joinedCodeRef.current) setReconnecting(true)
+    })
     socket.on('connect_error', (e: Error) => setError(e.message))
     socket.on('room:update', (l: LobbyState) => setLobby(l))
     socket.on('game:state', (v: unknown) => {
@@ -57,9 +73,7 @@ export function useRoom(gameId: string) {
       setResult(null)
     })
     socket.on('game:over', (r: GameResult) => setResult(r))
-    socket.on('error', (e: { message?: string }) =>
-      setError(e?.message ?? 'Greška'),
-    )
+    socket.on('error', (e: { message?: string }) => setError(e?.message ?? 'Greška'))
 
     return () => {
       socket.close()
@@ -80,6 +94,7 @@ export function useRoom(gameId: string) {
   const createRoom = useCallback(async () => {
     const r = await emit('room:create', { gameId })
     if (r.error) setError(r.error)
+    else if (r.code) joinedCodeRef.current = r.code
     return r
   }, [emit, gameId])
 
@@ -87,6 +102,7 @@ export function useRoom(gameId: string) {
     async (code: string) => {
       const r = await emit('room:join', { code })
       if (r.error) setError(r.error)
+      else joinedCodeRef.current = r.code ?? code.toUpperCase()
       return r
     },
     [emit],
@@ -112,10 +128,15 @@ export function useRoom(gameId: string) {
     [emit],
   )
 
-  const leave = useCallback(() => emit('room:leave', {}), [emit])
+  const leave = useCallback(() => {
+    joinedCodeRef.current = ''
+    setReconnecting(false)
+    return emit('room:leave', {})
+  }, [emit])
 
   return {
     connected,
+    reconnecting,
     lobby,
     view,
     result,
