@@ -1,0 +1,106 @@
+.lobby {
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.codeBox {
+  text-align: center;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.codeLabel {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.codeRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.code {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.4rem;
+  font-family: var(--font-mono);
+}
+
+.hint {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.playersTitle {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.playerList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--secondary);
+}
+
+.offline {
+  opacity: 0.5;
+}
+
+.playerName {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+}
+
+.status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.ready {
+  color: var(--neon-green);
+  background: oklch(0.7 0.2 150 / 0.12);
+}
+
+.notReady {
+  color: var(--muted-foreground);
+  background: var(--muted);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.waitNote {
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}

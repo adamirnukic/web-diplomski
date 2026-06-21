@@ -1,0 +1,83 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: min(560px, 94vw);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.scores {
+  color: var(--neon-cyan);
+}
+
+.question {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.options {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.option {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, transform 0.08s;
+}
+
+.option:not(:disabled):hover {
+  border-color: var(--primary-border);
+  background: var(--secondary);
+  transform: translateY(-2px);
+}
+
+.option:disabled {
+  cursor: default;
+}
+
+.correct {
+  border-color: var(--neon-green);
+  background: oklch(0.7 0.2 150 / 0.15);
+  color: var(--neon-green);
+}
+
+.wrong {
+  border-color: var(--destructive);
+  background: oklch(0.55 0.22 25 / 0.15);
+}
+
+.wait {
+  color: var(--muted-foreground);
+}
+
+.final {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.scoreLine {
+  font-size: 1.2rem;
+  color: var(--muted-foreground);
+}
+
+.loading {
+  color: var(--muted-foreground);
+}

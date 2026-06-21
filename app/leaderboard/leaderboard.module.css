@@ -1,163 +1,71 @@
 .page {
   min-height: 100vh;
-  background: var(--background);
 }
 
 .main {
-  margin: 0 auto;
-  max-width: 56rem;
-  padding: 2rem 1rem;
+  padding: 2.5rem 1rem 4rem;
+  max-width: 640px;
 }
 
 .header {
-  margin-bottom: 2rem;
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
 }
 
 .title {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--foreground);
-}
-
-.subtitle {
-  color: var(--muted-foreground);
-}
-
-.filters {
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.filterButton {
-  border-radius: 0.5rem;
-  padding: 0.375rem 0.875rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  background: var(--secondary);
-  color: var(--muted-foreground);
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-}
-
-.filterButton:hover {
-  color: var(--foreground);
-}
-
-.filterButtonActive {
-  background: var(--primary-soft);
-  color: var(--primary);
+  font-size: 2rem;
+  font-weight: 800;
 }
 
 .list {
+  list-style: none;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.empty {
-  border-radius: 0.75rem;
-  border: 1px solid var(--border-subtle);
-  background: var(--card);
-  padding: 3rem;
-  text-align: center;
-  color: var(--muted-foreground);
-}
-
 .row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto auto;
   align-items: center;
   gap: 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border-subtle);
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
   background: var(--card);
-  padding: 1rem;
-  transition: border-color 0.2s ease;
 }
 
-.row:hover {
-  border-color: color-mix(in oklch, var(--primary) 20%, transparent);
-}
-
-.rowTop {
-  border-color: color-mix(in oklch, var(--primary) 20%, transparent);
+.top {
+  border-color: var(--primary-border);
 }
 
 .rank {
-  display: flex;
-  width: 2rem;
-  align-items: center;
-  justify-content: center;
-}
-
-.rankIcon {
-  height: 1.25rem;
-  width: 1.25rem;
-}
-
-.rankText {
-  width: 1.25rem;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--muted-foreground);
   text-align: center;
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
+}
+
+.top .rank {
+  color: var(--neon-green);
+}
+
+.user {
+  font-weight: 600;
+}
+
+.wins {
   color: var(--muted-foreground);
-}
-
-.avatar {
-  height: 2.25rem;
-  width: 2.25rem;
-  border: 1px solid var(--border-subtle);
-}
-
-.avatarFallback {
-  background: var(--primary-soft);
-  color: var(--primary);
-  font-size: 0.75rem;
-}
-
-.playerInfo {
-  flex: 1;
-}
-
-.playerName {
-  font-weight: 500;
-  color: var(--foreground);
-}
-
-.playerMeta {
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
-}
-
-.stats {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  font-size: 0.875rem;
-}
-
-.statsDetail {
-  text-align: right;
-  color: var(--muted-foreground);
-}
-
-.statsDivider {
-  color: color-mix(in oklch, var(--muted-foreground) 50%, transparent);
+  font-size: 0.9rem;
 }
 
 .xp {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 700;
+  color: var(--neon-cyan);
 }
 
-@media (max-width: 639px) {
-  .statsDetail {
-    display: none;
-  }
+.muted {
+  color: var(--muted-foreground);
 }

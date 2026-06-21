@@ -1,0 +1,123 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.heading {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.hint {
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.status {
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 1.5rem;
+}
+
+.statusDone {
+  font-size: 1.4rem;
+}
+
+.boards {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.boardWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.boardLabel {
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.grid {
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  background: var(--border);
+  border-radius: 8px;
+}
+
+.cell {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 3px;
+  background: oklch(0.2 0.03 250);
+  border: none;
+  padding: 0;
+}
+
+button.cell:not(:disabled) {
+  cursor: pointer;
+}
+
+button.cell:not(:disabled):hover {
+  background: var(--primary-soft);
+}
+
+.unknown {
+  background: oklch(0.22 0.04 250);
+}
+
+.ship {
+  background: var(--muted-foreground);
+}
+
+.hit {
+  background: var(--neon-magenta);
+  box-shadow: 0 0 6px oklch(0.65 0.25 330 / 0.6);
+}
+
+.miss {
+  background: oklch(0.3 0.02 250);
+  position: relative;
+}
+
+.miss::after {
+  content: '·';
+  color: var(--muted-foreground);
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.wait {
+  color: var(--muted-foreground);
+  font-size: 1.1rem;
+  padding: 2rem;
+}
+
+@media (max-width: 560px) {
+  .cell {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+  .boards {
+    gap: 1rem;
+  }
+}
+
+.loading {
+  color: var(--muted-foreground);
+}

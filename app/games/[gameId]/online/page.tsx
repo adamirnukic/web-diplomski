@@ -1,0 +1,122 @@
+'use client'
+
+import { Suspense, use, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
+import { Navbar } from '@/components/layout/navbar'
+import { getGameMeta } from '@/lib/games-catalog'
+import { getEngine } from '@shared/games/registry'
+import { getGameComponent } from '@/components/games/registry'
+import { useAuth } from '@/lib/auth'
+import { useRoom } from '@/lib/useRoom'
+import { RoomLobby } from '@/components/RoomLobby'
+import { Button } from '@/components/ui/button'
+import styles from './online.module.css'
+
+function OnlineRunner({ gameId }: { gameId: string }) {
+  const game = getGameMeta(gameId)!
+  const Comp = getGameComponent(gameId)!
+  const { user } = useAuth()
+  const search = useSearchParams()
+  const joinCode = search.get('code')
+  const router = useRouter()
+  const room = useRoom(gameId)
+  const setupDone = useRef(false)
+
+  useEffect(() => {
+    if (!room.connected || setupDone.current) return
+    setupDone.current = true
+    if (joinCode) room.joinRoom(joinCode)
+    else room.createRoom()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.connected])
+
+  if (!user) return null
+  const status = room.lobby?.status ?? 'lobby'
+  const backToMenu = () => {
+    room.leave()
+    router.push(`/games/${gameId}`)
+  }
+
+  return (
+    <>
+      {room.error && <p className={styles.error}>{room.error}</p>}
+      {!room.connected && !room.error && (
+        <p className={styles.muted}>Povezivanje sa serverom…</p>
+      )}
+
+      {room.lobby && status === 'lobby' && (
+        <RoomLobby
+          lobby={room.lobby}
+          meId={user.id}
+          minPlayers={game.minPlayers}
+          onReady={room.setReady}
+          onStart={room.start}
+          onLeave={backToMenu}
+        />
+      )}
+
+      {room.lobby && status !== 'lobby' && (
+        <div className={styles.gameWrap}>
+          <Comp view={room.view} onAction={room.sendAction} mode="online" />
+          {room.result && (
+            <div className={styles.result}>
+              <p className={styles.resultText}>
+                {room.result.status === 'draw'
+                  ? 'Neriješeno!'
+                  : room.result.winnerId === user.id
+                    ? 'Pobijedio si! 🎉'
+                    : 'Izgubio si.'}
+              </p>
+              <Button variant="outline" onClick={backToMenu}>
+                Nazad u meni
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  )
+}
+
+export default function OnlineGamePage({
+  params,
+}: {
+  params: Promise<{ gameId: string }>
+}) {
+  const { gameId } = use(params)
+  const game = getGameMeta(gameId)
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) router.push('/login')
+  }, [loading, user, router])
+
+  const ready = Boolean(game && getEngine(gameId) && getGameComponent(gameId))
+
+  return (
+    <div className={styles.page}>
+      <Navbar />
+      <main className={`container ${styles.main}`}>
+        <Link href={`/games/${gameId}`} className={styles.back}>
+          <ArrowLeft size={16} /> Nazad
+        </Link>
+        <h1 className={styles.title}>
+          {game?.name ?? 'Igra'} <span className={styles.muted}>— online</span>
+        </h1>
+
+        {loading || !user ? (
+          <p className={styles.muted}>Učitavanje…</p>
+        ) : ready ? (
+          <Suspense fallback={<p className={styles.muted}>Učitavanje…</p>}>
+            <OnlineRunner gameId={gameId} />
+          </Suspense>
+        ) : (
+          <p className={styles.muted}>Ova igra još nije dostupna online.</p>
+        )}
+      </main>
+    </div>
+  )
+}

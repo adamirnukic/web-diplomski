@@ -1,111 +1,56 @@
 .page {
   min-height: 100vh;
-  background: var(--background);
 }
 
 .main {
-  margin: 0 auto;
-  max-width: var(--container-width);
-  padding: 2rem 1rem;
+  padding: 2.5rem 1rem 4rem;
 }
 
 .header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .title {
-  margin-bottom: 0.5rem;
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: var(--foreground);
+  font-size: 2rem;
+  font-weight: 800;
 }
 
 .subtitle {
   color: var(--muted-foreground);
+  margin-top: 0.25rem;
 }
 
 .filters {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.searchWrapper {
-  position: relative;
-  flex: 1;
-  max-width: 28rem;
-}
-
-.searchIcon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  height: 1rem;
-  width: 1rem;
-  transform: translateY(-50%);
-  color: var(--muted-foreground);
-}
-
-.searchInput {
-  padding-left: 2.5rem;
-  background: var(--card);
-  border-color: var(--border);
-}
-
-.categoryFilters {
-  display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.categoryButton {
-  border-color: var(--border);
+.filter {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
-.categoryButton:hover {
-  border-color: color-mix(in oklch, var(--primary) 50%, transparent);
+.filter:hover {
+  color: var(--foreground);
 }
 
-.categoryButtonActive {
-  background: var(--primary);
-  color: var(--primary-foreground);
+.filterActive {
+  color: var(--neon-cyan);
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
 }
 
 .grid {
   display: grid;
-  gap: 1.5rem;
-}
-
-.emptyState {
-  text-align: center;
-  padding: 4rem 0;
-}
-
-.emptyText {
-  font-size: 1.125rem;
-  color: var(--muted-foreground);
-}
-
-@media (min-width: 640px) {
-  .filters {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
 }

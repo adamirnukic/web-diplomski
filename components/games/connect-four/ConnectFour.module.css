@@ -1,0 +1,73 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.status {
+  font-size: 1.25rem;
+  font-weight: 600;
+  min-height: 1.5rem;
+}
+
+.statusDone {
+  font-size: 1.5rem;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border-radius: 16px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  width: min(420px, 92vw);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.column:disabled {
+  cursor: default;
+}
+
+.column:not(:disabled):hover {
+  background: var(--primary-soft);
+  border-radius: 999px;
+}
+
+.cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: var(--background);
+  box-shadow: inset 0 0 0 2px var(--border);
+  transition: background 0.15s;
+}
+
+.red {
+  background: var(--neon-magenta);
+  box-shadow: 0 0 8px oklch(0.65 0.25 330 / 0.5);
+}
+
+.yellow {
+  background: var(--neon-green);
+  box-shadow: 0 0 8px oklch(0.7 0.2 150 / 0.5);
+}
+
+.win {
+  outline: 3px solid var(--neon-cyan);
+  outline-offset: -3px;
+}
+
+.loading {
+  color: var(--muted-foreground);
+}

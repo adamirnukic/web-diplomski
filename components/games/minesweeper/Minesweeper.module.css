@@ -1,0 +1,71 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.scores {
+  display: flex;
+  gap: 1.5rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.status {
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 1.5rem;
+}
+
+.statusDone {
+  font-size: 1.4rem;
+}
+
+.board {
+  display: grid;
+  gap: 3px;
+  padding: 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.cell {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--secondary);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.cell:not(:disabled):hover {
+  background: var(--primary-soft);
+}
+
+.revealed {
+  background: var(--background);
+  cursor: default;
+}
+
+.mine {
+  background: oklch(0.55 0.22 25 / 0.25);
+}
+
+@media (max-width: 480px) {
+  .cell {
+    width: 1.7rem;
+    height: 1.7rem;
+    font-size: 0.8rem;
+  }
+}
+
+.loading {
+  color: var(--muted-foreground);
+}

@@ -1,0 +1,127 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.status {
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 1.5rem;
+}
+
+.statusDone {
+  font-size: 1.4rem;
+}
+
+.dice {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.die {
+  width: 3.25rem;
+  height: 3.25rem;
+  display: grid;
+  place-items: center;
+  font-size: 2.25rem;
+  line-height: 1;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, transform 0.08s;
+}
+
+.die:not(:disabled):hover {
+  border-color: var(--primary-border);
+}
+
+.die:disabled {
+  cursor: default;
+}
+
+.held {
+  border-color: var(--neon-cyan);
+  background: var(--primary-soft);
+  box-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.3);
+}
+
+.empty {
+  color: var(--muted-foreground);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hint {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.card {
+  width: min(440px, 96vw);
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.card th,
+.card td {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: center;
+}
+
+.card th {
+  background: var(--secondary);
+  font-size: 0.85rem;
+}
+
+.catName {
+  text-align: left !important;
+  color: var(--muted-foreground);
+}
+
+.activeCol {
+  color: var(--neon-cyan);
+}
+
+.scored {
+  font-weight: 700;
+}
+
+.pick {
+  width: 100%;
+  border: none;
+  background: var(--primary-soft);
+  color: var(--neon-cyan);
+  font-weight: 700;
+  padding: 0.3rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pick:hover {
+  background: var(--primary-border);
+  color: var(--foreground);
+}
+
+.totalRow {
+  font-weight: 800;
+}
+
+.totalRow td {
+  border-top: 2px solid var(--border);
+}
+
+.loading {
+  color: var(--muted-foreground);
+}

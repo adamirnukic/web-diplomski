@@ -1,240 +1,114 @@
 .page {
   min-height: 100vh;
-  background: var(--background);
 }
 
 .main {
-  margin: 0 auto;
-  max-width: 56rem;
-  padding: 2rem 1rem;
+  padding: 2.5rem 1rem 4rem;
+  max-width: 760px;
 }
 
-.loading {
+.head {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 8rem 0;
-  color: var(--muted-foreground);
-}
-
-.headerCard {
+  gap: 1.25rem;
   margin-bottom: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border-subtle);
-  background: var(--card);
-  padding: 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .headerCard {
-    flex-direction: row;
-    align-items: flex-start;
-  }
 }
 
 .avatar {
-  height: 5rem;
-  width: 5rem;
-  border: 2px solid color-mix(in oklch, var(--primary) 30%, transparent);
-}
-
-.avatarFallback {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
   background: var(--primary-soft);
-  color: var(--primary);
-  font-size: 1.5rem;
+  color: var(--neon-cyan);
+  font-size: 1.75rem;
+  font-weight: 800;
+  flex-shrink: 0;
 }
 
-.profileContent {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.name {
+  font-size: 1.75rem;
+  font-weight: 800;
 }
 
-.editForm {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.actionRow {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.actionButton {
-  gap: 0.25rem;
-}
-
-.actionIcon {
-  height: 0.875rem;
-  width: 0.875rem;
-}
-
-.headerRow {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.editButton {
-  height: 1.75rem;
-  width: 1.75rem;
-  padding: 0;
-}
-
-.username {
-  font-size: 0.875rem;
+.email {
   color: var(--muted-foreground);
+  font-size: 0.9rem;
 }
 
-.bio {
-  font-size: 0.875rem;
-  color: color-mix(in oklch, var(--foreground) 80%, transparent);
-}
-
-.levelRow {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.levelMeta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.875rem;
-}
-
-.levelTitle {
-  font-weight: 500;
-  color: var(--primary);
-}
-
-.levelXp {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
-}
-
-.progress {
-  height: 0.5rem;
-}
-
-.statsGrid {
-  margin-bottom: 2rem;
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.statCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border-subtle);
-  background: var(--card);
-  padding: 1rem;
-}
-
-.statIcon {
-  height: 1.25rem;
-  width: 1.25rem;
-}
-
-.statValue {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-family: var(--font-mono);
-  color: var(--foreground);
-}
-
-.statLabel {
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
-}
-
-.sectionTitle {
-  margin-bottom: 1rem;
-  font-size: 1.125rem;
+.level {
+  color: var(--neon-green);
   font-weight: 600;
-  color: var(--foreground);
-}
-
-.emptyStats {
-  border-radius: 0.75rem;
-  border: 1px solid var(--border-subtle);
-  background: var(--card);
-  padding: 2rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--muted-foreground);
-}
-
-.statsList {
-  display: grid;
-  gap: 0.75rem;
-}
-
-@media (min-width: 640px) {
-  .statsList {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  margin-top: 0.25rem;
 }
 
 .statRow {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border-subtle);
-  background: var(--card);
-  padding: 1rem;
+  margin-bottom: 2.5rem;
 }
 
-.gameIcon {
+.stat {
   display: flex;
-  height: 2.5rem;
-  width: 2.5rem;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  border-radius: 0.5rem;
-  background: var(--primary-soft);
+  gap: 0.25rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
 }
 
-.gameIconSvg {
-  height: 1.25rem;
-  width: 1.25rem;
-  color: var(--primary);
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--neon-cyan);
 }
 
-.statInfo {
-  flex: 1;
-}
-
-.statName {
-  font-weight: 500;
-  color: var(--foreground);
-}
-
-.statMeta {
-  font-size: 0.75rem;
+.statLabel {
   color: var(--muted-foreground);
+  font-size: 0.85rem;
 }
 
-.statCount {
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
+.section {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.table th {
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.table td:not(:first-child),
+.table th:not(:first-child) {
+  text-align: center;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.muted {
   color: var(--muted-foreground);
 }

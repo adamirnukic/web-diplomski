@@ -1,0 +1,81 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  width: 100%;
+}
+
+.dealer,
+.player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.areaLabel {
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cards {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.players {
+  display: flex;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.player {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.active {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 14px oklch(0.75 0.18 195 / 0.25);
+}
+
+.bust {
+  color: var(--destructive);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.outcome {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.win {
+  color: var(--neon-green);
+}
+
+.lose {
+  color: var(--destructive);
+}
+
+.push {
+  color: var(--muted-foreground);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.wait {
+  color: var(--muted-foreground);
+}
+
+.loading {
+  color: var(--muted-foreground);
+}
