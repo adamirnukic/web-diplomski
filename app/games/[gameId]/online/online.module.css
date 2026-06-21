@@ -65,3 +65,20 @@
   font-size: 1.4rem;
   font-weight: 700;
 }
+
+.resultActions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.reconnect {
+  text-align: center;
+  color: #e8a13a;
+  background: oklch(0.7 0.15 60 / 0.12);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
