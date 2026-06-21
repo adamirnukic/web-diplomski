@@ -1,0 +1,119 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.heading {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.hint {
+  color: var(--muted-foreground);
+}
+
+.setupForm {
+  display: flex;
+  gap: 0.5rem;
+  width: min(420px, 92vw);
+}
+
+.setupForm > :first-child {
+  flex: 1;
+}
+
+.waiting {
+  color: var(--muted-foreground);
+  font-size: 1.1rem;
+  padding: 2rem;
+}
+
+.attempts {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.crosses {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.cross {
+  color: var(--border);
+}
+
+.used {
+  color: var(--destructive);
+}
+
+.word {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.slot {
+  width: 2rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  border-bottom: 3px solid var(--border);
+}
+
+.filled {
+  color: var(--neon-cyan);
+}
+
+.space {
+  width: 1rem;
+}
+
+.keyboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  max-width: 520px;
+}
+
+.key {
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.key:not(:disabled):hover {
+  border-color: var(--primary-border);
+  background: var(--secondary);
+}
+
+.key:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.final {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.reveal {
+  color: var(--muted-foreground);
+}
+
+.loading {
+  color: var(--muted-foreground);
+}

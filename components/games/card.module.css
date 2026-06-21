@@ -1,0 +1,47 @@
+.card {
+  width: 3.25rem;
+  height: 4.6rem;
+  border-radius: 8px;
+  background: #f6f6fb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.small {
+  width: 2.5rem;
+  height: 3.5rem;
+}
+
+.rank {
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.suit {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.red {
+  color: #d11a4a;
+}
+
+.black {
+  color: #1a1a2e;
+}
+
+.back {
+  background: linear-gradient(135deg, oklch(0.4 0.12 290), oklch(0.45 0.15 330));
+  border: 2px solid oklch(0.75 0.18 195 / 0.4);
+}
+
+.backMark {
+  color: oklch(0.85 0.1 195 / 0.7);
+  font-size: 1.5rem;
+}

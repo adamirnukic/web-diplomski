@@ -1,2 +1,6 @@
+# pnpm 10 reads settings from here. Allow these packages to run build scripts:
+# - esbuild: required by tsx to run the TypeScript server
+# - sharp: optional image lib pulled in by Next
 allowBuilds:
+  esbuild: true
   sharp: true

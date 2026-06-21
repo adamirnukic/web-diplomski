@@ -1,0 +1,73 @@
+.link {
+  display: block;
+  text-decoration: none;
+}
+
+.card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  height: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.link:hover .card {
+  transform: translateY(-3px);
+  border-color: var(--primary-border);
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+}
+
+.disabled {
+  opacity: 0.55;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.desc {
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.meta {
+  margin-top: auto;
+  padding-top: 0.4rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.players {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}

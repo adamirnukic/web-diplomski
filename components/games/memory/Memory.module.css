@@ -1,0 +1,73 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.scores {
+  display: flex;
+  gap: 1.5rem;
+  font-weight: 600;
+}
+
+.score {
+  color: var(--muted-foreground);
+}
+
+.status {
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 1.5rem;
+}
+
+.statusDone {
+  font-size: 1.4rem;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  width: min(400px, 92vw);
+}
+
+.card {
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--secondary);
+  cursor: pointer;
+  transition: transform 0.12s, background 0.15s, border-color 0.15s;
+}
+
+.card:not(:disabled):hover {
+  border-color: var(--primary-border);
+  transform: translateY(-2px);
+}
+
+.up {
+  background: var(--card);
+  border-color: var(--primary-border);
+}
+
+.up .face {
+  opacity: 1;
+}
+
+.face {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.matched {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 10px oklch(0.7 0.2 150 / 0.3);
+}
+
+.loading {
+  color: var(--muted-foreground);
+}

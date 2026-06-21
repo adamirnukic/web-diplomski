@@ -8,3 +8,11 @@ node_modules/
 .next/
 .env*.local
 .DS_Store
+
+# Backend (SQLite db file + compiled server)
+server/data.sqlite
+server/data.sqlite-*
+dist-server/
+
+# TypeScript build info
+*.tsbuildinfo
