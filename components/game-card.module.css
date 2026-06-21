@@ -1,0 +1,117 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--card);
+  padding: 1.25rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-0.25rem) scale(1.02);
+  border-color: var(--accent-border, var(--border-subtle));
+  box-shadow: var(--accent-shadow, none);
+}
+
+.icon {
+  display: flex;
+  height: 3rem;
+  width: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.625rem;
+  background: var(--accent-bg);
+  color: var(--accent-color);
+  transition: transform 0.3s ease;
+}
+
+.card:hover .icon {
+  transform: scale(1.1);
+}
+
+.iconSvg {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.title {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tags {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge {
+  border-radius: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--accent-bg);
+  color: var(--accent-color);
+}
+
+.badgeMuted {
+  border-radius: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+
+.colorCyan {
+  --accent-color: var(--neon-cyan);
+  --accent-bg: oklch(0.75 0.18 195 / 0.1);
+  --accent-border: color-mix(in oklch, var(--neon-cyan) 50%, transparent);
+  --accent-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.3),
+    0 0 30px oklch(0.75 0.18 195 / 0.15),
+    0 0 60px oklch(0.75 0.18 195 / 0.05);
+}
+
+.colorMagenta {
+  --accent-color: var(--neon-magenta);
+  --accent-bg: oklch(0.65 0.25 330 / 0.1);
+  --accent-border: color-mix(in oklch, var(--neon-magenta) 50%, transparent);
+  --accent-shadow: 0 0 10px oklch(0.65 0.25 330 / 0.3),
+    0 0 30px oklch(0.65 0.25 330 / 0.15),
+    0 0 60px oklch(0.65 0.25 330 / 0.05);
+}
+
+.colorGreen {
+  --accent-color: var(--neon-green);
+  --accent-bg: oklch(0.7 0.2 150 / 0.1);
+  --accent-border: color-mix(in oklch, var(--neon-green) 50%, transparent);
+  --accent-shadow: 0 0 10px oklch(0.7 0.2 150 / 0.3),
+    0 0 30px oklch(0.7 0.2 150 / 0.15);
+}
+
+.colorPurple {
+  --accent-color: var(--neon-purple);
+  --accent-bg: oklch(0.6 0.2 290 / 0.1);
+  --accent-border: color-mix(in oklch, var(--neon-purple) 50%, transparent);
+  --accent-shadow: 0 0 10px oklch(0.6 0.2 290 / 0.3),
+    0 0 30px oklch(0.6 0.2 290 / 0.15);
+}

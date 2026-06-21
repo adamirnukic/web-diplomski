@@ -1,0 +1,164 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.scoreCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  padding: 0.75rem 1.5rem;
+}
+
+.scoreInactive {
+  opacity: 0.5;
+}
+
+.scoreDot {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+}
+
+.scoreDotCyan {
+  background: var(--neon-cyan);
+}
+
+.scoreDotMagenta {
+  background: var(--neon-magenta);
+}
+
+.scoreValue {
+  margin-top: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  color: var(--foreground);
+}
+
+.vsText {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.status {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.statusWin {
+  color: var(--neon-green);
+  text-shadow: 0 0 10px color-mix(in oklch, var(--neon-green) 60%, transparent);
+}
+
+.statusDefault {
+  color: var(--foreground);
+}
+
+.boardFrame {
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  padding: 0.75rem;
+}
+
+.boardGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.375rem;
+}
+
+.indicatorCell {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 0.25rem;
+}
+
+.indicatorDot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 999px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.indicatorCyan {
+  background: color-mix(in oklch, var(--neon-cyan) 50%, transparent);
+}
+
+.indicatorMagenta {
+  background: color-mix(in oklch, var(--neon-magenta) 50%, transparent);
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in oklch, var(--secondary) 30%, transparent);
+  transition: background 0.15s ease, border 0.15s ease, transform 0.15s ease;
+}
+
+@media (min-width: 768px) {
+  .cell {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+.cellEmpty {
+  cursor: pointer;
+}
+
+.cellEmpty:hover {
+  background: color-mix(in oklch, var(--secondary) 60%, transparent);
+}
+
+.cellFilled {
+  border-color: transparent;
+  cursor: default;
+  background: transparent;
+}
+
+.cellWin {
+  box-shadow: 0 0 0 2px var(--neon-green), 0 0 0 4px var(--card);
+}
+
+.disc {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+}
+
+.discCyan {
+  background: var(--neon-cyan);
+}
+
+.discMagenta {
+  background: var(--neon-magenta);
+}
+
+@media (min-width: 768px) {
+  .disc {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}

@@ -1,0 +1,151 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.subtitle {
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.scoreCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  padding: 0.75rem 1.5rem;
+}
+
+.scoreInactive {
+  opacity: 0.5;
+}
+
+.scoreLabel {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.scoreValue {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.scoreValueLarge {
+  font-size: 1.875rem;
+}
+
+.centerInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.resultText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--neon-green);
+}
+
+.turnText {
+  font-size: 0.875rem;
+  color: var(--primary);
+}
+
+.questionWrap {
+  width: 100%;
+  max-width: 32rem;
+}
+
+.questionCard {
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.questionCategory {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.questionText {
+  margin-top: 0.25rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.answerList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.answerButton {
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  transition: background 0.15s ease, border 0.15s ease;
+}
+
+.answerButton:hover {
+  border-color: color-mix(in oklch, var(--primary) 30%, transparent);
+  background: color-mix(in oklch, var(--primary) 5%, transparent);
+}
+
+.answerCorrect {
+  border-color: color-mix(in oklch, var(--neon-green) 50%, transparent);
+  background: color-mix(in oklch, var(--neon-green) 10%, transparent);
+  color: var(--neon-green);
+}
+
+.answerWrong {
+  border-color: color-mix(in oklch, var(--destructive) 50%, transparent);
+  background: color-mix(in oklch, var(--destructive) 10%, transparent);
+  color: var(--destructive);
+}
+
+.answerMuted {
+  border-color: var(--border-soft);
+  background: var(--card);
+  color: var(--muted-foreground);
+}
+
+.answerIdle {
+  color: var(--foreground);
+}
+
+.answerLetter {
+  margin-right: 0.5rem;
+  color: var(--muted-foreground);
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}

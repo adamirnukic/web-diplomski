@@ -1,0 +1,114 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.scoreCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  padding: 0.75rem 1.5rem;
+}
+
+.scoreInactive {
+  opacity: 0.5;
+}
+
+.scoreLetter {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.scoreValue {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  color: var(--foreground);
+}
+
+.vsText {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.status {
+  font-size: 1.125rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.statusWin {
+  color: var(--neon-green);
+  text-shadow: 0 0 10px color-mix(in oklch, var(--neon-green) 60%, transparent);
+}
+
+.statusDraw {
+  color: var(--muted-foreground);
+}
+
+.statusDefault {
+  color: var(--foreground);
+}
+
+.boardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 0.75rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  transition: background 0.15s ease, border 0.15s ease, transform 0.15s ease;
+}
+
+@media (min-width: 768px) {
+  .cell {
+    width: 7rem;
+    height: 7rem;
+  }
+}
+
+.cellEmpty {
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in oklch, var(--secondary) 50%, transparent);
+  cursor: pointer;
+}
+
+.cellEmpty:hover {
+  border-color: color-mix(in oklch, var(--primary) 50%, transparent);
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+}
+
+.cellFilled {
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  cursor: default;
+}
+
+.cellWin {
+  border-color: color-mix(in oklch, var(--neon-green) 50%, transparent);
+  background: color-mix(in oklch, var(--neon-green) 10%, transparent);
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}

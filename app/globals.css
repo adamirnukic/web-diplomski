@@ -1,0 +1,233 @@
+/* GameVault: Forced dark neon gaming theme */
+:root {
+  --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --background: oklch(0.09 0.01 270);
+  --foreground: oklch(0.95 0.01 270);
+  --card: oklch(0.13 0.015 270);
+  --card-foreground: oklch(0.95 0.01 270);
+  --popover: oklch(0.11 0.012 270);
+  --popover-foreground: oklch(0.95 0.01 270);
+  --primary: oklch(0.75 0.18 195);
+  --primary-foreground: oklch(0.09 0.01 270);
+  --secondary: oklch(0.18 0.02 270);
+  --secondary-foreground: oklch(0.9 0.01 270);
+  --muted: oklch(0.18 0.02 270);
+  --muted-foreground: oklch(0.6 0.02 270);
+  --accent: oklch(0.65 0.25 330);
+  --accent-foreground: oklch(0.09 0.01 270);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.95 0.01 0);
+  --border: oklch(0.22 0.03 270);
+  --input: oklch(0.18 0.02 270);
+  --ring: oklch(0.75 0.18 195);
+  --chart-1: oklch(0.75 0.18 195);
+  --chart-2: oklch(0.65 0.25 330);
+  --chart-3: oklch(0.7 0.2 150);
+  --chart-4: oklch(0.6 0.2 290);
+  --chart-5: oklch(0.7 0.15 60);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.11 0.012 270);
+  --sidebar-foreground: oklch(0.95 0.01 270);
+  --sidebar-primary: oklch(0.75 0.18 195);
+  --sidebar-primary-foreground: oklch(0.09 0.01 270);
+  --sidebar-accent: oklch(0.18 0.02 270);
+  --sidebar-accent-foreground: oklch(0.95 0.01 270);
+  --sidebar-border: oklch(0.22 0.03 270);
+  --sidebar-ring: oklch(0.75 0.18 195);
+
+  /* Custom neon tokens */
+  --neon-cyan: oklch(0.75 0.18 195);
+  --neon-magenta: oklch(0.65 0.25 330);
+  --neon-green: oklch(0.7 0.2 150);
+  --neon-purple: oklch(0.6 0.2 290);
+  --surface-raised: oklch(0.16 0.018 270);
+
+  /* Layout + spacing tokens */
+  --container-width: 80rem;
+  --container-padding: 1rem;
+
+  /* Computed utility tokens */
+  --primary-soft: oklch(0.75 0.18 195 / 0.1);
+  --primary-border: oklch(0.75 0.18 195 / 0.3);
+  --background-blur: oklch(0.09 0.01 270 / 0.8);
+  --background-strong: oklch(0.09 0.01 270 / 0.95);
+  --border-soft: oklch(0.22 0.03 270 / 0.5);
+  --border-subtle: oklch(0.22 0.03 270 / 0.3);
+  --ring-soft: oklch(0.75 0.18 195 / 0.5);
+  --primary-hover: oklch(0.7 0.17 195);
+  --secondary-hover: oklch(0.2 0.02 270);
+  --destructive-hover: oklch(0.5 0.2 25);
+  --shadow-xs: 0 1px 2px 0 oklch(0 0 0 / 0.25);
+}
+
+.dark {
+  /* same as root - forced dark */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, 'Geist', system-ui, sans-serif);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+svg {
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+.app-body {
+  min-height: 100vh;
+}
+
+.container {
+  margin: 0 auto;
+  max-width: var(--container-width);
+  padding: 0 var(--container-padding);
+}
+
+.neon-glow-cyan {
+  box-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.3),
+    0 0 30px oklch(0.75 0.18 195 / 0.15),
+    0 0 60px oklch(0.75 0.18 195 / 0.05);
+}
+
+.neon-glow-magenta {
+  box-shadow: 0 0 10px oklch(0.65 0.25 330 / 0.3),
+    0 0 30px oklch(0.65 0.25 330 / 0.15),
+    0 0 60px oklch(0.65 0.25 330 / 0.05);
+}
+
+.neon-glow-green {
+  box-shadow: 0 0 10px oklch(0.7 0.2 150 / 0.3),
+    0 0 30px oklch(0.7 0.2 150 / 0.15);
+}
+
+.neon-text-cyan {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.5),
+    0 0 30px oklch(0.75 0.18 195 / 0.3);
+}
+
+.neon-text-magenta {
+  color: var(--neon-magenta);
+  text-shadow: 0 0 10px oklch(0.65 0.25 330 / 0.5),
+    0 0 30px oklch(0.65 0.25 330 / 0.3);
+}
+
+.neon-border {
+  border-image: linear-gradient(
+      135deg,
+      oklch(0.75 0.18 195),
+      oklch(0.65 0.25 330),
+      oklch(0.6 0.2 290)
+    )
+    1;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(oklch(0.22 0.03 270 / 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.22 0.03 270 / 0.5) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.text-neon-cyan {
+  color: var(--neon-cyan);
+}
+
+.text-neon-magenta {
+  color: var(--neon-magenta);
+}
+
+.text-neon-green {
+  color: var(--neon-green);
+}
+
+.text-neon-purple {
+  color: var(--neon-purple);
+}
+
+.bg-neon-cyan-10 {
+  background: oklch(0.75 0.18 195 / 0.1);
+}
+
+.bg-neon-magenta-10 {
+  background: oklch(0.65 0.25 330 / 0.1);
+}
+
+.bg-neon-green-10 {
+  background: oklch(0.7 0.2 150 / 0.1);
+}
+
+.bg-neon-purple-10 {
+  background: oklch(0.6 0.2 290 / 0.1);
+}
+
+.neon-cyan {
+  color: var(--neon-cyan);
+  background: oklch(0.75 0.18 195 / 0.1);
+}
+
+.neon-magenta {
+  color: var(--neon-magenta);
+  background: oklch(0.65 0.25 330 / 0.1);
+}
+
+.neon-green {
+  color: var(--neon-green);
+  background: oklch(0.7 0.2 150 / 0.1);
+}
+
+.neon-purple {
+  color: var(--neon-purple);
+  background: oklch(0.6 0.2 290 / 0.1);
+}
+
+.icon-sm {
+  height: 1rem;
+  width: 1rem;
+}
+
+.icon-md {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.4),
+      0 0 30px oklch(0.75 0.18 195 / 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px oklch(0.75 0.18 195 / 0.6),
+      0 0 50px oklch(0.75 0.18 195 / 0.3);
+  }
+}

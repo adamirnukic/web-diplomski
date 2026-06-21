@@ -1,0 +1,141 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.scoreCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  padding: 0.75rem 1.5rem;
+}
+
+.scoreInactive {
+  opacity: 0.5;
+}
+
+.scoreLabel {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.scoreValue {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.status {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.statusWin {
+  color: var(--neon-green);
+}
+
+.statusDefault {
+  color: var(--foreground);
+}
+
+.boardGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.cardButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-soft);
+  font-size: 1.5rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  .cardButton {
+    width: 5rem;
+    height: 5rem;
+  }
+}
+
+.cardMatched {
+  border-color: color-mix(in oklch, var(--neon-green) 30%, transparent);
+  background: color-mix(in oklch, var(--neon-green) 5%, transparent);
+  transform: scale(0.95);
+  opacity: 0.6;
+}
+
+.cardFlipped {
+  border-color: color-mix(in oklch, var(--primary) 30%, transparent);
+  background: var(--card);
+}
+
+.cardHidden {
+  border-color: var(--border-soft);
+  background: color-mix(in oklch, var(--secondary) 50%, transparent);
+  cursor: pointer;
+}
+
+.cardHidden:hover {
+  border-color: color-mix(in oklch, var(--primary) 30%, transparent);
+  background: color-mix(in oklch, var(--secondary) 90%, transparent);
+}
+
+.symbol {
+  transition: transform 0.2s ease;
+}
+
+.symbolCyan {
+  color: var(--neon-cyan);
+}
+
+.symbolMagenta {
+  color: var(--neon-magenta);
+}
+
+.symbolGreen {
+  color: var(--neon-green);
+}
+
+.symbolPurple {
+  color: var(--neon-purple);
+}
+
+.symbolYellow {
+  color: #facc15;
+}
+
+.symbolOrange {
+  color: #fb923c;
+}
+
+.symbolRose {
+  color: #fb7185;
+}
+
+.symbolSky {
+  color: #38bdf8;
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}

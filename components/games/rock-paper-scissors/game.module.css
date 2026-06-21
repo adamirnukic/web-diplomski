@@ -1,0 +1,156 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.scoreCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  padding: 0.75rem 1.5rem;
+}
+
+.scoreInactive {
+  opacity: 0.5;
+}
+
+.scoreLabel {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.scoreValue {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.midInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.infoSmall {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.infoText {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.gameOverBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.gameOverText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--neon-green);
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.revealBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.revealRow {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.revealChoice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.revealEmoji {
+  font-size: 3.75rem;
+}
+
+.revealLabel {
+  font-size: 0.875rem;
+}
+
+.vsText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+}
+
+.roundResult {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.choicePrompt {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.choiceHint {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.choiceRow {
+  display: flex;
+  gap: 1rem;
+}
+
+.choiceButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  padding: 1.5rem;
+  transition: transform 0.15s ease, border 0.15s ease, box-shadow 0.15s ease;
+}
+
+.choiceButton:hover {
+  transform: scale(1.05);
+  border-color: color-mix(in oklch, var(--primary) 50%, transparent);
+  box-shadow: 0 0 16px color-mix(in oklch, var(--primary) 35%, transparent);
+}
+
+.choiceEmoji {
+  font-size: 3rem;
+}
+
+.choiceLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--foreground);
+}

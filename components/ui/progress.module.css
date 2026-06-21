@@ -1,0 +1,15 @@
+.progress {
+  position: relative;
+  height: 0.5rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+.indicator {
+  height: 100%;
+  width: 100%;
+  background: var(--primary);
+  transition: transform 0.2s ease;
+}
