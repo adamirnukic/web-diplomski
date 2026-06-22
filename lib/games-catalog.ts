@@ -12,6 +12,7 @@ import {
   Bomb,
   HelpCircle,
   Mail,
+  Box,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -67,6 +68,19 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 2,
     icon: Columns3,
     color: 'magenta',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
+  },
+  {
+    id: 'dots-and-boxes',
+    name: 'Točkice i kvadratići',
+    description: 'Povlači ivice i zatvaraj kvadrate; ko zatvori — igra ponovo.',
+    category: 'strategy',
+    minPlayers: 2,
+    maxPlayers: 2,
+    icon: Box,
+    color: 'green',
     hasLocal: true,
     hasOnline: true,
     implemented: true,
