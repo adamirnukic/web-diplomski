@@ -101,10 +101,10 @@ export const GAMES: GameMeta[] = [
   {
     id: 'poker',
     name: "Texas Hold'em",
-    description: 'Kralj kartaških igara. Blefiraj, ulaži i nadigraj protivnika.',
+    description: 'Kralj kartaških igara — 2-6 igrača, AI botovi lokalno, custom ulozi.',
     category: 'cards',
     minPlayers: 2,
-    maxPlayers: 2,
+    maxPlayers: 6,
     icon: Spade,
     color: 'green',
     hasLocal: true,

@@ -1,267 +1,436 @@
 import type { GameEngine, GameResult, PlayerId } from '../../types'
 import { type Card, freshDeck, shuffle } from '../_cards'
-import { bestScore, compareHands, handName } from './evaluate'
+import { compareHands, handName } from './evaluate'
 
 const START_CHIPS = 100
 const SB = 1
 const BB = 2
-const RAISE_STEP = 4
 
-type Street = 'preflop' | 'flop' | 'turn' | 'river'
+export type Street = 'preflop' | 'flop' | 'turn' | 'river'
 
 export interface PokerState {
-  order: [PlayerId, PlayerId]
+  order: PlayerId[]
+  names: Record<PlayerId, string>
+  ai: Record<PlayerId, boolean>
   chips: Record<PlayerId, number>
+  folded: Record<PlayerId, boolean>
+  allIn: Record<PlayerId, boolean>
+  out: Record<PlayerId, boolean>
   deck: Card[]
   holes: Record<PlayerId, Card[]>
   community: Card[]
   pot: number
   committed: Record<PlayerId, number>
-  acted: Record<PlayerId, boolean>
   street: Street
-  toAct: PlayerId
-  dealer: PlayerId
+  toAct: PlayerId | null
+  needsToAct: PlayerId[]
+  currentBet: number
+  minRaiseSize: number
+  buttonId: PlayerId
   phase: 'betting' | 'handover' | 'matchover'
-  hand: { winnerId: PlayerId | null; reason: string; reveal: boolean } | null
+  hand: { winners: PlayerId[]; reason: string; revealed: PlayerId[] } | null
 }
 
 export type PokerAction =
   | { type: 'fold' }
   | { type: 'check' }
   | { type: 'call' }
-  | { type: 'raise' }
+  | { type: 'raise'; amount: number }
   | { type: 'next' }
+
+export interface PokerSeat {
+  id: PlayerId
+  name: string
+  chips: number
+  committed: number
+  folded: boolean
+  allIn: boolean
+  out: boolean
+  isButton: boolean
+  isTurn: boolean
+  isAI: boolean
+  hole: (Card | null)[]
+}
 
 export interface PokerView {
   you: PlayerId
-  yourChips: number
-  oppChips: number
-  yourHole: Card[]
-  oppHole: (Card | null)[]
+  seats: PokerSeat[]
   community: Card[]
   pot: number
+  currentBet: number
   toCall: number
+  minRaise: number
+  maxRaise: number
   canCheck: boolean
-  canRaise: boolean
+  canAct: boolean
   street: Street
-  yourTurn: boolean
   phase: 'betting' | 'handover' | 'matchover'
-  hand: { winnerId: PlayerId | null; reason: string } | null
+  hand: { winners: PlayerId[]; reason: string } | null
   yourHandName: string | null
   result: GameResult | null
 }
 
-const other = (state: PokerState, id: PlayerId): PlayerId =>
-  state.order.find((p) => p !== id) as PlayerId
+const inHand = (s: PokerState, id: PlayerId) => !s.folded[id] && !s.out[id]
+const canAct = (s: PokerState, id: PlayerId) =>
+  inHand(s, id) && !s.allIn[id] && s.chips[id] > 0
 
-function currentBet(state: PokerState): number {
-  const [a, b] = state.order
-  return Math.max(state.committed[a], state.committed[b])
+function seatAfter(
+  s: PokerState,
+  fromId: PlayerId,
+  pred: (id: PlayerId) => boolean,
+): PlayerId | null {
+  const n = s.order.length
+  const start = s.order.indexOf(fromId)
+  for (let k = 1; k <= n; k++) {
+    const cand = s.order[(start + k) % n]
+    if (pred(cand)) return cand
+  }
+  return null
 }
 
-function dealHand(
-  order: [PlayerId, PlayerId],
-  chips: Record<PlayerId, number>,
-  dealer: PlayerId,
-): PokerState {
-  const deck = shuffle(freshDeck())
-  const nonDealer = order.find((p) => p !== dealer) as PlayerId
-  const holes: Record<PlayerId, Card[]> = {
-    [dealer]: [deck.pop() as Card, deck.pop() as Card],
-    [nonDealer]: [deck.pop() as Card, deck.pop() as Card],
+const nonFolded = (s: PokerState) => s.order.filter((id) => inHand(s, id))
+const canActList = (s: PokerState) => s.order.filter((id) => canAct(s, id))
+
+function startHand(prev: PokerState, buttonId: PlayerId): PokerState {
+  const order = prev.order
+  const chips = { ...prev.chips }
+  const out: Record<PlayerId, boolean> = {}
+  const folded: Record<PlayerId, boolean> = {}
+  const allIn: Record<PlayerId, boolean> = {}
+  const committed: Record<PlayerId, number> = {}
+  const holes: Record<PlayerId, Card[]> = {}
+  for (const id of order) {
+    out[id] = chips[id] <= 0
+    folded[id] = out[id]
+    allIn[id] = false
+    committed[id] = 0
+    holes[id] = []
   }
-  const newChips = { ...chips }
-  const sb = Math.min(SB, newChips[dealer])
-  const bb = Math.min(BB, newChips[nonDealer])
-  newChips[dealer] -= sb
-  newChips[nonDealer] -= bb
-  return {
-    order,
-    chips: newChips,
-    deck,
+  const aliveIds = order.filter((id) => !out[id])
+  const deck = shuffle(freshDeck())
+  for (const id of aliveIds) holes[id] = [deck.pop() as Card, deck.pop() as Card]
+
+  const aliveAfter = (fromId: PlayerId) => {
+    const n = order.length
+    const start = order.indexOf(fromId)
+    for (let k = 1; k <= n; k++) {
+      const cand = order[(start + k) % n]
+      if (!out[cand]) return cand
+    }
+    return fromId
+  }
+
+  let sbSeat: PlayerId
+  let bbSeat: PlayerId
+  if (aliveIds.length === 2) {
+    sbSeat = buttonId
+    bbSeat = aliveIds.find((id) => id !== buttonId) as PlayerId
+  } else {
+    sbSeat = aliveAfter(buttonId)
+    bbSeat = aliveAfter(sbSeat)
+  }
+  const post = (id: PlayerId, amt: number) => {
+    const pay = Math.min(amt, chips[id])
+    chips[id] -= pay
+    committed[id] = pay
+    if (chips[id] === 0) allIn[id] = true
+  }
+  post(sbSeat, SB)
+  post(bbSeat, BB)
+
+  const base: PokerState = {
+    ...prev,
+    chips,
+    out,
+    folded,
+    allIn,
+    committed,
     holes,
+    deck,
     community: [],
     pot: 0,
-    committed: { [dealer]: sb, [nonDealer]: bb },
-    acted: { [dealer]: false, [nonDealer]: false },
     street: 'preflop',
-    toAct: dealer, // small blind acts first preflop (heads-up)
-    dealer,
+    currentBet: BB,
+    minRaiseSize: BB,
+    buttonId,
     phase: 'betting',
     hand: null,
+    toAct: null,
+    needsToAct: order.filter((id) => !out[id] && !allIn[id]),
   }
-}
 
-function award(state: PokerState, winnerId: PlayerId, reason: string, reveal: boolean): PokerState {
-  const total = state.pot + state.committed[state.order[0]] + state.committed[state.order[1]]
-  const chips = { ...state.chips, [winnerId]: state.chips[winnerId] + total }
-  const broke = state.order.some((id) => chips[id] <= 0)
-  return {
-    ...state,
-    chips,
-    pot: 0,
-    committed: { [state.order[0]]: 0, [state.order[1]]: 0 },
-    hand: { winnerId, reason, reveal },
-    phase: broke ? 'matchover' : 'handover',
+  // first to act preflop
+  const firstFrom = aliveIds.length === 2 ? buttonId : bbSeat
+  const first =
+    aliveIds.length === 2 && canAct(base, buttonId)
+      ? buttonId
+      : seatAfter(base, firstFrom, (id) => canAct(base, id))
+  if (!first || canActList(base).length < 2) {
+    // not enough players can act -> run it out
+    return runOut(base)
   }
+  return { ...base, toAct: first }
 }
 
-function splitPot(state: PokerState, reason: string): PokerState {
-  const total = state.pot + state.committed[state.order[0]] + state.committed[state.order[1]]
-  const half = Math.floor(total / 2)
-  const [a, b] = state.order
-  const chips = { ...state.chips, [a]: state.chips[a] + half, [b]: state.chips[b] + (total - half) }
-  const broke = state.order.some((id) => chips[id] <= 0)
-  return {
-    ...state,
-    chips,
-    pot: 0,
-    committed: { [a]: 0, [b]: 0 },
-    hand: { winnerId: null, reason, reveal: true },
-    phase: broke ? 'matchover' : 'handover',
+function applyBet(s: PokerState, p: PlayerId, action: PokerAction): PokerState {
+  const committed = { ...s.committed }
+  const chips = { ...s.chips }
+  const folded = { ...s.folded }
+  const allIn = { ...s.allIn }
+  let currentBet = s.currentBet
+  let minRaiseSize = s.minRaiseSize
+  let needsToAct = s.needsToAct.filter((id) => id !== p)
+  const toCall = currentBet - committed[p]
+
+  if (action.type === 'fold') {
+    folded[p] = true
+  } else if (action.type === 'check') {
+    if (toCall > 0) throw new Error('Moraš platiti ili odustati')
+  } else if (action.type === 'call') {
+    const pay = Math.min(toCall, chips[p])
+    chips[p] -= pay
+    committed[p] += pay
+    if (chips[p] === 0) allIn[p] = true
+  } else if (action.type === 'raise') {
+    const maxTotal = committed[p] + chips[p]
+    const amount = Math.floor(action.amount)
+    if (amount <= currentBet) throw new Error('Podizanje mora biti veće od trenutnog uloga')
+    if (amount > maxTotal) throw new Error('Nemaš dovoljno žetona')
+    const minTotal = currentBet + minRaiseSize
+    if (amount < minTotal && amount < maxTotal) {
+      throw new Error(`Minimalno podizanje je ${minTotal}`)
+    }
+    const pay = amount - committed[p]
+    chips[p] -= pay
+    committed[p] = amount
+    if (chips[p] === 0) allIn[p] = true
+    minRaiseSize = amount - currentBet
+    currentBet = amount
+    // everyone else who can still act must respond to the raise
+    needsToAct = s.order.filter(
+      (id) => id !== p && !folded[id] && !s.out[id] && !allIn[id] && chips[id] > 0,
+    )
+  } else {
+    throw new Error('Nepoznata akcija')
   }
+
+  return { ...s, committed, chips, folded, allIn, currentBet, minRaiseSize, needsToAct }
 }
 
-function showdown(state: PokerState): PokerState {
-  const [a, b] = state.order
-  const ha = [...state.holes[a], ...state.community]
-  const hb = [...state.holes[b], ...state.community]
-  const c = compareHands(ha, hb)
-  if (c > 0) return award(state, a, `${handName(ha)}`, true)
-  if (c < 0) return award(state, b, `${handName(hb)}`, true)
-  return splitPot(state, 'Podijeljen pot')
+function collectToPot(s: PokerState): PokerState {
+  let pot = s.pot
+  const committed = { ...s.committed }
+  for (const id of s.order) {
+    pot += committed[id]
+    committed[id] = 0
+  }
+  return { ...s, pot, committed }
 }
 
-function advanceStreet(state: PokerState): PokerState {
-  const [a, b] = state.order
-  const pot = state.pot + state.committed[a] + state.committed[b]
-  const committed = { [a]: 0, [b]: 0 }
-  const acted = { [a]: false, [b]: false }
-  const deck = state.deck.slice()
-  const community = state.community.slice()
-  const nonDealer = other(state, state.dealer)
-
-  let street: Street = state.street
-  if (state.street === 'preflop') {
+function dealNextStreet(s: PokerState): PokerState {
+  const deck = [...s.deck]
+  const community = [...s.community]
+  let street = s.street
+  if (street === 'preflop') {
     community.push(deck.pop() as Card, deck.pop() as Card, deck.pop() as Card)
     street = 'flop'
-  } else if (state.street === 'flop') {
+  } else if (street === 'flop') {
     community.push(deck.pop() as Card)
     street = 'turn'
-  } else if (state.street === 'turn') {
+  } else if (street === 'turn') {
     community.push(deck.pop() as Card)
     street = 'river'
   }
-  return { ...state, pot, committed, acted, deck, community, street, toAct: nonDealer }
+  return { ...s, deck, community, street }
 }
 
-function settleOrContinue(state: PokerState): PokerState {
-  const [a, b] = state.order
-  const bothActed = state.acted[a] && state.acted[b]
-  const equal = state.committed[a] === state.committed[b]
-  if (!bothActed || !equal) return state
-  if (state.street === 'river') return showdown(state)
-  return advanceStreet(state)
+/** No more betting possible: deal out remaining community, then showdown. */
+function runOut(s: PokerState): PokerState {
+  let st = collectToPot(s)
+  while (st.street !== 'river') st = dealNextStreet(st)
+  return showdown(st)
 }
 
-function getResult(state: PokerState): GameResult | null {
-  if (state.phase !== 'matchover') return null
-  const winnerId = state.order.find((id) => state.chips[id] > 0) as PlayerId
+function endStreet(s: PokerState): PokerState {
+  let st = collectToPot(s)
+  while (true) {
+    if (st.street === 'river') return showdown(st)
+    st = dealNextStreet(st)
+    if (canActList(st).length >= 2) {
+      const needsToAct = canActList(st)
+      const first =
+        seatAfter(st, st.buttonId, (id) => canAct(st, id)) ?? needsToAct[0]
+      return { ...st, currentBet: 0, minRaiseSize: BB, needsToAct, toAct: first }
+    }
+    // fewer than 2 can act -> keep dealing (run it out)
+  }
+}
+
+function awardPot(
+  s: PokerState,
+  winners: PlayerId[],
+  reason: string,
+  revealed: PlayerId[],
+): PokerState {
+  const chips = { ...s.chips }
+  const share = Math.floor(s.pot / winners.length)
+  let rem = s.pot - share * winners.length
+  for (const id of winners) {
+    chips[id] += share + (rem > 0 ? 1 : 0)
+    if (rem > 0) rem--
+  }
+  const aliveCount = s.order.filter((id) => chips[id] > 0).length
+  return {
+    ...s,
+    chips,
+    pot: 0,
+    toAct: null,
+    needsToAct: [],
+    hand: { winners, reason, revealed },
+    phase: aliveCount <= 1 ? 'matchover' : 'handover',
+  }
+}
+
+function showdown(s: PokerState): PokerState {
+  const live = nonFolded(s)
+  if (live.length === 1) return awardPot(s, [live[0]], 'Svi su odustali', [])
+  let winners = [live[0]]
+  for (let i = 1; i < live.length; i++) {
+    const c = compareHands(
+      [...s.holes[live[i]], ...s.community],
+      [...s.holes[winners[0]], ...s.community],
+    )
+    if (c > 0) winners = [live[i]]
+    else if (c === 0) winners.push(live[i])
+  }
+  const reason = handName([...s.holes[winners[0]], ...s.community])
+  return awardPot(s, winners, reason, live)
+}
+
+function settle(s: PokerState, lastActor: PlayerId): PokerState {
+  const live = nonFolded(s)
+  if (live.length <= 1) {
+    const st = collectToPot(s)
+    return awardPot(st, [live[0]], 'Svi su odustali', [])
+  }
+  if (s.needsToAct.length === 0) return endStreet(s)
+  const next = seatAfter(s, lastActor, (id) => s.needsToAct.includes(id))
+  return { ...s, toAct: next ?? s.needsToAct[0] }
+}
+
+function getResult(s: PokerState): GameResult | null {
+  if (s.phase !== 'matchover') return null
+  const winnerId = s.order.find((id) => s.chips[id] > 0) as PlayerId
   return { status: 'win', winnerId, scores: { [winnerId]: 1 } }
 }
 
 export const pokerEngine: GameEngine<PokerState, PokerAction, PokerView> = {
   id: 'poker',
   minPlayers: 2,
-  maxPlayers: 2,
+  maxPlayers: 6,
 
-  createInitialState(players) {
-    if (players.length !== 2) throw new Error("Texas Hold'em zahtijeva 2 igrača")
-    const [p1, p2] = players
-    const order: [PlayerId, PlayerId] = [p1.id, p2.id]
-    return dealHand(order, { [p1.id]: START_CHIPS, [p2.id]: START_CHIPS }, p1.id)
+  createInitialState(players, options) {
+    if (players.length < 2) throw new Error("Texas Hold'em zahtijeva bar 2 igrača")
+    if (players.length > 6) throw new Error('Najviše 6 igrača')
+    const order = players.map((p) => p.id)
+    const names: Record<PlayerId, string> = {}
+    const ai: Record<PlayerId, boolean> = {}
+    const chips: Record<PlayerId, number> = {}
+    const out: Record<PlayerId, boolean> = {}
+    const aiIds = (options?.ai as string[] | undefined) ?? []
+    for (const p of players) {
+      names[p.id] = p.username
+      ai[p.id] = aiIds.includes(p.id)
+      chips[p.id] = START_CHIPS
+      out[p.id] = false
+    }
+    const base: PokerState = {
+      order,
+      names,
+      ai,
+      chips,
+      folded: {},
+      allIn: {},
+      out,
+      deck: [],
+      holes: {},
+      community: [],
+      pot: 0,
+      committed: {},
+      street: 'preflop',
+      toAct: null,
+      needsToAct: [],
+      currentBet: 0,
+      minRaiseSize: BB,
+      buttonId: order[0],
+      phase: 'betting',
+      hand: null,
+    }
+    return startHand(base, order[0])
   },
 
-  applyAction(state, playerId, action) {
-    if (state.phase === 'matchover') throw new Error('Meč je završen')
-
-    if (state.phase === 'handover') {
+  applyAction(s, p, action) {
+    if (s.phase === 'matchover') throw new Error('Meč je završen')
+    if (s.phase === 'handover') {
       if (action.type !== 'next') throw new Error('Ruka je gotova — podijeli novu')
-      const newDealer = other(state, state.dealer)
-      return dealHand(state.order, state.chips, newDealer)
+      const nextBtn =
+        seatAfter(s, s.buttonId, (id) => s.chips[id] > 0) ?? s.buttonId
+      return startHand(s, nextBtn)
     }
-
-    // betting
-    if (state.toAct !== playerId) throw new Error('Nije tvoj red')
-    const opp = other(state, playerId)
-    const toCall = currentBet(state) - state.committed[playerId]
-    let s: PokerState = { ...state, committed: { ...state.committed }, acted: { ...state.acted }, chips: { ...state.chips } }
-
-    switch (action.type) {
-      case 'fold':
-        return award(s, opp, 'Protivnik se predao', false)
-      case 'check':
-        if (toCall > 0) throw new Error('Moraš platiti ili odustati')
-        s.acted[playerId] = true
-        s.toAct = opp
-        return settleOrContinue(s)
-      case 'call': {
-        const pay = Math.min(toCall, s.chips[playerId])
-        s.chips[playerId] -= pay
-        s.committed[playerId] += pay
-        s.acted[playerId] = true
-        s.toAct = opp
-        return settleOrContinue(s)
-      }
-      case 'raise': {
-        const target = currentBet(s) + RAISE_STEP
-        const pay = Math.min(target - s.committed[playerId], s.chips[playerId])
-        if (pay <= 0) throw new Error('Nemaš dovoljno žetona')
-        s.chips[playerId] -= pay
-        s.committed[playerId] += pay
-        s.acted[playerId] = true
-        s.acted[opp] = false // opponent must respond
-        s.toAct = opp
-        return s
-      }
-      default:
-        throw new Error('Nepoznata akcija')
-    }
+    if (action.type === 'next') throw new Error('Runda je u toku')
+    if (s.toAct !== p) throw new Error('Nije tvoj red')
+    const s2 = applyBet(s, p, action)
+    return settle(s2, p)
   },
 
-  getView(state, playerId) {
-    const opp = other(state, playerId)
-    const reveal = Boolean(state.hand?.reveal) || state.phase === 'matchover'
-    const toCall = currentBet(state) - state.committed[playerId]
-    const yourHole = state.holes[playerId]
+  getView(s, playerId) {
+    const result = getResult(s)
+    const seats: PokerSeat[] = s.order.map((id) => {
+      const reveal =
+        id === playerId ||
+        Boolean(s.hand?.revealed.includes(id)) ||
+        s.phase === 'matchover'
+      return {
+        id,
+        name: s.names[id],
+        chips: s.chips[id],
+        committed: s.committed[id],
+        folded: s.folded[id],
+        allIn: s.allIn[id],
+        out: s.out[id],
+        isButton: id === s.buttonId,
+        isTurn: s.phase === 'betting' && s.toAct === id,
+        isAI: s.ai[id],
+        hole: reveal ? s.holes[id] : (s.holes[id] ?? []).map(() => null),
+      }
+    })
+    const toCall = Math.max(0, s.currentBet - (s.committed[playerId] ?? 0))
+    const maxRaise = (s.committed[playerId] ?? 0) + (s.chips[playerId] ?? 0)
     return {
       you: playerId,
-      yourChips: state.chips[playerId],
-      oppChips: state.chips[opp],
-      yourHole,
-      oppHole: reveal ? state.holes[opp] : [null, null],
-      community: state.community,
-      pot: state.pot + state.committed[playerId] + state.committed[opp],
-      toCall: Math.max(0, toCall),
+      seats,
+      community: s.community,
+      pot: s.pot + s.order.reduce((a, id) => a + s.committed[id], 0),
+      currentBet: s.currentBet,
+      toCall,
+      minRaise: Math.min(s.currentBet + s.minRaiseSize, maxRaise),
+      maxRaise,
       canCheck: toCall <= 0,
-      canRaise: state.chips[playerId] > toCall,
-      street: state.street,
-      yourTurn: state.phase === 'betting' && state.toAct === playerId,
-      phase: state.phase,
-      hand: state.hand ? { winnerId: state.hand.winnerId, reason: state.hand.reason } : null,
+      canAct: s.phase === 'betting' && s.toAct === playerId,
+      street: s.street,
+      phase: s.phase,
+      hand: s.hand ? { winners: s.hand.winners, reason: s.hand.reason } : null,
       yourHandName:
-        state.community.length >= 3 ? handName([...yourHole, ...state.community]) : null,
-      result: getResult(state),
+        s.community.length >= 3 && s.holes[playerId]?.length
+          ? handName([...s.holes[playerId], ...s.community])
+          : null,
+      result,
     }
   },
 
-  getCurrentPlayer(state) {
-    if (state.phase === 'betting') return state.toAct
-    return null
+  getCurrentPlayer(s) {
+    return s.phase === 'betting' ? s.toAct : null
   },
 
   getResult,
 }
-
-// re-export so the engine module is self-contained for consumers
-export { bestScore }
