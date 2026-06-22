@@ -1,4 +1,5 @@
 import { perudoAI } from './perudo/ai'
+import { cantStopAI } from './cant-stop/ai'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AiFn = (state: any, playerId: string) => any
@@ -6,6 +7,7 @@ type AiFn = (state: any, playerId: string) => any
 /** Per-game AI decision functions (used by the local "vs bots" runner). */
 export const AI_DECISIONS: Record<string, AiFn> = {
   perudo: perudoAI,
+  'cant-stop': cantStopAI,
 }
 
 export function aiDecide(gameId: string, state: any, playerId: string): any {

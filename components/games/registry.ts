@@ -14,6 +14,7 @@ import { BattleshipsBoard } from './battleships/Battleships'
 import { LoveLetterBoard } from './love-letter/LoveLetter'
 import { DotsAndBoxesBoard } from './dots-and-boxes/DotsAndBoxes'
 import { PerudoTable } from './perudo/Perudo'
+import { CantStopBoard } from './cant-stop/CantStop'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface GameBoardProps {
@@ -43,6 +44,7 @@ export const GAME_COMPONENTS: Record<string, ComponentType<GameBoardProps>> = {
   'love-letter': LoveLetterBoard,
   'dots-and-boxes': DotsAndBoxesBoard,
   perudo: PerudoTable,
+  'cant-stop': CantStopBoard,
 }
 
 export function getGameComponent(id: string): ComponentType<GameBoardProps> | undefined {

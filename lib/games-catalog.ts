@@ -14,6 +14,7 @@ import {
   Mail,
   Box,
   Dices,
+  Mountain,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -250,6 +251,20 @@ export const GAMES: GameMeta[] = [
     hasOnline: true,
     implemented: true,
     secret: true,
+    aiLocal: true,
+  },
+  {
+    id: 'cant-stop',
+    name: "Can't Stop",
+    description: 'Riskiraj kockicama i osvoji 3 kolone — ali ne pretjeraj!',
+    category: 'dice',
+    minPlayers: 2,
+    maxPlayers: 4,
+    icon: Mountain,
+    color: 'cyan',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
     aiLocal: true,
   },
 ]
