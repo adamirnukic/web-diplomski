@@ -39,6 +39,8 @@ export interface GameMeta {
   implemented: boolean
   /** hidden-information game -> local play uses a "pass device" gate */
   secret?: boolean
+  /** show a brief read-only review of the last move before handing the device over */
+  reviewOnPass?: boolean
 }
 
 export const GAMES: GameMeta[] = [
@@ -81,6 +83,7 @@ export const GAMES: GameMeta[] = [
     hasOnline: true,
     implemented: true,
     secret: true,
+    reviewOnPass: true,
   },
   {
     id: 'blackjack',

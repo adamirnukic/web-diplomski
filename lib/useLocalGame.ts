@@ -24,6 +24,12 @@ export function useLocalGame<S, A, V>(
     [engine, state, viewerId],
   )
 
+  /** Get the view from an arbitrary player's perspective (for pass-and-play). */
+  const viewFor = useCallback(
+    (pid: string) => engine.getView(state, pid),
+    [engine, state],
+  )
+
   const dispatch = useCallback(
     (action: A) => {
       setError(null)
@@ -48,5 +54,5 @@ export function useLocalGame<S, A, V>(
     setState(engine.createInitialState(players))
   }, [engine, players])
 
-  return { view, dispatch, result, restart, currentPlayer, error }
+  return { view, viewFor, dispatch, result, restart, currentPlayer, error }
 }

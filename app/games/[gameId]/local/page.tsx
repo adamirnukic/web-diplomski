@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useMemo, useState } from 'react'
+import { use, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
@@ -17,34 +17,72 @@ const LOCAL_PLAYERS: EnginePlayer[] = [
   { id: 'p2', username: 'Igrač 2' },
 ]
 
-function LocalRunner({ gameId, secret }: { gameId: string; secret: boolean }) {
+function LocalRunner({
+  gameId,
+  secret,
+  reviewOnPass,
+}: {
+  gameId: string
+  secret: boolean
+  reviewOnPass: boolean
+}) {
   const engine = getEngine(gameId)!
   const Comp = getGameComponent(gameId)!
   const players = useMemo(() => LOCAL_PLAYERS, [])
-  const { view, dispatch, restart, currentPlayer } = useLocalGame(engine, players)
-  const [revealedFor, setRevealedFor] = useState<string | null>(currentPlayer)
+  const { view, viewFor, dispatch, restart, currentPlayer } = useLocalGame(engine, players)
+  const [viewerId, setViewerId] = useState<string | null>(currentPlayer)
+  const [reviewing, setReviewing] = useState(false)
+
+  // Manage the pass-and-play hand-off (and an optional brief result review).
+  useEffect(() => {
+    if (!secret) {
+      setViewerId(currentPlayer)
+      return
+    }
+    if (currentPlayer == null || currentPlayer === viewerId) {
+      setReviewing(false)
+      return
+    }
+    // turn moved to a different player
+    if (reviewOnPass && viewerId != null) {
+      setReviewing(true)
+      const t = setTimeout(() => setReviewing(false), 1600)
+      return () => clearTimeout(t)
+    }
+    setReviewing(false)
+  }, [currentPlayer, viewerId, secret, reviewOnPass])
 
   const handleRestart = () => {
     restart()
-    setRevealedFor(LOCAL_PLAYERS[0].id)
+    setViewerId(LOCAL_PLAYERS[0].id)
+    setReviewing(false)
   }
 
-  // Hidden-information games: hand the device over before showing the next
-  // player's secret view (prevents peeking on a single screen).
-  if (secret && currentPlayer && revealedFor !== currentPlayer) {
+  const common = { onRestart: handleRestart, mode: 'local' as const, players }
+
+  // Perfect-information games: no hand-off needed.
+  if (!secret) {
+    return <Comp view={view} onAction={dispatch} {...common} />
+  }
+
+  // Game over: show the final board.
+  if (currentPlayer == null) {
+    return <Comp view={viewFor(viewerId ?? players[0].id)} onAction={() => {}} {...common} />
+  }
+
+  // Brief read-only review so the player who just moved sees the outcome.
+  if (reviewing && viewerId != null) {
+    return <Comp view={viewFor(viewerId)} onAction={() => {}} mode="local" players={players} />
+  }
+
+  // Hand the device to the next player before revealing their secret view.
+  if (currentPlayer !== viewerId) {
     const name = players.find((p) => p.id === currentPlayer)?.username ?? 'Igrač'
-    return <PassDevice name={name} onReady={() => setRevealedFor(currentPlayer)} />
+    return <PassDevice name={name} onReady={() => setViewerId(currentPlayer)} />
   }
 
-  return (
-    <Comp
-      view={view}
-      onAction={dispatch}
-      onRestart={handleRestart}
-      mode="local"
-      players={players}
-    />
-  )
+  // Normal play for the current viewer.
+  return <Comp view={viewFor(viewerId)} onAction={dispatch} {...common} />
 }
 
 export default function LocalGamePage({
@@ -67,7 +105,11 @@ export default function LocalGamePage({
           {game?.name ?? 'Igra'} <span className={styles.muted}>— lokalno</span>
         </h1>
         {ready ? (
-          <LocalRunner gameId={gameId} secret={game?.secret ?? false} />
+          <LocalRunner
+            gameId={gameId}
+            secret={game?.secret ?? false}
+            reviewOnPass={game?.reviewOnPass ?? false}
+          />
         ) : (
           <p className={styles.muted}>Ova igra još nije dostupna.</p>
         )}

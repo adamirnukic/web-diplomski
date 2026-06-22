@@ -1,16 +1,17 @@
 import type { GameEngine, GameResult, PlayerId } from '../../types'
 
 const SIZE = 8
-const SHIP_SIZES = [4, 3, 3, 2, 2]
+const FLEET = [4, 3, 3, 2, 2]
 
 interface Board {
-  ships: number[][] // each ship = list of cell indices
-  hit: boolean[] // cells that have been fired upon (received shots)
+  placed: number[][] // ships (cell lists), in FLEET order
+  hit: boolean[] // shots received (length SIZE*SIZE)
 }
 
 export interface BSState {
   order: [PlayerId, PlayerId]
   size: number
+  fleet: number[]
   boards: Record<PlayerId, Board>
   ready: Record<PlayerId, boolean>
   phase: 'placement' | 'battle'
@@ -18,7 +19,10 @@ export interface BSState {
 }
 
 export type BSAction =
-  | { type: 'shuffle' }
+  | { type: 'place'; cell: number; horizontal: boolean }
+  | { type: 'undo' }
+  | { type: 'clear' }
+  | { type: 'randomize' }
   | { type: 'ready' }
   | { type: 'fire'; index: number }
 
@@ -30,62 +34,82 @@ export interface BSView {
   phase: 'placement' | 'battle'
   youReady: boolean
   oppReady: boolean
+  fleet: number[]
+  placedCount: number
+  nextSize: number | null
   yourBoard: CellSelf[]
   oppBoard: CellOpp[]
   yourTurn: boolean
   result: GameResult | null
 }
 
-function randInt(n: number): number {
-  return Math.floor(Math.random() * n)
+const inB = (r: number, c: number) => r >= 0 && r < SIZE && c >= 0 && c < SIZE
+
+function shipCellsAt(start: number, size: number, horizontal: boolean): number[] | null {
+  const r0 = Math.floor(start / SIZE)
+  const c0 = start % SIZE
+  const cells: number[] = []
+  for (let k = 0; k < size; k++) {
+    const r = horizontal ? r0 : r0 + k
+    const c = horizontal ? c0 + k : c0
+    if (!inB(r, c)) return null
+    cells.push(r * SIZE + c)
+  }
+  return cells
 }
 
-function placeShips(): number[][] {
-  const occupied = new Set<number>()
-  const ships: number[][] = []
-  for (const len of SHIP_SIZES) {
-    let placed = false
-    for (let tries = 0; tries < 2000 && !placed; tries++) {
-      const horiz = Math.random() < 0.5
-      const r = randInt(SIZE)
-      const c = randInt(SIZE)
-      const cells: number[] = []
-      let ok = true
-      for (let k = 0; k < len; k++) {
-        const rr = horiz ? r : r + k
-        const cc = horiz ? c + k : c
-        if (rr >= SIZE || cc >= SIZE) {
-          ok = false
-          break
+/** cells occupied by placed ships plus all their 8-neighbours (no-touch rule) */
+function blockedCells(placed: number[][]): Set<number> {
+  const s = new Set<number>()
+  for (const ship of placed) {
+    for (const cell of ship) {
+      const r = Math.floor(cell / SIZE)
+      const c = cell % SIZE
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const nr = r + dr
+          const nc = c + dc
+          if (inB(nr, nc)) s.add(nr * SIZE + nc)
         }
-        const idx = rr * SIZE + cc
-        if (occupied.has(idx)) {
-          ok = false
-          break
-        }
-        cells.push(idx)
-      }
-      if (ok) {
-        cells.forEach((x) => occupied.add(x))
-        ships.push(cells)
-        placed = true
       }
     }
-    if (!placed) throw new Error('Neuspješno raspoređivanje brodova')
   }
-  return ships
+  return s
+}
+
+function canPlace(board: Board, cells: number[]): boolean {
+  const blocked = blockedCells(board.placed)
+  return cells.every((c) => !blocked.has(c))
 }
 
 function emptyBoard(): Board {
-  return { ships: placeShips(), hit: Array(SIZE * SIZE).fill(false) }
+  return { placed: [], hit: Array(SIZE * SIZE).fill(false) }
 }
 
-function shipCells(board: Board): Set<number> {
-  return new Set(board.ships.flat())
+function randomBoard(): Board {
+  const board = emptyBoard()
+  for (const size of FLEET) {
+    let ok = false
+    for (let t = 0; t < 3000 && !ok; t++) {
+      const horizontal = Math.random() < 0.5
+      const start = Math.floor(Math.random() * SIZE * SIZE)
+      const cells = shipCellsAt(start, size, horizontal)
+      if (cells && canPlace(board, cells)) {
+        board.placed.push(cells)
+        ok = true
+      }
+    }
+    if (!ok) return randomBoard() // extremely rare; retry whole board
+  }
+  return board
+}
+
+function shipCellSet(board: Board): Set<number> {
+  return new Set(board.placed.flat())
 }
 
 function allSunk(board: Board): boolean {
-  return board.ships.every((ship) => ship.every((cell) => board.hit[cell]))
+  return board.placed.length > 0 && board.placed.every((ship) => ship.every((c) => board.hit[c]))
 }
 
 function getResult(state: BSState): GameResult | null {
@@ -110,6 +134,7 @@ export const battleshipsEngine: GameEngine<BSState, BSAction, BSView> = {
     return {
       order: [p1.id, p2.id],
       size: SIZE,
+      fleet: FLEET,
       boards: { [p1.id]: emptyBoard(), [p2.id]: emptyBoard() },
       ready: { [p1.id]: false, [p2.id]: false },
       phase: 'placement',
@@ -123,13 +148,32 @@ export const battleshipsEngine: GameEngine<BSState, BSAction, BSView> = {
 
     if (state.phase === 'placement') {
       if (state.ready[playerId]) throw new Error('Već si spreman')
-      if (action.type === 'shuffle') {
-        return {
-          ...state,
-          boards: { ...state.boards, [playerId]: emptyBoard() },
-        }
+      const board = state.boards[playerId]
+
+      if (action.type === 'place') {
+        const idx = board.placed.length
+        if (idx >= FLEET.length) throw new Error('Svi brodovi su postavljeni')
+        const size = FLEET[idx]
+        const cells = shipCellsAt(action.cell, size, action.horizontal)
+        if (!cells) throw new Error('Brod izlazi van table')
+        if (!canPlace(board, cells)) throw new Error('Brodovi se ne smiju dodirivati')
+        const next: Board = { ...board, placed: [...board.placed, cells] }
+        return { ...state, boards: { ...state.boards, [playerId]: next } }
+      }
+      if (action.type === 'undo') {
+        const next: Board = { ...board, placed: board.placed.slice(0, -1) }
+        return { ...state, boards: { ...state.boards, [playerId]: next } }
+      }
+      if (action.type === 'clear') {
+        return { ...state, boards: { ...state.boards, [playerId]: emptyBoard() } }
+      }
+      if (action.type === 'randomize') {
+        return { ...state, boards: { ...state.boards, [playerId]: randomBoard() } }
       }
       if (action.type === 'ready') {
+        if (board.placed.length !== FLEET.length) {
+          throw new Error('Prvo postavi sve brodove')
+        }
         const ready = { ...state.ready, [playerId]: true }
         const bothReady = state.order.every((id) => ready[id])
         return {
@@ -152,7 +196,7 @@ export const battleshipsEngine: GameEngine<BSState, BSAction, BSView> = {
 
     const hit = board.hit.slice()
     hit[action.index] = true
-    const nextTurn = state.order.find((id) => id !== playerId) as PlayerId
+    const nextTurn = opp
     return {
       ...state,
       boards: { ...state.boards, [opp]: { ...board, hit } },
@@ -165,8 +209,8 @@ export const battleshipsEngine: GameEngine<BSState, BSAction, BSView> = {
     const opp = state.order.find((id) => id !== playerId) as PlayerId
     const mine = state.boards[playerId]
     const theirs = state.boards[opp]
-    const myShips = shipCells(mine)
-    const theirShips = shipCells(theirs)
+    const myShips = shipCellSet(mine)
+    const theirShips = shipCellSet(theirs)
 
     const yourBoard: CellSelf[] = Array.from({ length: SIZE * SIZE }, (_, i) => {
       if (myShips.has(i)) return mine.hit[i] ? 'hit' : 'ship'
@@ -179,11 +223,15 @@ export const battleshipsEngine: GameEngine<BSState, BSAction, BSView> = {
       return 'unknown'
     })
 
+    const placedCount = mine.placed.length
     return {
       size: SIZE,
       phase: state.phase,
       youReady: state.ready[playerId],
       oppReady: state.ready[opp],
+      fleet: FLEET,
+      placedCount,
+      nextSize: placedCount < FLEET.length ? FLEET[placedCount] : null,
       yourBoard,
       oppBoard,
       yourTurn: state.phase === 'battle' && state.turn === playerId && !result,
