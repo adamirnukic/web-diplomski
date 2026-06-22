@@ -15,6 +15,7 @@ import { loveLetterEngine } from './love-letter/engine'
 import { dotsAndBoxesEngine } from './dots-and-boxes/engine'
 import { perudoEngine } from './perudo/engine'
 import { cantStopEngine } from './cant-stop/engine'
+import { skullEngine } from './skull/engine'
 
 /**
  * Authoritative engine registry. The server uses this to run online games and
@@ -37,6 +38,7 @@ export const ENGINES: Record<string, GameEngine<any, any, any>> = {
   'dots-and-boxes': dotsAndBoxesEngine,
   perudo: perudoEngine,
   'cant-stop': cantStopEngine,
+  skull: skullEngine,
 }
 
 export function getEngine(id: string): GameEngine<any, any, any> | undefined {

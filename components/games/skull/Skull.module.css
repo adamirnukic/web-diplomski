@@ -1,0 +1,155 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.7rem;
+  min-width: 96px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.seatTurn {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.3);
+}
+
+.seatYou {
+  background: var(--primary-soft);
+}
+
+.seatOut {
+  opacity: 0.4;
+}
+
+.seatName {
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.pts {
+  font-size: 0.8rem;
+  min-height: 1rem;
+}
+
+.discRow {
+  display: flex;
+  gap: 2px;
+  min-height: 1.6rem;
+  align-items: center;
+}
+
+.disc {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.back {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, oklch(0.4 0.12 290), oklch(0.45 0.15 330));
+  border: 1px solid oklch(0.75 0.18 195 / 0.4);
+}
+
+.owned {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.reveal {
+  font-size: 1.1rem;
+}
+
+.msg {
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.hand {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--secondary);
+}
+
+.handLabel {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.bidControl {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.counter button {
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--secondary);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.counter span {
+  font-weight: 800;
+  min-width: 1.3rem;
+  text-align: center;
+}
+
+.wait {
+  color: var(--muted-foreground);
+}
+
+.big {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.loading {
+  color: var(--muted-foreground);
+}

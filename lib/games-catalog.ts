@@ -15,6 +15,7 @@ import {
   Box,
   Dices,
   Mountain,
+  Skull as SkullIcon,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -265,6 +266,21 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+    aiLocal: true,
+  },
+  {
+    id: 'skull',
+    name: 'Skull',
+    description: 'Blefiraj diskovima — okreni cvjetove, izbjegni lobanju. 2-6, botovi.',
+    category: 'classic',
+    minPlayers: 2,
+    maxPlayers: 6,
+    icon: SkullIcon,
+    color: 'purple',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
+    secret: true,
     aiLocal: true,
   },
 ]

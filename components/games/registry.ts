@@ -15,6 +15,7 @@ import { LoveLetterBoard } from './love-letter/LoveLetter'
 import { DotsAndBoxesBoard } from './dots-and-boxes/DotsAndBoxes'
 import { PerudoTable } from './perudo/Perudo'
 import { CantStopBoard } from './cant-stop/CantStop'
+import { SkullBoard } from './skull/Skull'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface GameBoardProps {
@@ -45,6 +46,7 @@ export const GAME_COMPONENTS: Record<string, ComponentType<GameBoardProps>> = {
   'dots-and-boxes': DotsAndBoxesBoard,
   perudo: PerudoTable,
   'cant-stop': CantStopBoard,
+  skull: SkullBoard,
 }
 
 export function getGameComponent(id: string): ComponentType<GameBoardProps> | undefined {
