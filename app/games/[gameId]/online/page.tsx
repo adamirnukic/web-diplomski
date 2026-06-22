@@ -63,15 +63,24 @@ function OnlineRunner({ gameId }: { gameId: string }) {
 
       {room.lobby && status !== 'lobby' && (
         <div className={styles.gameWrap}>
-          <Comp view={room.view} onAction={room.sendAction} mode="online" />
+          <Comp
+            view={room.view}
+            onAction={room.sendAction}
+            mode="online"
+            players={room.lobby?.players.map((p) => ({ id: p.id, username: p.username }))}
+          />
           {room.result && (
             <div className={styles.result}>
               <p className={styles.resultText}>
-                {room.result.status === 'draw'
-                  ? 'Neriješeno!'
-                  : room.result.winnerId === user.id
-                    ? 'Pobijedio si! 🎉'
-                    : 'Izgubio si.'}
+                {room.result.coop
+                  ? room.result.status === 'win'
+                    ? 'Pobjeda! 🎉'
+                    : 'Niste uspjeli 💥'
+                  : room.result.status === 'draw'
+                    ? 'Neriješeno!'
+                    : room.result.winnerId === user.id
+                      ? 'Pobijedio si! 🎉'
+                      : 'Izgubio si.'}
               </p>
               <div className={styles.resultActions}>
                 {isHost ? (

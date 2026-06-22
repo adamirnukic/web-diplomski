@@ -7,27 +7,43 @@ import type { MemoryView } from '@shared/games/memory/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Memory.module.css'
 
-export function MemoryBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
+export function MemoryBoard({ view, onAction, onRestart, mode, players }: GameBoardProps) {
   const v = view as MemoryView | null
   if (!v) return <div className={styles.loading}>Učitavanje…</div>
 
   const { cards, result } = v
   const canPlay = v.yourTurn && !result
+  const turnName = players?.find((p) => p.id === v.turn)?.username ?? 'Igrač'
+  const twoPlayers = players && players.length === 2
 
   let status: string
   if (result) {
-    status = result.status === 'draw' ? 'Neriješeno!' : 'Pobjeda! 🎉'
+    const winnerName = players?.find((p) => p.id === result.winnerId)?.username ?? ''
+    status = result.status === 'draw' ? 'Neriješeno!' : `Pobjeda: ${winnerName} 🎉`
   } else if (mode === 'online') {
-    status = v.yourTurn ? 'Tvoj potez' : 'Protivnik je na potezu…'
+    status = v.yourTurn ? 'Tvoj potez' : `${turnName} je na potezu…`
   } else {
-    status = v.yourTurn ? 'Tvoj potez' : 'Potez protivnika'
+    status = `Na potezu: ${turnName}`
   }
 
   return (
     <div className={styles.root}>
       <div className={styles.scores}>
-        <span className={styles.score}>Ti: {v.yourScore}</span>
-        <span className={styles.score}>Protivnik: {v.oppScore}</span>
+        {mode === 'local' && twoPlayers ? (
+          <>
+            <span className={styles.score}>
+              {players![0].username}: {v.scores[players![0].id] ?? 0}
+            </span>
+            <span className={styles.score}>
+              {players![1].username}: {v.scores[players![1].id] ?? 0}
+            </span>
+          </>
+        ) : (
+          <>
+            <span className={styles.score}>Ti: {v.yourScore}</span>
+            <span className={styles.score}>Protivnik: {v.oppScore}</span>
+          </>
+        )}
       </div>
       <p className={cn(styles.status, result && styles.statusDone)}>{status}</p>
 

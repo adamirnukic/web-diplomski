@@ -36,7 +36,15 @@ function LocalRunner({ gameId, secret }: { gameId: string; secret: boolean }) {
     return <PassDevice name={name} onReady={() => setRevealedFor(currentPlayer)} />
   }
 
-  return <Comp view={view} onAction={dispatch} onRestart={handleRestart} mode="local" />
+  return (
+    <Comp
+      view={view}
+      onAction={dispatch}
+      onRestart={handleRestart}
+      mode="local"
+      players={players}
+    />
+  )
 }
 
 export default function LocalGamePage({

@@ -33,6 +33,7 @@ export interface MemoryView {
   turn: PlayerId
   yourScore: number
   oppScore: number
+  scores: Record<PlayerId, number>
   result: GameResult | null
 }
 
@@ -123,6 +124,7 @@ export const memoryEngine: GameEngine<MemoryState, MemoryAction, MemoryView> = {
       turn: state.turn,
       yourScore: state.scores[playerId] ?? 0,
       oppScore: state.scores[other] ?? 0,
+      scores: state.scores,
       result: getResult(state),
     }
   },

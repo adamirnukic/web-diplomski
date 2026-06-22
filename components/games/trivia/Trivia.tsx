@@ -7,26 +7,30 @@ import type { TriviaView } from '@shared/games/trivia-quiz/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Trivia.module.css'
 
-export function TriviaQuizGame({ view, onAction, onRestart, mode }: GameBoardProps) {
+export function TriviaQuizGame({ view, onAction, onRestart, mode, players }: GameBoardProps) {
   const v = view as TriviaView | null
   if (!v) return <div className={styles.loading}>Učitavanje…</div>
 
+  const turnName = players?.find((p) => p.id === v.turn)?.username ?? 'Igrač'
+  const scoreLine =
+    players && players.length === 2
+      ? `${players[0].username}: ${v.scores[players[0].id] ?? 0} · ${players[1].username}: ${v.scores[players[1].id] ?? 0}`
+      : `${v.yourScore} : ${v.oppScore}`
+
   if (v.result) {
-    const won = mode === 'online' ? v.yourScore > v.oppScore : null
+    const winnerName = players?.find((p) => p.id === v.result?.winnerId)?.username ?? ''
     return (
       <div className={styles.root}>
         <p className={styles.final}>
           {v.result.status === 'draw'
             ? 'Neriješeno!'
             : mode === 'online'
-              ? won
+              ? v.yourScore > v.oppScore
                 ? 'Pobijedio si! 🎉'
                 : 'Izgubio si.'
-              : 'Kraj kviza!'}
+              : `Pobjeda: ${winnerName} 🎉`}
         </p>
-        <p className={styles.scoreLine}>
-          Rezultat: {v.yourScore} : {v.oppScore}
-        </p>
+        <p className={styles.scoreLine}>Rezultat — {scoreLine}</p>
         {mode === 'local' && onRestart && (
           <Button onClick={onRestart} className="neon-glow-cyan">
             <RotateCcw size={16} /> Nova igra
@@ -42,10 +46,15 @@ export function TriviaQuizGame({ view, onAction, onRestart, mode }: GameBoardPro
         <span>
           Pitanje {v.questionNumber}/{v.total}
         </span>
-        <span className={styles.scores}>
-          Ti {v.yourScore} : {v.oppScore} Protivnik
-        </span>
+        <span className={styles.scores}>{scoreLine}</span>
       </div>
+      <p className={styles.turnInfo}>
+        {mode === 'online'
+          ? v.yourTurn
+            ? 'Ti odgovaraš'
+            : `${turnName} odgovara…`
+          : `Na potezu: ${turnName}`}
+      </p>
 
       {v.question && (
         <>
@@ -76,7 +85,6 @@ export function TriviaQuizGame({ view, onAction, onRestart, mode }: GameBoardPro
               Dalje
             </Button>
           )}
-          {!v.yourTurn && <p className={styles.wait}>Protivnik odgovara…</p>}
         </>
       )}
     </div>

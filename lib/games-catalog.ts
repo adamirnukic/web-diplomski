@@ -179,9 +179,9 @@ export const GAMES: GameMeta[] = [
   {
     id: 'minesweeper',
     name: 'Minolovac',
-    description: 'Otkrivajte polja naizmjenično — ko nagazi minu, gubi.',
+    description: 'Očisti polje bez aktiviranja mina — sam ili u co-op-u.',
     category: 'puzzle',
-    minPlayers: 2,
+    minPlayers: 1,
     maxPlayers: 2,
     icon: Bomb,
     color: 'cyan',
