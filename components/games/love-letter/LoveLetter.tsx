@@ -9,18 +9,20 @@ import type { GameBoardProps } from '../registry'
 import styles from './LoveLetter.module.css'
 
 const LABEL: Record<CardName, string> = {
+  spy: 'Špijun',
   guard: 'Stražar',
   priest: 'Sveštenik',
   baron: 'Baron',
   handmaid: 'Sluškinja',
   prince: 'Princ',
+  chancellor: 'Kancelar',
   king: 'Kralj',
   countess: 'Grofica',
   princess: 'Princeza',
 }
 
 const NON_GUARD: CardName[] = [
-  'priest', 'baron', 'handmaid', 'prince', 'king', 'countess', 'princess',
+  'spy', 'priest', 'baron', 'handmaid', 'prince', 'chancellor', 'king', 'countess', 'princess',
 ]
 
 function Card({
@@ -65,7 +67,13 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
   const playCard = (card: CardName) => {
     if (!v.yourTurn) return
     if (v.mustPlayCountess && card !== 'countess') return
-    if (card === 'handmaid' || card === 'countess' || card === 'princess') {
+    if (
+      card === 'spy' ||
+      card === 'handmaid' ||
+      card === 'countess' ||
+      card === 'princess' ||
+      card === 'chancellor'
+    ) {
       onAction({ type: 'play', card })
       return
     }
@@ -173,6 +181,17 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
         <Button onClick={() => onAction({ type: 'ack' })} className="neon-glow-cyan">
           Nastavi
         </Button>
+      </div>
+    )
+  } else if (v.choosingKeep) {
+    panel = (
+      <div className={styles.panel}>
+        <p className={styles.prompt}>Kancelar — zadrži jednu kartu (ostale idu na dno špila):</p>
+        <div className={styles.hand}>
+          {v.yourHand.map((c, i) => (
+            <Card key={i} card={c} onClick={() => onAction({ type: 'keep', index: i })} />
+          ))}
+        </div>
       </div>
     )
   } else if (v.yourTurn) {
