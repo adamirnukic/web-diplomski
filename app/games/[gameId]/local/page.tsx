@@ -9,6 +9,7 @@ import { getEngine } from '@shared/games/registry'
 import { getGameComponent } from '@/components/games/registry'
 import { PassDevice } from '@/components/games/PassDevice'
 import { PokerLocal } from '@/components/games/poker/PokerLocal'
+import { LoveLetterLocal } from '@/components/games/love-letter/LoveLetterLocal'
 import { useLocalGame } from '@/lib/useLocalGame'
 import type { EnginePlayer } from '@shared/types'
 import styles from './local.module.css'
@@ -109,6 +110,8 @@ export default function LocalGamePage({
           <p className={styles.muted}>Ova igra još nije dostupna.</p>
         ) : gameId === 'poker' ? (
           <PokerLocal />
+        ) : gameId === 'love-letter' ? (
+          <LoveLetterLocal />
         ) : (
           <LocalRunner
             gameId={gameId}

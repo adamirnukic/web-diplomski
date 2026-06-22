@@ -1,0 +1,198 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.6rem 0.7rem;
+  min-width: 100px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.playerTurn {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 12px oklch(0.75 0.18 195 / 0.3);
+}
+
+.playerYou {
+  background: var(--primary-soft);
+}
+
+.playerOut {
+  opacity: 0.45;
+}
+
+.playerHead {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.tokens {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+
+.tokenNum {
+  margin-left: 0.25rem;
+}
+
+.handBack {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.lastDiscard {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.deck {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.log {
+  color: var(--foreground);
+  font-size: 0.9rem;
+  text-align: center;
+  max-width: 30ch;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 460px;
+}
+
+.prompt {
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--neon-magenta);
+  font-size: 0.85rem;
+}
+
+.hand {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.card {
+  width: 4.5rem;
+  height: 6.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border: 1px solid var(--primary-border);
+  border-radius: 10px;
+  background: linear-gradient(160deg, var(--card), var(--surface-raised));
+  cursor: default;
+}
+
+button.card {
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.12s;
+}
+
+button.card:not(:disabled):hover {
+  transform: translateY(-4px);
+  border-color: var(--neon-cyan);
+}
+
+button.card:disabled {
+  opacity: 0.4;
+}
+
+.cardSmall {
+  width: 3.2rem;
+  height: 4.6rem;
+  padding: 0.3rem;
+}
+
+.cardSel {
+  border-color: var(--neon-cyan);
+}
+
+.cardVal {
+  align-self: flex-start;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--neon-cyan);
+}
+
+.cardName {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.cardSmall .cardVal {
+  font-size: 1rem;
+}
+
+.cardSmall .cardName {
+  font-size: 0.65rem;
+}
+
+.peek {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.05rem;
+}
+
+.big {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.roundReason {
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.loading {
+  color: var(--muted-foreground);
+}
