@@ -11,6 +11,7 @@ import {
   PenLine,
   Bomb,
   HelpCircle,
+  Mail,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -107,6 +108,20 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 6,
     icon: Spade,
     color: 'green',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
+    secret: true,
+  },
+  {
+    id: 'love-letter',
+    name: 'Love Letter',
+    description: 'Nadmudri protivnike kartama dvora — pogađaj, mijenjaj, eliminiši.',
+    category: 'cards',
+    minPlayers: 2,
+    maxPlayers: 4,
+    icon: Mail,
+    color: 'magenta',
     hasLocal: true,
     hasOnline: true,
     implemented: true,

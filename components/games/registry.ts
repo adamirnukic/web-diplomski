@@ -11,6 +11,7 @@ import { TriviaQuizGame } from './trivia/Trivia'
 import { CheckersBoard } from './checkers/Checkers'
 import { PokerTable } from './poker/Poker'
 import { BattleshipsBoard } from './battleships/Battleships'
+import { LoveLetterBoard } from './love-letter/LoveLetter'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface GameBoardProps {
@@ -37,6 +38,7 @@ export const GAME_COMPONENTS: Record<string, ComponentType<GameBoardProps>> = {
   checkers: CheckersBoard,
   poker: PokerTable,
   battleships: BattleshipsBoard,
+  'love-letter': LoveLetterBoard,
 }
 
 export function getGameComponent(id: string): ComponentType<GameBoardProps> | undefined {
