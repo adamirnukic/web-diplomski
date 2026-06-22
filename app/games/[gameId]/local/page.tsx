@@ -10,6 +10,7 @@ import { getGameComponent } from '@/components/games/registry'
 import { PassDevice } from '@/components/games/PassDevice'
 import { PokerLocal } from '@/components/games/poker/PokerLocal'
 import { LoveLetterLocal } from '@/components/games/love-letter/LoveLetterLocal'
+import { AiLocal } from '@/components/games/AiLocal'
 import { useLocalGame } from '@/lib/useLocalGame'
 import type { EnginePlayer } from '@shared/types'
 import styles from './local.module.css'
@@ -112,6 +113,13 @@ export default function LocalGamePage({
           <PokerLocal />
         ) : gameId === 'love-letter' ? (
           <LoveLetterLocal />
+        ) : game?.aiLocal ? (
+          <AiLocal
+            gameId={gameId}
+            minPlayers={game?.minPlayers ?? 2}
+            maxPlayers={game?.maxPlayers ?? 6}
+            secret={game?.secret ?? false}
+          />
         ) : (
           <LocalRunner
             gameId={gameId}

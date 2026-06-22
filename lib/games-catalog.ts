@@ -12,6 +12,10 @@ import {
   Bomb,
   HelpCircle,
   Mail,
+  Box,
+  Dices,
+  Mountain,
+  Skull as SkullIcon,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -42,6 +46,8 @@ export interface GameMeta {
   secret?: boolean
   /** show a brief read-only review of the last move before handing the device over */
   reviewOnPass?: boolean
+  /** uses the generic local "vs bots" runner (player-count + bots setup) */
+  aiLocal?: boolean
 }
 
 export const GAMES: GameMeta[] = [
@@ -67,6 +73,19 @@ export const GAMES: GameMeta[] = [
     maxPlayers: 2,
     icon: Columns3,
     color: 'magenta',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
+  },
+  {
+    id: 'dots-and-boxes',
+    name: 'Točkice i kvadratići',
+    description: 'Povlači ivice i zatvaraj kvadrate; ko zatvori — igra ponovo.',
+    category: 'strategy',
+    minPlayers: 2,
+    maxPlayers: 2,
+    icon: Box,
+    color: 'green',
     hasLocal: true,
     hasOnline: true,
     implemented: true,
@@ -219,6 +238,50 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+  },
+  {
+    id: 'perudo',
+    name: "Perudo (Liar's Dice)",
+    description: 'Blefiraj kockicama — licitiraj koliko ih ima ili viči "laž!". 2-6, botovi.',
+    category: 'dice',
+    minPlayers: 2,
+    maxPlayers: 6,
+    icon: Dices,
+    color: 'magenta',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
+    secret: true,
+    aiLocal: true,
+  },
+  {
+    id: 'cant-stop',
+    name: "Can't Stop",
+    description: 'Riskiraj kockicama i osvoji 3 kolone — ali ne pretjeraj!',
+    category: 'dice',
+    minPlayers: 2,
+    maxPlayers: 4,
+    icon: Mountain,
+    color: 'cyan',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
+    aiLocal: true,
+  },
+  {
+    id: 'skull',
+    name: 'Skull',
+    description: 'Blefiraj diskovima — okreni cvjetove, izbjegni lobanju. 2-6, botovi.',
+    category: 'classic',
+    minPlayers: 2,
+    maxPlayers: 6,
+    icon: SkullIcon,
+    color: 'purple',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
+    secret: true,
+    aiLocal: true,
   },
 ]
 
