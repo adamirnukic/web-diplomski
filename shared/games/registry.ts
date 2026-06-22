@@ -13,6 +13,7 @@ import { pokerEngine } from './poker/engine'
 import { battleshipsEngine } from './battleships/engine'
 import { loveLetterEngine } from './love-letter/engine'
 import { dotsAndBoxesEngine } from './dots-and-boxes/engine'
+import { perudoEngine } from './perudo/engine'
 
 /**
  * Authoritative engine registry. The server uses this to run online games and
@@ -33,6 +34,7 @@ export const ENGINES: Record<string, GameEngine<any, any, any>> = {
   battleships: battleshipsEngine,
   'love-letter': loveLetterEngine,
   'dots-and-boxes': dotsAndBoxesEngine,
+  perudo: perudoEngine,
 }
 
 export function getEngine(id: string): GameEngine<any, any, any> | undefined {

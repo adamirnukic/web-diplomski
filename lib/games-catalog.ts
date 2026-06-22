@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Mail,
   Box,
+  Dices,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -43,6 +44,8 @@ export interface GameMeta {
   secret?: boolean
   /** show a brief read-only review of the last move before handing the device over */
   reviewOnPass?: boolean
+  /** uses the generic local "vs bots" runner (player-count + bots setup) */
+  aiLocal?: boolean
 }
 
 export const GAMES: GameMeta[] = [
@@ -233,6 +236,21 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+  },
+  {
+    id: 'perudo',
+    name: "Perudo (Liar's Dice)",
+    description: 'Blefiraj kockicama — licitiraj koliko ih ima ili viči "laž!". 2-6, botovi.',
+    category: 'dice',
+    minPlayers: 2,
+    maxPlayers: 6,
+    icon: Dices,
+    color: 'magenta',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
+    secret: true,
+    aiLocal: true,
   },
 ]
 
