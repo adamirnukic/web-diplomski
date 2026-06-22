@@ -6,6 +6,19 @@
   width: 100%;
 }
 
+.drawing {
+  width: 150px;
+  height: auto;
+}
+
+.drawing line,
+.drawing circle {
+  stroke: var(--foreground);
+  stroke-width: 4;
+  stroke-linecap: round;
+  fill: none;
+}
+
 .heading {
   font-size: 1.5rem;
   font-weight: 800;

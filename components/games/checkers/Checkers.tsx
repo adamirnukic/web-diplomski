@@ -8,7 +8,7 @@ import type { CheckersView, Piece } from '@shared/games/checkers/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Checkers.module.css'
 
-export function CheckersBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
+export function CheckersBoard({ view, onAction, onRestart, mode, players }: GameBoardProps) {
   const v = view as CheckersView | null
   const [selected, setSelected] = useState<number | null>(null)
   if (!v) return <div className={styles.loading}>Učitavanje…</div>
@@ -29,30 +29,33 @@ export function CheckersBoard({ view, onAction, onRestart, mode }: GameBoardProp
     else setSelected(null)
   }
 
+  const turnName = players?.find((p) => p.id === v.turn)?.username ?? 'Igrač'
   let status: string
-  if (result) status = mode === 'online' ? (v.yourTurn ? '' : '') + 'Kraj igre!' : 'Kraj igre!'
-  else status = v.yourTurn ? 'Tvoj potez' : 'Protivnik je na potezu…'
+  if (result) {
+    if (result.status === 'draw') status = 'Neriješeno!'
+    else if (mode === 'local') {
+      const w = players?.find((p) => p.id === result.winnerId)?.username ?? 'Igrač'
+      status = `Pobjeda: ${w} 🎉`
+    } else status = 'Kraj igre!'
+  } else {
+    status =
+      mode === 'online'
+        ? v.yourTurn
+          ? 'Tvoj potez'
+          : `${turnName} je na potezu…`
+        : `Na potezu: ${turnName}`
+  }
 
   const pieceClass = (p: Piece) =>
     cn(
       styles.piece,
-      (p === 'r' || p === 'R') ? styles.red : styles.black,
+      p === 'r' || p === 'R' ? styles.red : styles.black,
       (p === 'R' || p === 'B') && styles.king,
     )
 
   return (
     <div className={styles.root}>
-      <p className={cn(styles.status, result && styles.statusDone)}>
-        {result
-          ? result.status === 'draw'
-            ? 'Neriješeno!'
-            : mode === 'online'
-              ? result.winnerId && v.yourColor && !v.yourTurn
-                ? 'Kraj igre!'
-                : 'Kraj igre!'
-              : 'Kraj igre!'
-          : status}
-      </p>
+      <p className={cn(styles.status, result && styles.statusDone)}>{status}</p>
 
       <div className={styles.board}>
         {board.map((p, i) => {

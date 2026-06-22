@@ -9,10 +9,8 @@ export interface MineState {
   height: number
   mines: boolean[]
   revealed: boolean[]
-  order: [PlayerId, PlayerId]
-  turn: PlayerId
-  revealedBy: Record<PlayerId, number>
-  loserId: PlayerId | null
+  order: PlayerId[]
+  exploded: boolean
 }
 
 export type MineAction = { type: 'reveal'; index: number }
@@ -27,10 +25,11 @@ export interface MineView {
   width: number
   height: number
   cells: MineCellView[]
-  yourTurn: boolean
-  turn: PlayerId
-  yourCount: number
-  oppCount: number
+  mines: number
+  cleared: number
+  safeTotal: number
+  canPlay: boolean
+  exploded: boolean
   result: GameResult | null
 }
 
@@ -53,32 +52,25 @@ function adjacentCount(mines: boolean[], i: number, w: number, h: number): numbe
   return neighbors(i, w, h).filter((n) => mines[n]).length
 }
 
+function clearedCount(state: MineState): number {
+  return state.revealed.filter(Boolean).length
+}
+
 function getResult(state: MineState): GameResult | null {
-  if (state.loserId) {
-    const winnerId = state.order.find((id) => id !== state.loserId) as PlayerId
-    return { status: 'win', winnerId, scores: { [winnerId]: 1 } }
-  }
+  // Cooperative: everyone wins (cleared) or everyone loses (mine hit).
+  if (state.exploded) return { status: 'draw', coop: true }
   const total = state.width * state.height
-  const safeRevealed = state.revealed.filter(Boolean).length
-  if (safeRevealed >= total - MINES) {
-    const [a, b] = state.order
-    const ca = state.revealedBy[a] ?? 0
-    const cb = state.revealedBy[b] ?? 0
-    if (ca === cb) return { status: 'draw' }
-    const winnerId = ca > cb ? a : b
-    return { status: 'win', winnerId, scores: { [a]: ca, [b]: cb } }
-  }
+  if (clearedCount(state) >= total - MINES) return { status: 'win', coop: true }
   return null
 }
 
 export const minesweeperEngine: GameEngine<MineState, MineAction, MineView> = {
   id: 'minesweeper',
-  minPlayers: 2,
+  minPlayers: 1,
   maxPlayers: 2,
 
   createInitialState(players) {
-    if (players.length !== 2) throw new Error('Minolovac zahtijeva 2 igrača')
-    const [p1, p2] = players
+    if (players.length < 1) throw new Error('Potreban je bar 1 igrač')
     const size = WIDTH * HEIGHT
     const mines = Array(size).fill(false)
     let placed = 0
@@ -94,70 +86,61 @@ export const minesweeperEngine: GameEngine<MineState, MineAction, MineView> = {
       height: HEIGHT,
       mines,
       revealed: Array(size).fill(false),
-      order: [p1.id, p2.id],
-      turn: p1.id,
-      revealedBy: { [p1.id]: 0, [p2.id]: 0 },
-      loserId: null,
+      order: players.map((p) => p.id),
+      exploded: false,
     }
   },
 
-  applyAction(state, playerId, action) {
+  // Cooperative: any player may reveal any cell, no turns.
+  applyAction(state, _playerId, action) {
     if (getResult(state)) throw new Error('Igra je završena')
-    if (state.turn !== playerId) throw new Error('Nije tvoj potez')
     if (action.type !== 'reveal') throw new Error('Nepoznata akcija')
     const i = action.index
     if (i < 0 || i >= state.width * state.height) throw new Error('Nevažeće polje')
     if (state.revealed[i]) throw new Error('Polje je već otkriveno')
 
     if (state.mines[i]) {
-      return { ...state, loserId: playerId }
+      return { ...state, exploded: true }
     }
 
     const revealed = state.revealed.slice()
     const stack = [i]
-    let count = 0
     while (stack.length > 0) {
       const cur = stack.pop() as number
       if (revealed[cur] || state.mines[cur]) continue
       revealed[cur] = true
-      count++
       if (adjacentCount(state.mines, cur, state.width, state.height) === 0) {
         for (const n of neighbors(cur, state.width, state.height)) {
           if (!revealed[n] && !state.mines[n]) stack.push(n)
         }
       }
     }
-
-    const revealedBy = {
-      ...state.revealedBy,
-      [playerId]: (state.revealedBy[playerId] ?? 0) + count,
-    }
-    const nextTurn = state.order.find((id) => id !== playerId) as PlayerId
-    return { ...state, revealed, revealedBy, turn: nextTurn }
+    return { ...state, revealed }
   },
 
-  getView(state, playerId) {
+  getView(state) {
     const result = getResult(state)
-    const other = state.order.find((id) => id !== playerId) as PlayerId
+    const revealMines = state.exploded || Boolean(result)
     const cells: MineCellView[] = state.revealed.map((rev, i) => ({
       revealed: rev,
-      mine: state.mines[i] && (rev || Boolean(result)),
+      mine: state.mines[i] && (rev || revealMines),
       adjacent: adjacentCount(state.mines, i, state.width, state.height),
     }))
     return {
       width: state.width,
       height: state.height,
       cells,
-      yourTurn: state.turn === playerId && !result,
-      turn: state.turn,
-      yourCount: state.revealedBy[playerId] ?? 0,
-      oppCount: state.revealedBy[other] ?? 0,
+      mines: MINES,
+      cleared: clearedCount(state),
+      safeTotal: state.width * state.height - MINES,
+      canPlay: !result,
+      exploded: state.exploded,
       result,
     }
   },
 
   getCurrentPlayer(state) {
-    return getResult(state) ? null : state.turn
+    return getResult(state) ? null : state.order[0]
   },
 
   getResult,

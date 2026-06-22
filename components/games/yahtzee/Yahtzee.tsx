@@ -47,9 +47,11 @@ export function YahtzeeGame({ view, onAction, onRestart, mode }: GameBoardProps)
                 ? 'Pobijedio si! 🎉'
                 : 'Izgubio si.'
               : 'Kraj igre!'
-          : v.yourTurn
-            ? 'Tvoj potez'
-            : 'Potez protivnika'}
+          : mode === 'online'
+            ? v.yourTurn
+              ? 'Tvoj potez'
+              : `${colLabel(v.turn, v.order.indexOf(v.turn))} je na potezu`
+            : `Na potezu: ${colLabel(v.turn, v.order.indexOf(v.turn))}`}
       </p>
 
       <div className={styles.dice}>

@@ -25,18 +25,18 @@ export function MinesweeperBoard({ view, onAction, onRestart, mode }: GameBoardP
 
   let status: string
   if (v.result) {
-    status = v.result.status === 'draw' ? 'Neriješeno!' : 'Kraj igre!'
-  } else if (mode === 'online') {
-    status = v.yourTurn ? 'Tvoj potez' : 'Protivnik je na potezu…'
+    status = v.exploded ? '💥 Bum! Aktivirana mina.' : 'Polje očišćeno! 🎉'
   } else {
-    status = v.yourTurn ? 'Tvoj potez' : 'Potez protivnika'
+    status = 'Otkrivaj polja i izbjegavaj mine.'
   }
 
   return (
     <div className={styles.root}>
       <div className={styles.scores}>
-        <span>Ti: {v.yourCount}</span>
-        <span>Protivnik: {v.oppCount}</span>
+        <span>💣 {v.mines}</span>
+        <span>
+          Očišćeno: {v.cleared}/{v.safeTotal}
+        </span>
       </div>
       <p className={cn(styles.status, v.result && styles.statusDone)}>{status}</p>
 
@@ -52,7 +52,7 @@ export function MinesweeperBoard({ view, onAction, onRestart, mode }: GameBoardP
               cell.revealed && styles.revealed,
               cell.mine && styles.mine,
             )}
-            disabled={!v.yourTurn || cell.revealed || !!v.result}
+            disabled={!v.canPlay || cell.revealed}
             onClick={() => onAction({ type: 'reveal', index: i })}
             style={
               cell.revealed && !cell.mine && cell.adjacent > 0

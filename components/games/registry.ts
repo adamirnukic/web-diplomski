@@ -20,6 +20,8 @@ export interface GameBoardProps {
   onAction: (action: any) => void
   onRestart?: () => void
   mode: 'local' | 'online'
+  /** players in the match, used to label whose turn it is (esp. local hot-seat) */
+  players?: { id: string; username: string }[]
 }
 
 export const GAME_COMPONENTS: Record<string, ComponentType<GameBoardProps>> = {

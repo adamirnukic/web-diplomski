@@ -39,6 +39,8 @@ export interface GameMeta {
   implemented: boolean
   /** hidden-information game -> local play uses a "pass device" gate */
   secret?: boolean
+  /** show a brief read-only review of the last move before handing the device over */
+  reviewOnPass?: boolean
 }
 
 export const GAMES: GameMeta[] = [
@@ -81,6 +83,7 @@ export const GAMES: GameMeta[] = [
     hasOnline: true,
     implemented: true,
     secret: true,
+    reviewOnPass: true,
   },
   {
     id: 'blackjack',
@@ -98,10 +101,10 @@ export const GAMES: GameMeta[] = [
   {
     id: 'poker',
     name: "Texas Hold'em",
-    description: 'Kralj kartaških igara. Blefiraj, ulaži i nadigraj protivnika.',
+    description: 'Kralj kartaških igara — 2-6 igrača, AI botovi lokalno, custom ulozi.',
     category: 'cards',
     minPlayers: 2,
-    maxPlayers: 2,
+    maxPlayers: 6,
     icon: Spade,
     color: 'green',
     hasLocal: true,
@@ -179,9 +182,9 @@ export const GAMES: GameMeta[] = [
   {
     id: 'minesweeper',
     name: 'Minolovac',
-    description: 'Otkrivajte polja naizmjenično — ko nagazi minu, gubi.',
+    description: 'Očisti polje bez aktiviranja mina — sam ili u co-op-u.',
     category: 'puzzle',
-    minPlayers: 2,
+    minPlayers: 1,
     maxPlayers: 2,
     icon: Bomb,
     color: 'cyan',

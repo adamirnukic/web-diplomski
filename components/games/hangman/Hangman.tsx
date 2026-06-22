@@ -11,6 +11,26 @@ import styles from './Hangman.module.css'
 
 const ALPHABET = 'ABCČĆDĐEFGHIJKLMNOPRSŠTUVZŽ'.split('')
 
+function HangmanDrawing({ wrong }: { wrong: number }) {
+  const show = (n: number) => wrong >= n
+  return (
+    <svg viewBox="0 0 120 160" className={styles.drawing} aria-hidden="true">
+      {/* gallows */}
+      <line x1="10" y1="150" x2="80" y2="150" />
+      <line x1="30" y1="150" x2="30" y2="10" />
+      <line x1="30" y1="10" x2="90" y2="10" />
+      <line x1="90" y1="10" x2="90" y2="28" />
+      {/* figure, one part per wrong guess */}
+      {show(1) && <circle cx="90" cy="40" r="12" />}
+      {show(2) && <line x1="90" y1="52" x2="90" y2="100" />}
+      {show(3) && <line x1="90" y1="66" x2="72" y2="86" />}
+      {show(4) && <line x1="90" y1="66" x2="108" y2="86" />}
+      {show(5) && <line x1="90" y1="100" x2="74" y2="128" />}
+      {show(6) && <line x1="90" y1="100" x2="106" y2="128" />}
+    </svg>
+  )
+}
+
 export function HangmanGame({ view, onAction, onRestart, mode }: GameBoardProps) {
   const v = view as HangmanView | null
   const [word, setWord] = useState('')
@@ -48,18 +68,14 @@ export function HangmanGame({ view, onAction, onRestart, mode }: GameBoardProps)
 
   // Playing phase
   const wrongLeft = v.maxWrong - v.wrong
+  const guesserWon = v.masked.every((c) => c !== null)
+
   return (
     <div className={styles.root}>
-      <div className={styles.attempts}>
+      <HangmanDrawing wrong={v.wrong} />
+      <p className={styles.attempts}>
         Preostalo grešaka: <strong>{wrongLeft}</strong>
-        <span className={styles.crosses}>
-          {Array.from({ length: v.maxWrong }).map((_, i) => (
-            <span key={i} className={cn(styles.cross, i < v.wrong && styles.used)}>
-              ✕
-            </span>
-          ))}
-        </span>
-      </div>
+      </p>
 
       <div className={styles.word}>
         {v.masked.map((ch, i) =>
@@ -76,16 +92,13 @@ export function HangmanGame({ view, onAction, onRestart, mode }: GameBoardProps)
       {v.result ? (
         <>
           <p className={styles.final}>
-            {mode === 'online'
-              ? v.yourTurn === false && v.role === 'guesser'
-                ? ''
-                : ''
-              : ''}
             {v.role === 'guesser'
-              ? v.result.winnerId && resultIsGuesserWin(v)
+              ? guesserWon
                 ? 'Pogodio si riječ! 🎉'
                 : 'Nisi uspio. 💀'
-              : 'Kraj igre.'}
+              : guesserWon
+                ? 'Protivnik je pogodio riječ.'
+                : 'Protivnik nije pogodio! 🎉'}
           </p>
           {v.fullWord && <p className={styles.reveal}>Riječ je bila: {v.fullWord}</p>}
           {mode === 'local' && onRestart && (
@@ -112,9 +125,4 @@ export function HangmanGame({ view, onAction, onRestart, mode }: GameBoardProps)
       )}
     </div>
   )
-}
-
-function resultIsGuesserWin(v: HangmanView): boolean {
-  // guesser wins when the word is fully revealed (no remaining unknown letters)
-  return v.masked.every((c) => c !== null)
 }

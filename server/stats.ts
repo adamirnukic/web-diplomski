@@ -25,9 +25,20 @@ export function recordMatchResult(room: MinimalRoom, result: GameResult): void {
   `)
 
   for (const player of room.players.values()) {
-    const isWin = result.status === 'win' && result.winnerId === player.id
-    const isDraw = result.status === 'draw'
-    const isLoss = result.status === 'win' && result.winnerId !== player.id
+    let isWin: boolean
+    let isDraw: boolean
+    let isLoss: boolean
+    if (result.coop) {
+      // cooperative game: everyone wins or everyone loses together
+      const won = result.status === 'win'
+      isWin = won
+      isDraw = false
+      isLoss = !won
+    } else {
+      isWin = result.status === 'win' && result.winnerId === player.id
+      isDraw = result.status === 'draw'
+      isLoss = result.status === 'win' && result.winnerId !== player.id
+    }
     const xp = isWin ? XP_WIN : isDraw ? XP_DRAW : XP_LOSS
     upsert.run(
       player.id,

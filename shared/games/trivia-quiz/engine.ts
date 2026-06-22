@@ -42,9 +42,11 @@ export interface TriviaView {
   phase: 'answering' | 'revealed'
   chosen: number | null
   correctIndex: number | null
+  turn: PlayerId
   yourTurn: boolean
   yourScore: number
   oppScore: number
+  scores: Record<PlayerId, number>
   result: GameResult | null
 }
 
@@ -112,9 +114,11 @@ export const triviaEngine: GameEngine<TriviaState, TriviaAction, TriviaView> = {
       phase: state.pending ? 'revealed' : 'answering',
       chosen: state.pending?.chosen ?? null,
       correctIndex: state.pending && q ? q.correct : null,
+      turn: state.turn,
       yourTurn: state.turn === playerId && !getResult(state),
       yourScore: state.scores[playerId] ?? 0,
       oppScore: state.scores[other] ?? 0,
+      scores: state.scores,
       result: getResult(state),
     }
   },

@@ -14,6 +14,8 @@ export interface GameResult {
   winnerId?: PlayerId
   /** optional per-player scores, used for stats / XP */
   scores?: Record<PlayerId, number>
+  /** cooperative result: all players win together (status 'win') or all lose (status 'draw') */
+  coop?: boolean
 }
 
 /**
