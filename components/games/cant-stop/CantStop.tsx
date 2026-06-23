@@ -3,6 +3,7 @@
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { CantStopView } from '@shared/games/cant-stop/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './CantStop.module.css'
@@ -11,8 +12,9 @@ const PIPS = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
 const COLORS = ['var(--neon-cyan)', 'var(--neon-magenta)', 'var(--neon-green)', 'var(--neon-purple)']
 
 export function CantStopBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as CantStopView | null
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
   const colorOf = (id: string) => COLORS[v.order.indexOf(id)] ?? 'var(--foreground)'
 
   return (
@@ -67,13 +69,13 @@ export function CantStopBoard({ view, onAction, onRestart, mode }: GameBoardProp
           <p className={styles.big}>
             {mode === 'online'
               ? v.result.winnerId === v.you
-                ? 'Pobijedio si! 🏆'
-                : `Pobjednik: ${v.names[v.result.winnerId ?? '']}`
-              : `Pobjednik: ${v.names[v.result.winnerId ?? '']} 🏆`}
+                ? t('g.youWinTrophy')
+                : t('g.winnerName', { name: v.names[v.result.winnerId ?? ''] ?? '' })
+              : t('g.winnerTrophy', { name: v.names[v.result.winnerId ?? ''] ?? '' })}
           </p>
           {mode === 'local' && onRestart && (
             <Button onClick={onRestart} className="neon-glow-cyan">
-              <RotateCcw size={16} /> Nova igra
+              <RotateCcw size={16} /> {t('g.newGame')}
             </Button>
           )}
         </div>
@@ -83,12 +85,12 @@ export function CantStopBoard({ view, onAction, onRestart, mode }: GameBoardProp
         <div className={styles.panel}>
           <p className={styles.msg}>{v.message}</p>
           <Button onClick={() => onAction({ type: 'roll' })} className="neon-glow-cyan">
-            Baci kockice
+            {t('cs.roll')}
           </Button>
         </div>
       ) : v.phase === 'choosing' ? (
         <div className={styles.panel}>
-          <p className={styles.msg}>Izaberi par (napreduješ na poljima):</p>
+          <p className={styles.msg}>{t('cs.choosePair')}</p>
           <div className={styles.pairings}>
             {v.pairings.map((pr, i) => (
               <Button
@@ -105,13 +107,13 @@ export function CantStopBoard({ view, onAction, onRestart, mode }: GameBoardProp
         </div>
       ) : (
         <div className={styles.panel}>
-          <p className={styles.msg}>Baci ponovo (rizik!) ili stani da zaključaš napredak.</p>
+          <p className={styles.msg}>{t('cs.decide')}</p>
           <div className={styles.decide}>
             <Button onClick={() => onAction({ type: 'roll' })} className="neon-glow-magenta">
-              Baci ponovo
+              {t('cs.rollAgain')}
             </Button>
             <Button onClick={() => onAction({ type: 'stop' })} className="neon-glow-cyan">
-              Stani
+              {t('cs.stop')}
             </Button>
           </div>
         </div>

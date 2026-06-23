@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { SkullView } from '@shared/games/skull/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Skull.module.css'
@@ -11,9 +12,11 @@ import styles from './Skull.module.css'
 const ICON = { flower: '🌹', skull: '💀' } as const
 
 export function SkullBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as SkullView | null
   const [bidCount, setBidCount] = useState(1)
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
+
 
   const minBid = v.phase === 'bidding' ? v.bid + 1 : 1
   const bid = Math.max(minBid, Math.min(bidCount, v.placedTotal))
@@ -54,7 +57,7 @@ export function SkullBoard({ view, onAction, onRestart, mode }: GameBoardProps) 
       {v.lastReveal && (
         <p className={styles.reveal}>
           {v.lastReveal.ownerName}: {ICON[v.lastReveal.type]}{' '}
-          {v.lastReveal.type === 'skull' ? '— lobanja!' : ''}
+          {v.lastReveal.type === 'skull' ? t('skull.skullRevealed') : ''}
         </p>
       )}
       <p className={styles.msg}>{v.message}</p>
@@ -62,7 +65,7 @@ export function SkullBoard({ view, onAction, onRestart, mode }: GameBoardProps) 
       {/* Your hand */}
       {v.yourHand.flowers + (v.yourHand.skull ? 1 : 0) > 0 && (
         <div className={styles.hand}>
-          <span className={styles.handLabel}>Tvoji diskovi:</span>
+          <span className={styles.handLabel}>{t('skull.yourDiscs')}</span>
           {Array.from({ length: v.yourHand.flowers }).map((_, i) => (
             <span key={i} className={styles.disc}>
               🌹
@@ -78,33 +81,39 @@ export function SkullBoard({ view, onAction, onRestart, mode }: GameBoardProps) 
           <p className={styles.big}>
             {mode === 'online'
               ? v.result.winnerId === v.you
-                ? 'Pobijedio si! 🏆'
-                : `Pobjednik: ${v.seats.find((s) => s.id === v.result?.winnerId)?.name}`
-              : `Pobjednik: ${v.seats.find((s) => s.id === v.result?.winnerId)?.name} 🏆`}
+                ? t('g.youWinTrophy')
+                : t('g.winnerName', { name: v.seats.find((s) => s.id === v.result?.winnerId)?.name ?? '' })
+              : t('g.winnerTrophy', { name: v.seats.find((s) => s.id === v.result?.winnerId)?.name ?? '' })}
           </p>
           {mode === 'local' && onRestart && (
             <Button onClick={onRestart} className="neon-glow-cyan">
-              <RotateCcw size={16} /> Nova igra
+              <RotateCcw size={16} /> {t('g.newGame')}
             </Button>
           )}
         </div>
       ) : !v.yourTurn ? (
-        <p className={styles.wait}>{v.bidderName && v.bid > 0 ? `Licitacija: ${v.bid} (${v.bidderName})` : 'Čekaj svoj red…'}</p>
+        <p className={styles.wait}>
+          {v.bidderName && v.bid > 0
+            ? t('skull.bidLine', { bid: v.bid, by: v.bidderName })
+            : t('skull.waitTurn')}
+        </p>
       ) : v.phase === 'placing' ? (
         <div className={styles.panel}>
           <div className={styles.actions}>
             {v.yourHand.flowers > 0 && (
-              <Button onClick={() => onAction({ type: 'place', disc: 'flower' })}>Položi 🌹</Button>
+              <Button onClick={() => onAction({ type: 'place', disc: 'flower' })}>
+                {t('skull.placeFlower')}
+              </Button>
             )}
             {v.yourHand.skull && (
               <Button variant="outline" onClick={() => onAction({ type: 'place', disc: 'skull' })}>
-                Položi 💀
+                {t('skull.placeSkull')}
               </Button>
             )}
           </div>
           {v.canBid && (
             <BidControl
-              label="Licitiraj"
+              label={t('skull.bid')}
               bid={bid}
               min={1}
               max={v.placedTotal}
@@ -115,10 +124,10 @@ export function SkullBoard({ view, onAction, onRestart, mode }: GameBoardProps) 
         </div>
       ) : v.phase === 'bidding' ? (
         <div className={styles.panel}>
-          <p className={styles.msg}>Trenutna licitacija: {v.bid} ({v.bidderName})</p>
+          <p className={styles.msg}>{t('skull.currentBid', { bid: v.bid, by: v.bidderName ?? '' })}</p>
           <div className={styles.actions}>
             <BidControl
-              label="Podigni"
+              label={t('skull.raise')}
               bid={bid}
               min={minBid}
               max={v.placedTotal}
@@ -126,19 +135,20 @@ export function SkullBoard({ view, onAction, onRestart, mode }: GameBoardProps) 
               onSubmit={() => onAction({ type: 'bid', count: bid })}
             />
             <Button variant="outline" onClick={() => onAction({ type: 'pass' })}>
-              Pasiraj
+              {t('skull.pass')}
             </Button>
           </div>
         </div>
       ) : v.isChallenger ? (
         <div className={styles.panel}>
           <p className={styles.msg}>
-            Okreni cvjetove ({v.flippedFlowers}/{v.bid}){v.ownFlipDone ? ' — sad biraj protivnike' : ' — prvo svoje'}
+            {t('skull.flip', { n: v.flippedFlowers, bid: v.bid })}
+            {v.ownFlipDone ? t('skull.flipOthers') : t('skull.flipOwn')}
           </p>
           <div className={styles.actions}>
-            {v.flipTargets.map((t) => (
-              <Button key={t.id} onClick={() => onAction({ type: 'flip', target: t.id })}>
-                {t.id === v.you ? 'Svoj disk' : t.name}
+            {v.flipTargets.map((ft) => (
+              <Button key={ft.id} onClick={() => onAction({ type: 'flip', target: ft.id })}>
+                {ft.id === v.you ? t('skull.ownDisc') : ft.name}
               </Button>
             ))}
           </div>
