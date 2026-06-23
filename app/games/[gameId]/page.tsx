@@ -8,6 +8,7 @@ import { Navbar } from '@/components/layout/navbar'
 import { getGameMeta } from '@/lib/games-catalog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useT } from '@/lib/i18n'
 import styles from './game-detail.module.css'
 
 export default function GameDetailPage({
@@ -18,6 +19,7 @@ export default function GameDetailPage({
   const { gameId } = use(params)
   const game = getGameMeta(gameId)
   const router = useRouter()
+  const { t } = useT()
   const [code, setCode] = useState('')
 
   if (!game) {
@@ -25,7 +27,7 @@ export default function GameDetailPage({
       <div className={styles.page}>
         <Navbar />
         <main className={`container ${styles.main}`}>
-          <p className={styles.muted}>Igra nije pronađena.</p>
+          <p className={styles.muted}>{t('detail.notFound')}</p>
         </main>
       </div>
     )
@@ -38,7 +40,7 @@ export default function GameDetailPage({
       <Navbar />
       <main className={`container ${styles.main}`}>
         <Link href="/games" className={styles.back}>
-          <ArrowLeft size={16} /> Nazad na igre
+          <ArrowLeft size={16} /> {t('detail.back')}
         </Link>
 
         <div className={styles.head}>
@@ -55,27 +57,23 @@ export default function GameDetailPage({
           <div className={styles.modes}>
             <div className={styles.modeCard}>
               <Monitor size={28} className="text-neon-magenta" />
-              <h2 className={styles.modeTitle}>Lokalno</h2>
-              <p className={styles.modeText}>
-                Igrajte na istom uređaju, jedan pored drugog.
-              </p>
+              <h2 className={styles.modeTitle}>{t('detail.local')}</h2>
+              <p className={styles.modeText}>{t('detail.localText')}</p>
               <Link href={`/games/${game.id}/local`}>
-                <Button className="neon-glow-magenta">Igraj lokalno</Button>
+                <Button className="neon-glow-magenta">{t('detail.playLocal')}</Button>
               </Link>
             </div>
 
             <div className={styles.modeCard}>
               <Globe size={28} className="text-neon-cyan" />
-              <h2 className={styles.modeTitle}>Online</h2>
-              <p className={styles.modeText}>
-                Napravi sobu i podijeli kod, ili se pridruži postojećoj.
-              </p>
+              <h2 className={styles.modeTitle}>{t('detail.online')}</h2>
+              <p className={styles.modeText}>{t('detail.onlineText')}</p>
               <Link href={`/games/${game.id}/online`}>
-                <Button className="neon-glow-cyan">Napravi sobu</Button>
+                <Button className="neon-glow-cyan">{t('detail.createRoom')}</Button>
               </Link>
               <div className={styles.joinRow}>
                 <Input
-                  placeholder="Kod sobe"
+                  placeholder={t('room.code')}
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   maxLength={6}
@@ -85,13 +83,13 @@ export default function GameDetailPage({
                   disabled={!code}
                   onClick={() => router.push(`/games/${game.id}/online?code=${code}`)}
                 >
-                  Pridruži se
+                  {t('detail.join')}
                 </Button>
               </div>
             </div>
           </div>
         ) : (
-          <p className={styles.soon}>Ova igra je u izradi i uskoro dolazi. 🚧</p>
+          <p className={styles.soon}>{t('detail.soon')}</p>
         )}
       </main>
     </div>

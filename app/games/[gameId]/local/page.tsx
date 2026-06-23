@@ -11,6 +11,7 @@ import { PassDevice } from '@/components/games/PassDevice'
 import { PokerLocal } from '@/components/games/poker/PokerLocal'
 import { AiLocal } from '@/components/games/AiLocal'
 import { useLocalGame } from '@/lib/useLocalGame'
+import { useT } from '@/lib/i18n'
 import type { EnginePlayer } from '@shared/types'
 import styles from './local.module.css'
 
@@ -94,6 +95,7 @@ export default function LocalGamePage({
 }) {
   const { gameId } = use(params)
   const game = getGameMeta(gameId)
+  const { t } = useT()
   const ready = Boolean(game && getEngine(gameId) && getGameComponent(gameId))
 
   return (
@@ -101,13 +103,13 @@ export default function LocalGamePage({
       <Navbar />
       <main className={`container ${styles.main}`}>
         <Link href={`/games/${gameId}`} className={styles.back}>
-          <ArrowLeft size={16} /> Nazad
+          <ArrowLeft size={16} /> {t('common.back')}
         </Link>
         <h1 className={styles.title}>
-          {game?.name ?? 'Igra'} <span className={styles.muted}>— lokalno</span>
+          {game?.name ?? 'Game'} <span className={styles.muted}>— {t('games.localSuffix')}</span>
         </h1>
         {!ready ? (
-          <p className={styles.muted}>Ova igra još nije dostupna.</p>
+          <p className={styles.muted}>{t('games.unavailableLocal')}</p>
         ) : gameId === 'poker' ? (
           <PokerLocal />
         ) : game?.aiLocal ? (

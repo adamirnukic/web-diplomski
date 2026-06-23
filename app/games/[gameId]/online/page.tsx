@@ -9,6 +9,7 @@ import { getGameMeta } from '@/lib/games-catalog'
 import { getEngine } from '@shared/games/registry'
 import { getGameComponent } from '@/components/games/registry'
 import { useAuth } from '@/lib/auth'
+import { useT } from '@/lib/i18n'
 import { useRoom } from '@/lib/useRoom'
 import { RoomLobby } from '@/components/RoomLobby'
 import { InviteFriends } from '@/components/games/InviteFriends'
@@ -20,6 +21,7 @@ function OnlineRunner({ gameId }: { gameId: string }) {
   const game = getGameMeta(gameId)!
   const Comp = getGameComponent(gameId)!
   const { user } = useAuth()
+  const { t } = useT()
   const search = useSearchParams()
   const joinCode = search.get('code')
   const router = useRouter()
@@ -52,11 +54,9 @@ function OnlineRunner({ gameId }: { gameId: string }) {
   return (
     <>
       {room.error && <p className={styles.error}>{room.error}</p>}
-      {room.reconnecting && (
-        <p className={styles.reconnect}>Veza prekinuta — ponovno povezivanje…</p>
-      )}
+      {room.reconnecting && <p className={styles.reconnect}>{t('online.reconnecting')}</p>}
       {!room.connected && !room.reconnecting && !room.error && (
-        <p className={styles.muted}>Povezivanje sa serverom…</p>
+        <p className={styles.muted}>{t('online.connecting')}</p>
       )}
 
       {room.lobby && status === 'lobby' && (
@@ -90,24 +90,24 @@ function OnlineRunner({ gameId }: { gameId: string }) {
               <p className={styles.resultText}>
                 {room.result.coop
                   ? room.result.status === 'win'
-                    ? 'Pobjeda! 🎉'
-                    : 'Niste uspjeli 💥'
+                    ? t('online.coopWin')
+                    : t('online.coopLose')
                   : room.result.status === 'draw'
-                    ? 'Neriješeno!'
+                    ? t('g.draw')
                     : room.result.winnerId === user.id
-                      ? 'Pobijedio si! 🎉'
-                      : 'Izgubio si.'}
+                      ? t('g.youWin')
+                      : t('g.youLose')}
               </p>
               <div className={styles.resultActions}>
                 {isHost ? (
                   <Button onClick={() => room.start()} className="neon-glow-cyan">
-                    Revanš
+                    {t('online.rematch')}
                   </Button>
                 ) : (
-                  <span className={styles.muted}>Čeka se revanš od hosta…</span>
+                  <span className={styles.muted}>{t('online.waitRematch')}</span>
                 )}
                 <Button variant="outline" onClick={backToMenu}>
-                  Nazad u meni
+                  {t('online.backToMenu')}
                 </Button>
               </div>
             </div>
@@ -126,6 +126,7 @@ export default function OnlineGamePage({
   const { gameId } = use(params)
   const game = getGameMeta(gameId)
   const { user, loading } = useAuth()
+  const { t } = useT()
   const router = useRouter()
 
   useEffect(() => {
@@ -139,20 +140,20 @@ export default function OnlineGamePage({
       <Navbar />
       <main className={`container ${styles.main}`}>
         <Link href={`/games/${gameId}`} className={styles.back}>
-          <ArrowLeft size={16} /> Nazad
+          <ArrowLeft size={16} /> {t('common.back')}
         </Link>
         <h1 className={styles.title}>
-          {game?.name ?? 'Igra'} <span className={styles.muted}>— online</span>
+          {game?.name ?? 'Game'} <span className={styles.muted}>— {t('games.onlineSuffix')}</span>
         </h1>
 
         {loading || !user ? (
-          <p className={styles.muted}>Učitavanje…</p>
+          <p className={styles.muted}>{t('common.loading')}</p>
         ) : ready ? (
-          <Suspense fallback={<p className={styles.muted}>Učitavanje…</p>}>
+          <Suspense fallback={<p className={styles.muted}>{t('common.loading')}</p>}>
             <OnlineRunner gameId={gameId} />
           </Suspense>
         ) : (
-          <p className={styles.muted}>Ova igra još nije dostupna online.</p>
+          <p className={styles.muted}>{t('games.unavailableOnline')}</p>
         )}
       </main>
     </div>
