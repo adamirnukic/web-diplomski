@@ -56,11 +56,23 @@
 .red {
   background: var(--neon-magenta);
   box-shadow: 0 0 8px oklch(0.65 0.25 330 / 0.5);
+  animation: c4drop 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
 .yellow {
   background: var(--neon-green);
   box-shadow: 0 0 8px oklch(0.7 0.2 150 / 0.5);
+  animation: c4drop 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+/* disc falls into place */
+@keyframes c4drop {
+  from {
+    transform: translateY(-450%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .win {

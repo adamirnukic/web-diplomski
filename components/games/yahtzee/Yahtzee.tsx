@@ -39,7 +39,7 @@ export function YahtzeeGame({ view, onAction, onRestart, mode }: GameBoardProps)
       <div className={styles.dice}>
         {v.dice.map((d, i) => (
           <button
-            key={i}
+            key={`${i}:${d}`}
             className={cn(styles.die, v.held[i] && styles.held, d === 0 && styles.empty)}
             disabled={!v.yourTurn || !v.rolled || !!v.result}
             onClick={() => onAction({ type: 'toggleHold', index: i })}

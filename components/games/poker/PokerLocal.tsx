@@ -1,10 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Bot, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { PassDevice } from '@/components/games/PassDevice'
+import { useSound } from '@/lib/sound'
 import {
   pokerEngine,
   type PokerAction,
@@ -112,6 +113,8 @@ function PokerGame({
   )
   const [viewer, setViewer] = useState<string>(humanIds[0])
   const [error, setError] = useState<string | null>(null)
+  const { play } = useSound()
+  const resultPlayed = useRef(false)
 
   const dispatch = useCallback((action: PokerAction, actor: string) => {
     setError(null)
@@ -137,7 +140,20 @@ function PokerGame({
   const restart = () => {
     setState(pokerEngine.createInitialState(players, { ai: aiIds }))
     setViewer(humanIds[0])
+    resultPlayed.current = false
   }
+
+  useEffect(() => {
+    const res = pokerEngine.getResult(state)
+    if (!res) {
+      resultPlayed.current = false
+      return
+    }
+    if (resultPlayed.current) return
+    resultPlayed.current = true
+    play(res.winnerId && humanIds.includes(res.winnerId) ? 'win' : 'lose')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state])
 
   // Hand the device between human players (hide their hole cards from each other).
   const needHandoff =
@@ -155,10 +171,14 @@ function PokerGame({
   const view = pokerEngine.getView(state, viewer)
   const onAction = (action: PokerAction) => {
     if (action.type === 'next') {
+      play('move')
       dispatch(action, viewer)
       return
     }
-    if (current && !state.ai[current]) dispatch(action, current)
+    if (current && !state.ai[current]) {
+      play('move')
+      dispatch(action, current)
+    }
   }
 
   return (

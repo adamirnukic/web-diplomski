@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useEffect, useMemo, useState } from 'react'
+import { use, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
@@ -12,6 +12,7 @@ import { PokerLocal } from '@/components/games/poker/PokerLocal'
 import { AiLocal } from '@/components/games/AiLocal'
 import { useLocalGame } from '@/lib/useLocalGame'
 import { useT } from '@/lib/i18n'
+import { useSound } from '@/lib/sound'
 import type { EnginePlayer } from '@shared/types'
 import styles from './local.module.css'
 
@@ -32,9 +33,29 @@ function LocalRunner({
   const engine = getEngine(gameId)!
   const Comp = getGameComponent(gameId)!
   const players = useMemo(() => LOCAL_PLAYERS, [])
+  const { play } = useSound()
   const { view, viewFor, dispatch, restart, currentPlayer } = useLocalGame(engine, players)
   const [viewerId, setViewerId] = useState<string | null>(currentPlayer)
   const [reviewing, setReviewing] = useState(false)
+  const resultPlayed = useRef(false)
+  const onMove = (action: unknown) => {
+    play('move')
+    dispatch(action as never)
+  }
+
+  useEffect(() => {
+    const res = (view as { result?: { status: string; coop?: boolean } | null } | null)?.result
+    if (!res) {
+      resultPlayed.current = false
+      return
+    }
+    if (resultPlayed.current) return
+    resultPlayed.current = true
+    if (res.coop) play(res.status === 'win' ? 'win' : 'lose')
+    else if (res.status === 'draw') play('draw')
+    else play('win')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view])
 
   // Manage the pass-and-play hand-off (and an optional brief result review).
   useEffect(() => {
@@ -59,13 +80,14 @@ function LocalRunner({
     restart()
     setViewerId(LOCAL_PLAYERS[0].id)
     setReviewing(false)
+    resultPlayed.current = false
   }
 
   const common = { onRestart: handleRestart, mode: 'local' as const, players }
 
   // Perfect-information games: no hand-off needed.
   if (!secret) {
-    return <Comp view={view} onAction={dispatch} {...common} />
+    return <Comp view={view} onAction={onMove} {...common} />
   }
 
   // Game over: show the final board.
@@ -85,7 +107,7 @@ function LocalRunner({
   }
 
   // Normal play for the current viewer.
-  return <Comp view={viewFor(viewerId)} onAction={dispatch} {...common} />
+  return <Comp view={viewFor(viewerId)} onAction={onMove} {...common} />
 }
 
 export default function LocalGamePage({

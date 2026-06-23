@@ -54,6 +54,23 @@
   box-shadow: 0 0 10px oklch(0.7 0.2 150 / 0.4), 0 0 30px oklch(0.7 0.2 150 / 0.2);
 }
 
+/* mark pops in when placed */
+.cell span {
+  display: inline-block;
+  animation: ttPop 0.18s ease-out;
+}
+
+@keyframes ttPop {
+  from {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .loading {
   color: var(--muted-foreground);
 }

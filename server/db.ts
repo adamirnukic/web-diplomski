@@ -48,6 +48,13 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_match_players_user ON match_players(user_id, created_at);
 
+  CREATE TABLE IF NOT EXISTS achievements (
+    user_id        TEXT NOT NULL,
+    achievement_id TEXT NOT NULL,
+    earned_at      INTEGER NOT NULL,
+    PRIMARY KEY (user_id, achievement_id)
+  );
+
   CREATE TABLE IF NOT EXISTS password_resets (
     token       TEXT PRIMARY KEY,
     user_id     TEXT NOT NULL,
