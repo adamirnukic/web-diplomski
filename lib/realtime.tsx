@@ -22,13 +22,21 @@ export interface GameInvite {
   code: string
 }
 
+export interface AchievementPop {
+  key: string
+  id: string
+  icon: string
+}
+
 interface RealtimeValue {
   online: Set<string>
   friends: FriendUser[]
   incomingCount: number
   invites: GameInvite[]
+  achievements: AchievementPop[]
   sendInvite: (toUserId: string, gameId: string, code: string) => void
   dismissInvite: (id: string) => void
+  dismissAchievement: (key: string) => void
   refreshSocial: () => void
 }
 
@@ -45,6 +53,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   const [friends, setFriends] = useState<FriendUser[]>([])
   const [incomingCount, setIncomingCount] = useState(0)
   const [invites, setInvites] = useState<GameInvite[]>([])
+  const [achievements, setAchievements] = useState<AchievementPop[]>([])
 
   const refreshSocial = useCallback(() => {
     apiFriends()
@@ -64,6 +73,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       setFriends([])
       setIncomingCount(0)
       setInvites([])
+      setAchievements([])
       return
     }
     refreshSocial()
@@ -86,6 +96,9 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     )
     socket.on('friend:request:new', refreshSocial)
     socket.on('friend:accepted', refreshSocial)
+    socket.on('achievement:earned', ({ id, icon }: { id: string; icon: string }) =>
+      setAchievements((prev) => [...prev, { key: `${Date.now()}-${Math.random()}`, id, icon }]),
+    )
 
     return () => {
       socket.close()
@@ -102,9 +115,24 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const dismissAchievement = useCallback(
+    (key: string) => setAchievements((prev) => prev.filter((a) => a.key !== key)),
+    [],
+  )
+
   return (
     <Ctx.Provider
-      value={{ online, friends, incomingCount, invites, sendInvite, dismissInvite, refreshSocial }}
+      value={{
+        online,
+        friends,
+        incomingCount,
+        invites,
+        achievements,
+        sendInvite,
+        dismissInvite,
+        dismissAchievement,
+        refreshSocial,
+      }}
     >
       {children}
     </Ctx.Provider>

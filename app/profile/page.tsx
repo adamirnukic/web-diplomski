@@ -7,14 +7,18 @@ import { Navbar } from '@/components/layout/navbar'
 import { useAuth } from '@/lib/auth'
 import { useT } from '@/lib/i18n'
 import {
+  apiAchievements,
   apiChangePassword,
   apiHistory,
   apiStats,
   apiUpdateProfile,
+  type AchievementRow,
   type GameStatRow,
   type MatchRow,
 } from '@/lib/api'
 import { getGameMeta } from '@/lib/games-catalog'
+import { useRealtime } from '@/lib/realtime'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import styles from './profile.module.css'
@@ -58,9 +62,11 @@ const RES_COLOR: Record<MatchRow['outcome'], string> = {
 export default function ProfilePage() {
   const { user, loading, applySession } = useAuth()
   const { t } = useT()
+  const { achievements: achPops } = useRealtime()
   const router = useRouter()
   const [stats, setStats] = useState<GameStatRow[]>([])
   const [history, setHistory] = useState<MatchRow[]>([])
+  const [achievements, setAchievements] = useState<AchievementRow[]>([])
   const [loaded, setLoaded] = useState(false)
   const [editing, setEditing] = useState(false)
 
@@ -89,6 +95,13 @@ export default function ProfilePage() {
       .then((r) => setHistory(r.matches))
       .catch(() => {})
   }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    apiAchievements()
+      .then((r) => setAchievements(r.achievements))
+      .catch(() => {})
+  }, [user, achPops.length])
 
   if (loading || !user) {
     return (
@@ -317,6 +330,24 @@ export default function ProfilePage() {
             </tbody>
           </table>
         )}
+
+        <h2 className={styles.section}>{t('ach.title')}</h2>
+        <div className={styles.badges}>
+          {achievements.map((a) => (
+            <div
+              key={a.id}
+              className={cn(styles.badge, a.earned ? styles.badgeEarned : styles.badgeLocked)}
+            >
+              <span className={styles.badgeIcon}>{a.icon}</span>
+              <span>
+                <div className={styles.badgeName}>{t(`ach.${a.id}.name`)}</div>
+                <div className={styles.badgeDesc}>
+                  {a.earned ? t(`ach.${a.id}.desc`) : t('ach.locked')}
+                </div>
+              </span>
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   )

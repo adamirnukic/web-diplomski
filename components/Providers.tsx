@@ -6,6 +6,7 @@ import { SoundProvider } from '@/lib/sound'
 import { AuthProvider } from '@/lib/auth'
 import { RealtimeProvider } from '@/lib/realtime'
 import { InviteToasts } from '@/components/InviteToasts'
+import { AchievementToasts } from '@/components/AchievementToasts'
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <RealtimeProvider>
             {children}
             <InviteToasts />
+            <AchievementToasts />
           </RealtimeProvider>
         </AuthProvider>
       </SoundProvider>

@@ -27,6 +27,7 @@ import {
   sendFriendRequest,
 } from './friends'
 import { getLeaderboard, getMatchHistory, getStatsForUser } from './stats'
+import { listForUser as listAchievements } from './achievements'
 import { registerRoomHandlers } from './rooms'
 import { registerSocialHandlers } from './social'
 import { emitToUser, setIO } from './presence'
@@ -148,6 +149,12 @@ app.get('/api/history', (req: Request, res: Response) => {
   const u = requireAuth(req, res)
   if (!u) return
   res.json({ matches: getMatchHistory(u.id) })
+})
+
+app.get('/api/achievements', (req: Request, res: Response) => {
+  const u = requireAuth(req, res)
+  if (!u) return
+  res.json({ achievements: listAchievements(u.id) })
 })
 
 app.get('/api/leaderboard', (req: Request, res: Response) => {

@@ -113,6 +113,17 @@ export function apiHistory() {
   return request<{ matches: MatchRow[] }>('/api/history')
 }
 
+export interface AchievementRow {
+  id: string
+  icon: string
+  earned: boolean
+  earned_at: number | null
+}
+
+export function apiAchievements() {
+  return request<{ achievements: AchievementRow[] }>('/api/achievements')
+}
+
 export function apiChangePassword(currentPassword: string, newPassword: string) {
   return request<{ ok: true }>('/api/auth/change-password', {
     method: 'POST',

@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { db } from './db'
+import { awardAchievements } from './achievements'
+import { emitToUser } from './presence'
 import type { GameResult, PlayerId } from '../shared/types'
 
 const XP_WIN = 30
@@ -60,6 +62,13 @@ export function recordMatchResult(room: MinimalRoom, result: GameResult): void {
   db.prepare(
     'INSERT INTO matches (id, game_id, mode, result, created_at) VALUES (?, ?, ?, ?, ?)',
   ).run(matchId, room.gameId, 'online', JSON.stringify(result), ts)
+
+  // hand out any newly-earned achievements and notify the players
+  for (const player of room.players.values()) {
+    for (const ach of awardAchievements(player.id)) {
+      emitToUser(player.id, 'achievement:earned', ach)
+    }
+  }
 }
 
 export function getMatchHistory(userId: string, limit = 25): unknown[] {

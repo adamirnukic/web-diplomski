@@ -202,3 +202,44 @@
   color: #ff6b6b;
   font-size: 0.85rem;
 }
+
+.badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: 0.75rem;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.badgeEarned {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.18);
+}
+
+.badgeLocked {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+}
+
+.badgeIcon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.badgeName {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.badgeDesc {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
