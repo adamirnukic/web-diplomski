@@ -3,28 +3,34 @@
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { Choice, RpsView } from '@shared/games/rock-paper-scissors/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './RockPaperScissors.module.css'
 
-const OPTIONS: { choice: Choice; emoji: string; label: string }[] = [
-  { choice: 'rock', emoji: '✊', label: 'Kamen' },
-  { choice: 'paper', emoji: '✋', label: 'Papir' },
-  { choice: 'scissors', emoji: '✌️', label: 'Makaze' },
+const OPTIONS: { choice: Choice; emoji: string }[] = [
+  { choice: 'rock', emoji: '✊' },
+  { choice: 'paper', emoji: '✋' },
+  { choice: 'scissors', emoji: '✌️' },
 ]
 
 const EMOJI: Record<Choice, string> = { rock: '✊', paper: '✋', scissors: '✌️' }
 
 export function RockPaperScissorsGame({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as RpsView | null
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   return (
     <div className={styles.root}>
       <div className={styles.scores}>
-        <span>Ti: {v.yourScore}</span>
-        <span className={styles.round}>Runda {v.round}</span>
-        <span>Protivnik: {v.oppScore}</span>
+        <span>
+          {t('rps.you')}: {v.yourScore}
+        </span>
+        <span className={styles.round}>{t('rps.round', { n: v.round })}</span>
+        <span>
+          {t('rps.opp')}: {v.oppScore}
+        </span>
       </div>
 
       {v.last && (
@@ -38,10 +44,10 @@ export function RockPaperScissorsGame({ view, onAction, onRestart, mode }: GameB
             )}
           >
             {v.last.outcome === 'win'
-              ? 'Dobio si rundu'
+              ? t('rps.wonRound')
               : v.last.outcome === 'lose'
-                ? 'Izgubio si rundu'
-                : 'Neriješeno'}
+                ? t('rps.lostRound')
+                : t('res.draw')}
           </span>
           <span className={styles.lastEmoji}>{EMOJI[v.last.theirs]}</span>
         </div>
@@ -50,16 +56,16 @@ export function RockPaperScissorsGame({ view, onAction, onRestart, mode }: GameB
       {v.result ? (
         <>
           <p className={styles.final}>
-            {v.result.winnerId ? (v.yourScore > v.oppScore ? 'Pobijedio si! 🎉' : 'Izgubio si.') : ''}
+            {v.result.winnerId ? (v.yourScore > v.oppScore ? t('g.youWin') : t('g.youLose')) : ''}
           </p>
           {mode === 'local' && onRestart && (
             <Button onClick={onRestart} className="neon-glow-cyan">
-              <RotateCcw size={16} /> Igraj ponovo
+              <RotateCcw size={16} /> {t('g.playAgain')}
             </Button>
           )}
         </>
       ) : v.waitingForOpponent ? (
-        <p className={styles.waiting}>Čekaš protivnika…</p>
+        <p className={styles.waiting}>{t('rps.waiting')}</p>
       ) : (
         <div className={styles.options}>
           {OPTIONS.map((o) => (
@@ -69,7 +75,7 @@ export function RockPaperScissorsGame({ view, onAction, onRestart, mode }: GameB
               onClick={() => onAction({ type: 'choose', choice: o.choice })}
             >
               <span className={styles.optionEmoji}>{o.emoji}</span>
-              <span>{o.label}</span>
+              <span>{t(`rps.${o.choice}`)}</span>
             </button>
           ))}
         </div>

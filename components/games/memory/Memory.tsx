@@ -3,13 +3,15 @@
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { MemoryView } from '@shared/games/memory/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Memory.module.css'
 
 export function MemoryBoard({ view, onAction, onRestart, mode, players }: GameBoardProps) {
+  const { t } = useT()
   const v = view as MemoryView | null
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   const { cards, result } = v
   const canPlay = v.yourTurn && !result
@@ -19,11 +21,11 @@ export function MemoryBoard({ view, onAction, onRestart, mode, players }: GameBo
   let status: string
   if (result) {
     const winnerName = players?.find((p) => p.id === result.winnerId)?.username ?? ''
-    status = result.status === 'draw' ? 'Neriješeno!' : `Pobjeda: ${winnerName} 🎉`
+    status = result.status === 'draw' ? t('g.draw') : t('g.winnerName', { name: winnerName })
   } else if (mode === 'online') {
-    status = v.yourTurn ? 'Tvoj potez' : `${turnName} je na potezu…`
+    status = v.yourTurn ? t('g.yourTurn') : t('g.nameTurn', { name: turnName })
   } else {
-    status = `Na potezu: ${turnName}`
+    status = t('g.turnOf', { name: turnName })
   }
 
   return (
@@ -40,8 +42,12 @@ export function MemoryBoard({ view, onAction, onRestart, mode, players }: GameBo
           </>
         ) : (
           <>
-            <span className={styles.score}>Ti: {v.yourScore}</span>
-            <span className={styles.score}>Protivnik: {v.oppScore}</span>
+            <span className={styles.score}>
+              {t('rps.you')}: {v.yourScore}
+            </span>
+            <span className={styles.score}>
+              {t('rps.opp')}: {v.oppScore}
+            </span>
           </>
         )}
       </div>
@@ -58,7 +64,7 @@ export function MemoryBoard({ view, onAction, onRestart, mode, players }: GameBo
             )}
             disabled={!canPlay || c.faceUp || c.matched}
             onClick={() => onAction({ type: 'flip', index: i })}
-            aria-label={c.symbol ? `Karta ${c.symbol}` : 'Skrivena karta'}
+            aria-label={c.symbol ? t('mem.card', { s: c.symbol }) : t('mem.hidden')}
           >
             <span className={styles.face}>{c.symbol ?? '?'}</span>
           </button>
@@ -67,7 +73,7 @@ export function MemoryBoard({ view, onAction, onRestart, mode, players }: GameBo
 
       {result && mode === 'local' && onRestart && (
         <Button onClick={onRestart} className="neon-glow-cyan">
-          <RotateCcw size={16} /> Igraj ponovo
+          <RotateCcw size={16} /> {t('g.playAgain')}
         </Button>
       )}
     </div>

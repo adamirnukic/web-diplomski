@@ -3,24 +3,26 @@
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { TttView } from '@shared/games/tic-tac-toe/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './TicTacToe.module.css'
 
 export function TicTacToeBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as TttView | null
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   const { board, winningLine, result } = v
   const canPlay = v.yourTurn && !result
 
   let status: string
   if (result) {
-    status = result.status === 'draw' ? 'Neriješeno!' : `Pobjeda igrača ${winnerMark(v)} 🎉`
+    status = result.status === 'draw' ? t('g.draw') : t('ttt.winMark', { mark: winnerMark(v) })
   } else if (mode === 'online') {
-    status = v.yourTurn ? 'Tvoj potez' : 'Protivnik je na potezu…'
+    status = v.yourTurn ? t('g.yourTurn') : t('g.oppTurn')
   } else {
-    status = `Na potezu: ${v.turnMark}`
+    status = t('g.turnOf', { name: v.turnMark })
   }
 
   return (
@@ -34,7 +36,7 @@ export function TicTacToeBoard({ view, onAction, onRestart, mode }: GameBoardPro
             className={cn(styles.cell, winningLine?.includes(i) && styles.cellWin)}
             disabled={!!cell || !canPlay}
             onClick={() => onAction({ type: 'place', index: i })}
-            aria-label={`Polje ${i + 1}${cell ? ': ' + cell : ''}`}
+            aria-label={`${t('ttt.cell', { n: i + 1 })}${cell ? ': ' + cell : ''}`}
           >
             {cell === 'X' && <span className="neon-text-cyan">X</span>}
             {cell === 'O' && <span className="neon-text-magenta">O</span>}
@@ -44,7 +46,7 @@ export function TicTacToeBoard({ view, onAction, onRestart, mode }: GameBoardPro
 
       {result && mode === 'local' && onRestart && (
         <Button onClick={onRestart} className="neon-glow-cyan">
-          <RotateCcw size={16} /> Igraj ponovo
+          <RotateCcw size={16} /> {t('g.playAgain')}
         </Button>
       )}
     </div>

@@ -5,6 +5,7 @@ import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useT } from '@/lib/i18n'
 import type { HangmanView } from '@shared/games/hangman/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Hangman.module.css'
@@ -32,17 +33,18 @@ function HangmanDrawing({ wrong }: { wrong: number }) {
 }
 
 export function HangmanGame({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as HangmanView | null
   const [word, setWord] = useState('')
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   // Setup phase
   if (v.phase === 'setup') {
     if (v.role === 'setter') {
       return (
         <div className={styles.root}>
-          <h2 className={styles.heading}>Postavi riječ</h2>
-          <p className={styles.hint}>Protivnik će je pogađati slovo po slovo.</p>
+          <h2 className={styles.heading}>{t('hm.setWord')}</h2>
+          <p className={styles.hint}>{t('hm.setHint')}</p>
           <form
             className={styles.setupForm}
             onSubmit={(e) => {
@@ -53,17 +55,17 @@ export function HangmanGame({ view, onAction, onRestart, mode }: GameBoardProps)
             <Input
               value={word}
               onChange={(e) => setWord(e.target.value)}
-              placeholder="npr. PROGRAMIRANJE"
+              placeholder={t('hm.placeholder')}
               autoFocus
             />
             <Button type="submit" className="neon-glow-cyan">
-              Postavi
+              {t('hm.set')}
             </Button>
           </form>
         </div>
       )
     }
-    return <p className={styles.waiting}>Čeka se da protivnik postavi riječ…</p>
+    return <p className={styles.waiting}>{t('hm.waitSetter')}</p>
   }
 
   // Playing phase
@@ -74,7 +76,7 @@ export function HangmanGame({ view, onAction, onRestart, mode }: GameBoardProps)
     <div className={styles.root}>
       <HangmanDrawing wrong={v.wrong} />
       <p className={styles.attempts}>
-        Preostalo grešaka: <strong>{wrongLeft}</strong>
+        {t('hm.left')} <strong>{wrongLeft}</strong>
       </p>
 
       <div className={styles.word}>
@@ -94,16 +96,16 @@ export function HangmanGame({ view, onAction, onRestart, mode }: GameBoardProps)
           <p className={styles.final}>
             {v.role === 'guesser'
               ? guesserWon
-                ? 'Pogodio si riječ! 🎉'
-                : 'Nisi uspio. 💀'
+                ? t('hm.guessedWord')
+                : t('hm.failed')
               : guesserWon
-                ? 'Protivnik je pogodio riječ.'
-                : 'Protivnik nije pogodio! 🎉'}
+                ? t('hm.oppGuessed')
+                : t('hm.oppFailed')}
           </p>
-          {v.fullWord && <p className={styles.reveal}>Riječ je bila: {v.fullWord}</p>}
+          {v.fullWord && <p className={styles.reveal}>{t('hm.wordWas', { w: v.fullWord })}</p>}
           {mode === 'local' && onRestart && (
             <Button onClick={onRestart} className="neon-glow-cyan">
-              <RotateCcw size={16} /> Nova igra
+              <RotateCcw size={16} /> {t('g.newGame')}
             </Button>
           )}
         </>
@@ -121,7 +123,7 @@ export function HangmanGame({ view, onAction, onRestart, mode }: GameBoardProps)
           ))}
         </div>
       ) : (
-        <p className={styles.waiting}>Protivnik pogađa…</p>
+        <p className={styles.waiting}>{t('hm.oppGuessing')}</p>
       )}
     </div>
   )
