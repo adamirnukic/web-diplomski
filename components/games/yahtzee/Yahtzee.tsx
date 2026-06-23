@@ -3,55 +3,37 @@
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import {
-  CATEGORIES,
-  type Category,
-  type YView,
-} from '@shared/games/yahtzee/engine'
+import { CATEGORIES, type YView } from '@shared/games/yahtzee/engine'
+import { useT } from '@/lib/i18n'
 import type { GameBoardProps } from '../registry'
 import styles from './Yahtzee.module.css'
-
-const LABELS: Record<Category, string> = {
-  ones: 'Jedinice',
-  twos: 'Dvojke',
-  threes: 'Trojke',
-  fours: 'Četvorke',
-  fives: 'Petice',
-  sixes: 'Šestice',
-  threeKind: 'Tri iste',
-  fourKind: 'Četiri iste',
-  fullHouse: 'Full House',
-  smallStraight: 'Mala skala',
-  largeStraight: 'Velika skala',
-  yahtzee: 'Yahtzee',
-  chance: 'Šansa',
-}
 
 const PIPS = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
 
 export function YahtzeeGame({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as YView | null
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   const colLabel = (id: string, i: number) =>
-    mode === 'online' ? (id === v.you ? 'Ti' : 'Protivnik') : `Igrač ${i + 1}`
+    mode === 'online' ? (id === v.you ? t('rps.you') : t('rps.opp')) : t('g.playerN', { n: i + 1 })
 
   return (
     <div className={styles.root}>
       <p className={cn(styles.status, v.result && styles.statusDone)}>
         {v.result
           ? v.result.status === 'draw'
-            ? 'Neriješeno!'
+            ? t('g.draw')
             : mode === 'online'
               ? v.result.winnerId === v.you
-                ? 'Pobijedio si! 🎉'
-                : 'Izgubio si.'
-              : 'Kraj igre!'
+                ? t('g.youWin')
+                : t('g.youLose')
+              : t('g.gameOver')
           : mode === 'online'
             ? v.yourTurn
-              ? 'Tvoj potez'
-              : `${colLabel(v.turn, v.order.indexOf(v.turn))} je na potezu`
-            : `Na potezu: ${colLabel(v.turn, v.order.indexOf(v.turn))}`}
+              ? t('g.yourTurn')
+              : t('g.nameTurn', { name: colLabel(v.turn, v.order.indexOf(v.turn)) })
+            : t('g.turnOf', { name: colLabel(v.turn, v.order.indexOf(v.turn)) })}
       </p>
 
       <div className={styles.dice}>
@@ -61,7 +43,7 @@ export function YahtzeeGame({ view, onAction, onRestart, mode }: GameBoardProps)
             className={cn(styles.die, v.held[i] && styles.held, d === 0 && styles.empty)}
             disabled={!v.yourTurn || !v.rolled || !!v.result}
             onClick={() => onAction({ type: 'toggleHold', index: i })}
-            aria-label={`Kockica ${d || ''}${v.held[i] ? ', zadržana' : ''}`}
+            aria-label={`${t('y.die', { d: d || '' })}${v.held[i] ? t('y.held') : ''}`}
           >
             {d > 0 ? PIPS[d] : '·'}
           </button>
@@ -75,16 +57,16 @@ export function YahtzeeGame({ view, onAction, onRestart, mode }: GameBoardProps)
             disabled={v.rollsLeft <= 0}
             className="neon-glow-cyan"
           >
-            Baci kockice ({v.rollsLeft})
+            {t('y.roll', { n: v.rollsLeft })}
           </Button>
-          {v.rolled && <span className={styles.hint}>Klikni kockicu da je zadržiš, pa izaberi polje.</span>}
+          {v.rolled && <span className={styles.hint}>{t('y.hint')}</span>}
         </div>
       )}
 
       <table className={styles.card}>
         <thead>
           <tr>
-            <th>Kategorija</th>
+            <th>{t('y.category')}</th>
             {v.order.map((id, i) => (
               <th key={id} className={id === v.turn ? styles.activeCol : undefined}>
                 {colLabel(id, i)}
@@ -95,7 +77,7 @@ export function YahtzeeGame({ view, onAction, onRestart, mode }: GameBoardProps)
         <tbody>
           {CATEGORIES.map((cat) => (
             <tr key={cat}>
-              <td className={styles.catName}>{LABELS[cat]}</td>
+              <td className={styles.catName}>{t(`y.${cat}`)}</td>
               {v.order.map((id) => {
                 const val = v.scores[id]?.[cat]
                 const isMe = id === v.you
@@ -125,7 +107,7 @@ export function YahtzeeGame({ view, onAction, onRestart, mode }: GameBoardProps)
             </tr>
           ))}
           <tr className={styles.totalRow}>
-            <td>Ukupno</td>
+            <td>{t('y.total')}</td>
             {v.order.map((id) => (
               <td key={id}>{v.totals[id]}</td>
             ))}
@@ -135,7 +117,7 @@ export function YahtzeeGame({ view, onAction, onRestart, mode }: GameBoardProps)
 
       {v.result && mode === 'local' && onRestart && (
         <Button onClick={onRestart} className="neon-glow-cyan">
-          <RotateCcw size={16} /> Nova igra
+          <RotateCcw size={16} /> {t('g.newGame')}
         </Button>
       )}
     </div>
