@@ -14,6 +14,7 @@ import {
   type FriendsData,
 } from '@/lib/api'
 import { useRealtime } from '@/lib/realtime'
+import { useT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import styles from './friends.module.css'
@@ -29,6 +30,7 @@ function Avatar({ u }: { u: FriendUser }) {
 export default function FriendsPage() {
   const { user, loading } = useAuth()
   const { online, refreshSocial } = useRealtime()
+  const { t } = useT()
   const router = useRouter()
   const [data, setData] = useState<FriendsData | null>(null)
   const [q, setQ] = useState('')
@@ -54,7 +56,7 @@ export default function FriendsPage() {
       <div className={styles.page}>
         <Navbar />
         <main className={`container ${styles.main}`}>
-          <p className={styles.muted}>Učitavanje…</p>
+          <p className={styles.muted}>{t('common.loading')}</p>
         </main>
       </div>
     )
@@ -66,7 +68,7 @@ export default function FriendsPage() {
     try {
       const r = await apiFriendRequest(q)
       setQ('')
-      setMsg({ ok: r.status === 'accepted' ? 'Sada ste prijatelji!' : 'Zahtjev poslan.' })
+      setMsg({ ok: r.status === 'accepted' ? t('fr.nowFriends') : t('fr.requestSent') })
       load()
     } catch (e) {
       setMsg({ err: (e as Error).message })
@@ -114,19 +116,19 @@ export default function FriendsPage() {
     <div className={styles.page}>
       <Navbar />
       <main className={`container ${styles.main}`}>
-        <h1 className={styles.title}>Prijatelji</h1>
+        <h1 className={styles.title}>{t('fr.title')}</h1>
 
         <div className={styles.codeBox}>
-          <span className={styles.codeLabel}>Tvoj friend kod:</span>
+          <span className={styles.codeLabel}>{t('fr.yourCode')}</span>
           <span className={styles.codeVal}>{data?.friendCode ?? '······'}</span>
           <Button variant="ghost" size="sm" onClick={copyCode}>
-            <Copy size={15} /> {copied ? 'Kopirano' : 'Kopiraj'}
+            <Copy size={15} /> {copied ? t('common.copied') : t('common.copy')}
           </Button>
         </div>
 
         <div className={styles.addRow}>
           <label>
-            Dodaj prijatelja (friend kod ili korisničko ime)
+            {t('fr.add')}
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -137,7 +139,7 @@ export default function FriendsPage() {
             />
           </label>
           <Button onClick={add} disabled={busy || !q.trim()} className="neon-glow-cyan">
-            <UserPlus size={16} /> Pošalji
+            <UserPlus size={16} /> {t('common.send')}
           </Button>
         </div>
         {msg.ok && <span className={styles.ok}>{msg.ok}</span>}
@@ -145,7 +147,7 @@ export default function FriendsPage() {
 
         {data && data.incoming.length > 0 && (
           <>
-            <h2 className={styles.section}>Zahtjevi za prijateljstvo</h2>
+            <h2 className={styles.section}>{t('fr.requests')}</h2>
             <div className={styles.list}>
               {data.incoming.map((req) => (
                 <div key={req.id} className={styles.row}>
@@ -158,10 +160,10 @@ export default function FriendsPage() {
                       disabled={busy}
                       className="neon-glow-cyan"
                     >
-                      <Check size={15} /> Prihvati
+                      <Check size={15} /> {t('fr.accept')}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => respond(req.id, false)} disabled={busy}>
-                      <X size={15} /> Odbij
+                      <X size={15} /> {t('fr.decline')}
                     </Button>
                   </div>
                 </div>
@@ -170,9 +172,11 @@ export default function FriendsPage() {
           </>
         )}
 
-        <h2 className={styles.section}>Moji prijatelji {data ? `(${data.friends.length})` : ''}</h2>
+        <h2 className={styles.section}>
+          {t('fr.mine')} {data ? `(${data.friends.length})` : ''}
+        </h2>
         {data && data.friends.length === 0 ? (
-          <p className={styles.muted}>Još nemaš prijatelja. Pošalji nekome svoj friend kod!</p>
+          <p className={styles.muted}>{t('fr.none')}</p>
         ) : (
           <div className={styles.list}>
             {data?.friends.map((f) => (
@@ -195,7 +199,7 @@ export default function FriendsPage() {
                   )}
                 </span>
                 <Button size="sm" variant="ghost" onClick={() => remove(f.id)} disabled={busy}>
-                  Ukloni
+                  {t('fr.remove')}
                 </Button>
               </div>
             ))}
@@ -204,13 +208,13 @@ export default function FriendsPage() {
 
         {data && data.outgoing.length > 0 && (
           <>
-            <h2 className={styles.section}>Poslani zahtjevi</h2>
+            <h2 className={styles.section}>{t('fr.sent')}</h2>
             <div className={styles.list}>
               {data.outgoing.map((req) => (
                 <div key={req.id} className={styles.row}>
                   <Avatar u={req.user} />
                   <span className={styles.rowName}>{req.user.username}</span>
-                  <span className={styles.muted}>na čekanju…</span>
+                  <span className={styles.muted}>{t('fr.pending')}</span>
                 </div>
               ))}
             </div>

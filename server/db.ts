@@ -39,6 +39,15 @@ db.exec(`
     created_at  INTEGER NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS match_players (
+    match_id    TEXT NOT NULL,
+    user_id     TEXT NOT NULL,
+    game_id     TEXT NOT NULL,
+    outcome     TEXT NOT NULL,
+    created_at  INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_match_players_user ON match_players(user_id, created_at);
+
   CREATE TABLE IF NOT EXISTS password_resets (
     token       TEXT PRIMARY KEY,
     user_id     TEXT NOT NULL,

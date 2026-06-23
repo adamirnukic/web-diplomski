@@ -26,7 +26,7 @@ import {
   respondFriendRequest,
   sendFriendRequest,
 } from './friends'
-import { getLeaderboard, getStatsForUser } from './stats'
+import { getLeaderboard, getMatchHistory, getStatsForUser } from './stats'
 import { registerRoomHandlers } from './rooms'
 import { registerSocialHandlers } from './social'
 import { emitToUser, setIO } from './presence'
@@ -144,13 +144,20 @@ app.get('/api/stats/:userId', (req: Request, res: Response) => {
   res.json({ stats: getStatsForUser(req.params.userId) })
 })
 
+app.get('/api/history', (req: Request, res: Response) => {
+  const u = requireAuth(req, res)
+  if (!u) return
+  res.json({ matches: getMatchHistory(u.id) })
+})
+
 app.get('/api/leaderboard', (req: Request, res: Response) => {
+  const gameId = typeof req.query.game === 'string' ? req.query.game : undefined
   if (req.query.scope === 'friends') {
     const u = requireAuth(req, res)
     if (!u) return
-    return res.json({ leaderboard: getLeaderboard([u.id, ...friendIds(u.id)]) })
+    return res.json({ leaderboard: getLeaderboard([u.id, ...friendIds(u.id)], gameId) })
   }
-  res.json({ leaderboard: getLeaderboard() })
+  res.json({ leaderboard: getLeaderboard(undefined, gameId) })
 })
 
 app.get('/api/friends', (req: Request, res: Response) => {

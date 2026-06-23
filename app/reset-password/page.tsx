@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { BackButton } from '@/components/ui/back-button'
+import { useT } from '@/lib/i18n'
 import styles from '@/components/AuthForm.module.css'
 
 function ResetInner() {
@@ -17,6 +18,7 @@ function ResetInner() {
   const token = params.get('token') ?? ''
   const router = useRouter()
   const { applySession } = useAuth()
+  const { t } = useT()
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -25,9 +27,9 @@ function ResetInner() {
   if (!token) {
     return (
       <p className={styles.subtitle}>
-        Link nije ispravan — nedostaje token.{' '}
+        {t('reset.missing')}{' '}
         <Link href="/forgot-password" className="neon-text-cyan">
-          Zatraži novi
+          {t('reset.requestNew')}
         </Link>
       </p>
     )
@@ -37,7 +39,7 @@ function ResetInner() {
     e.preventDefault()
     setError(null)
     if (password !== confirm) {
-      setError('Lozinke se ne poklapaju')
+      setError(t('reset.mismatch'))
       return
     }
     setLoading(true)
@@ -55,7 +57,7 @@ function ResetInner() {
   return (
     <form onSubmit={submit} className={styles.form}>
       <div className={styles.field}>
-        <Label htmlFor="password">Nova lozinka</Label>
+        <Label htmlFor="password">{t('reset.new')}</Label>
         <Input
           id="password"
           type="password"
@@ -67,7 +69,7 @@ function ResetInner() {
         />
       </div>
       <div className={styles.field}>
-        <Label htmlFor="confirm">Potvrdi lozinku</Label>
+        <Label htmlFor="confirm">{t('reset.confirm')}</Label>
         <Input
           id="confirm"
           type="password"
@@ -80,13 +82,14 @@ function ResetInner() {
       </div>
       {error && <p className={styles.error}>{error}</p>}
       <Button type="submit" disabled={loading} className="neon-glow-cyan">
-        {loading ? 'Sačekaj…' : 'Postavi novu lozinku'}
+        {loading ? t('auth.wait') : t('reset.submit')}
       </Button>
     </form>
   )
 }
 
 export default function ResetPasswordPage() {
+  const { t } = useT()
   return (
     <div className={styles.wrap}>
       <BackButton />
@@ -100,14 +103,14 @@ export default function ResetPasswordPage() {
       </Link>
 
       <div className={styles.card}>
-        <h1 className={styles.title}>Nova lozinka</h1>
-        <p className={styles.subtitle}>Postavi novu lozinku za svoj nalog.</p>
-        <Suspense fallback={<p className={styles.subtitle}>Učitavanje…</p>}>
+        <h1 className={styles.title}>{t('reset.title')}</h1>
+        <p className={styles.subtitle}>{t('reset.subtitle')}</p>
+        <Suspense fallback={<p className={styles.subtitle}>{t('common.loading')}</p>}>
           <ResetInner />
         </Suspense>
         <p className={styles.switch}>
           <Link href="/login" className="neon-text-cyan">
-            Nazad na prijavu
+            {t('reset.back')}
           </Link>
         </p>
       </div>

@@ -95,9 +95,22 @@ export function apiStats(userId: string) {
   return request<{ stats: GameStatRow[] }>(`/api/stats/${userId}`)
 }
 
-export function apiLeaderboard(scope?: 'friends') {
-  const q = scope === 'friends' ? '?scope=friends' : ''
-  return request<{ leaderboard: LeaderboardRow[] }>(`/api/leaderboard${q}`)
+export function apiLeaderboard(scope?: 'friends', gameId?: string) {
+  const params = new URLSearchParams()
+  if (scope === 'friends') params.set('scope', 'friends')
+  if (gameId) params.set('game', gameId)
+  const q = params.toString()
+  return request<{ leaderboard: LeaderboardRow[] }>(`/api/leaderboard${q ? `?${q}` : ''}`)
+}
+
+export interface MatchRow {
+  game_id: string
+  outcome: 'win' | 'loss' | 'draw'
+  created_at: number
+}
+
+export function apiHistory() {
+  return request<{ matches: MatchRow[] }>('/api/history')
 }
 
 export function apiChangePassword(currentPassword: string, newPassword: string) {

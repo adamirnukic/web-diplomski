@@ -24,6 +24,12 @@ export function recordMatchResult(room: MinimalRoom, result: GameResult): void {
       xp           = xp + excluded.xp
   `)
 
+  const matchId = randomUUID()
+  const ts = Date.now()
+  const logPlayer = db.prepare(
+    'INSERT INTO match_players (match_id, user_id, game_id, outcome, created_at) VALUES (?, ?, ?, ?, ?)',
+  )
+
   for (const player of room.players.values()) {
     let isWin: boolean
     let isDraw: boolean
@@ -48,11 +54,22 @@ export function recordMatchResult(room: MinimalRoom, result: GameResult): void {
       isDraw ? 1 : 0,
       xp,
     )
+    logPlayer.run(matchId, player.id, room.gameId, isWin ? 'win' : isDraw ? 'draw' : 'loss', ts)
   }
 
   db.prepare(
     'INSERT INTO matches (id, game_id, mode, result, created_at) VALUES (?, ?, ?, ?, ?)',
-  ).run(randomUUID(), room.gameId, 'online', JSON.stringify(result), Date.now())
+  ).run(matchId, room.gameId, 'online', JSON.stringify(result), ts)
+}
+
+export function getMatchHistory(userId: string, limit = 25): unknown[] {
+  return db
+    .prepare(
+      `SELECT game_id, outcome, created_at
+       FROM match_players WHERE user_id = ?
+       ORDER BY created_at DESC LIMIT ?`,
+    )
+    .all(userId, limit)
 }
 
 export function getStatsForUser(userId: string): unknown[] {
@@ -63,24 +80,35 @@ export function getStatsForUser(userId: string): unknown[] {
     .all(userId)
 }
 
-export function getLeaderboard(userIds?: string[]): unknown[] {
-  const select = `
-      SELECT u.username                       AS username,
-             u.avatar                         AS avatar,
-             COALESCE(SUM(s.xp), 0)           AS xp,
-             COALESCE(SUM(s.wins), 0)         AS wins,
-             COALESCE(SUM(s.games_played), 0) AS games_played
-      FROM users u
-      LEFT JOIN game_stats s ON s.user_id = u.id`
-  const tail = `
-      GROUP BY u.id
-      ORDER BY xp DESC, wins DESC
-      LIMIT 100`
+export function getLeaderboard(userIds?: string[], gameId?: string): unknown[] {
+  if (userIds && userIds.length === 0) return []
+  const params: unknown[] = []
+  let sql: string
 
-  if (userIds) {
-    if (userIds.length === 0) return []
-    const placeholders = userIds.map(() => '?').join(', ')
-    return db.prepare(`${select} WHERE u.id IN (${placeholders}) ${tail}`).all(...userIds)
+  if (gameId) {
+    // ranking within a single game
+    sql = `SELECT u.username AS username, u.avatar AS avatar,
+                  s.xp AS xp, s.wins AS wins, s.games_played AS games_played
+           FROM game_stats s JOIN users u ON u.id = s.user_id
+           WHERE s.game_id = ?`
+    params.push(gameId)
+    if (userIds) {
+      sql += ` AND u.id IN (${userIds.map(() => '?').join(', ')})`
+      params.push(...userIds)
+    }
+    sql += ` ORDER BY s.xp DESC, s.wins DESC LIMIT 100`
+  } else {
+    // aggregate across all games
+    sql = `SELECT u.username AS username, u.avatar AS avatar,
+                  COALESCE(SUM(s.xp), 0) AS xp,
+                  COALESCE(SUM(s.wins), 0) AS wins,
+                  COALESCE(SUM(s.games_played), 0) AS games_played
+           FROM users u LEFT JOIN game_stats s ON s.user_id = u.id`
+    if (userIds) {
+      sql += ` WHERE u.id IN (${userIds.map(() => '?').join(', ')})`
+      params.push(...userIds)
+    }
+    sql += ` GROUP BY u.id ORDER BY xp DESC, wins DESC LIMIT 100`
   }
-  return db.prepare(`${select} ${tail}`).all()
+  return db.prepare(sql).all(...params)
 }

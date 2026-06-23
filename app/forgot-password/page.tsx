@@ -8,9 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { BackButton } from '@/components/ui/back-button'
+import { useT } from '@/lib/i18n'
 import styles from '@/components/AuthForm.module.css'
 
 export default function ForgotPasswordPage() {
+  const { t } = useT()
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -45,20 +47,17 @@ export default function ForgotPasswordPage() {
       </Link>
 
       <div className={styles.card}>
-        <h1 className={styles.title}>Zaboravljena lozinka</h1>
-        <p className={styles.subtitle}>Unesi email i poslat ćemo ti link za reset.</p>
+        <h1 className={styles.title}>{t('forgot.title')}</h1>
+        <p className={styles.subtitle}>{t('forgot.subtitle')}</p>
 
         {done ? (
           <div className={styles.form}>
-            <p className={styles.subtitle}>
-              Ako nalog s tim emailom postoji, link za reset lozinke je poslan. Provjeri inbox
-              (i spam).
-            </p>
+            <p className={styles.subtitle}>{t('forgot.sent')}</p>
             {link && (
               <p className={styles.subtitle}>
-                Email server nije konfigurisan, pa evo direktnog linka:{' '}
+                {t('forgot.devLink')}{' '}
                 <a href={link} className="neon-text-cyan">
-                  Resetuj lozinku
+                  {t('forgot.resetLink')}
                 </a>
               </p>
             )}
@@ -66,7 +65,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={submit} className={styles.form}>
             <div className={styles.field}>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -78,15 +77,15 @@ export default function ForgotPasswordPage() {
             </div>
             {error && <p className={styles.error}>{error}</p>}
             <Button type="submit" disabled={loading} className="neon-glow-cyan">
-              {loading ? 'Šaljem…' : 'Pošalji link'}
+              {loading ? t('forgot.sending') : t('forgot.send')}
             </Button>
           </form>
         )}
 
         <p className={styles.switch}>
-          Sjetio/la si se?{' '}
+          {t('forgot.remembered')}{' '}
           <Link href="/login" className="neon-text-cyan">
-            Prijavi se
+            {t('auth.signIn')}
           </Link>
         </p>
       </div>
