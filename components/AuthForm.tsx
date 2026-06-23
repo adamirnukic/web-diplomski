@@ -106,6 +106,16 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
             />
           </div>
 
+          {mode === 'login' && (
+            <Link
+              href="/forgot-password"
+              className="neon-text-cyan"
+              style={{ fontSize: '0.85rem', alignSelf: 'flex-end' }}
+            >
+              Zaboravili ste lozinku?
+            </Link>
+          )}
+
           {error && <p className={styles.error}>{error}</p>}
 
           <Button type="submit" disabled={loading} className="neon-glow-cyan">

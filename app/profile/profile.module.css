@@ -112,3 +112,93 @@
 .muted {
   color: var(--muted-foreground);
 }
+
+.avatarImg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid var(--neon-cyan);
+}
+
+.headMain {
+  flex: 1;
+}
+
+.code {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.codeVal {
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--neon-magenta);
+}
+
+.sectionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 2.25rem 0 1rem;
+}
+
+.editCard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 1.25rem;
+  margin-bottom: 2.5rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.editBlock {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.editBlock h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.editRow {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.editRow > label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  flex: 1;
+  min-width: 160px;
+}
+
+.avatarEdit {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ok {
+  color: var(--neon-green);
+  font-size: 0.85rem;
+}
+
+.err {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+}

@@ -1,0 +1,171 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.seat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  min-width: 140px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.seatTurn {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.3);
+}
+
+.seatYou {
+  background: var(--primary-soft);
+}
+
+.seatOut {
+  opacity: 0.4;
+}
+
+.seatHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.coins {
+  font-size: 0.8rem;
+  color: var(--neon-green);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cards {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.card {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.3rem 0.4rem;
+  border-radius: 6px;
+  background: linear-gradient(135deg, oklch(0.45 0.13 285), oklch(0.5 0.16 320));
+  color: white;
+  border: 1px solid oklch(0.8 0.12 300 / 0.5);
+  min-width: 58px;
+  text-align: center;
+}
+
+.cardBack {
+  width: 26px;
+  height: 36px;
+  border-radius: 6px;
+  background: repeating-linear-gradient(45deg, oklch(0.35 0.1 280), oklch(0.35 0.1 280) 4px, oklch(0.4 0.12 300) 4px, oklch(0.4 0.12 300) 8px);
+  border: 1px solid oklch(0.75 0.18 195 / 0.4);
+}
+
+.cardLost {
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  border: 1px dashed var(--border);
+  text-decoration: line-through;
+}
+
+.tag {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 560px;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.prompt {
+  font-weight: 600;
+  text-align: center;
+}
+
+.muted {
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hand {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.handLabel {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.chip {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+}
+
+.chipSel {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 8px oklch(0.75 0.18 195 / 0.35);
+}
+
+.log {
+  width: 100%;
+  max-width: 560px;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.big {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.loading {
+  color: var(--muted-foreground);
+}
