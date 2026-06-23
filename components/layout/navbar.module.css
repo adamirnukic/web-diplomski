@@ -82,11 +82,34 @@
   background: var(--secondary);
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
+  .inner {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 0.5rem 0;
+    gap: 0.5rem;
+  }
+  /* links drop to their own full-width row below brand + actions */
+  .links {
+    order: 3;
+    width: 100%;
+    margin: 0;
+    justify-content: center;
+  }
+  .actions {
+    margin-left: auto;
+  }
   .brandText {
-    display: none;
+    font-size: 1rem;
   }
   .link {
-    padding: 0.5rem 0.6rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .userChip span {
+    display: none;
   }
 }

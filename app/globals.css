@@ -100,12 +100,25 @@ button {
 
 .app-body {
   min-height: 100vh;
+  /* guard against accidental horizontal scrolling on small screens */
+  overflow-x: hidden;
 }
 
 .container {
   margin: 0 auto;
   max-width: var(--container-width);
   padding: 0 var(--container-padding);
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --container-padding: 0.85rem;
+  }
 }
 
 .neon-glow-cyan {

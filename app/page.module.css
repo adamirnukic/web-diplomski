@@ -47,6 +47,15 @@
   padding: 5rem 1rem 6rem;
 }
 
+@media (max-width: 640px) {
+  .hero {
+    padding: 3rem 1rem 3.5rem;
+  }
+  .navInner {
+    gap: 0.5rem;
+  }
+}
+
 .hero :global(.bg-grid-pattern) {
   position: absolute;
   inset: 0;
@@ -100,7 +109,7 @@
 
 .features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 1.25rem;
   padding-bottom: 4rem;
 }
