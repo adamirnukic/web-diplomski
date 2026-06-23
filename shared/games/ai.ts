@@ -10,6 +10,7 @@ import { rpsAI } from './rock-paper-scissors/ai'
 import { yahtzeeAI } from './yahtzee/ai'
 import { battleshipsAI } from './battleships/ai'
 import { loveLetterAI } from './love-letter/ai'
+import { coupAI } from './coup/ai'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AiFn = (state: any, playerId: string) => any
@@ -28,6 +29,7 @@ export const AI_DECISIONS: Record<string, AiFn> = {
   yahtzee: yahtzeeAI,
   battleships: battleshipsAI,
   'love-letter': loveLetterAI,
+  coup: coupAI,
 }
 
 export function aiDecide(gameId: string, state: any, playerId: string): any {
