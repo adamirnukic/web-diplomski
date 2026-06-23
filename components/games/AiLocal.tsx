@@ -50,7 +50,7 @@ function Setup({
   const [bots, setBots] = useState(1)
   const humans = total - bots
   const totals: number[] = []
-  for (let n = Math.max(2, minP); n <= maxP; n++) totals.push(n)
+  for (let n = minP; n <= maxP; n++) totals.push(n)
 
   const changeTotal = (t: number) => {
     setTotal(t)

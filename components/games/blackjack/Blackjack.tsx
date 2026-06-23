@@ -18,8 +18,7 @@ export function BlackjackTable({ view, onAction, onRestart, mode }: GameBoardPro
   const v = view as BJView | null
   if (!v) return <div className={styles.loading}>Učitavanje…</div>
 
-  const label = (id: string, i: number) =>
-    mode === 'online' ? (id === v.you ? 'Ti' : 'Protivnik') : `Igrač ${i + 1}`
+  const label = (id: string) => `${v.ai[id] ? '🤖 ' : ''}${v.names[id] ?? 'Igrač'}`
 
   return (
     <div className={styles.root}>
@@ -36,7 +35,7 @@ export function BlackjackTable({ view, onAction, onRestart, mode }: GameBoardPro
       </div>
 
       <div className={styles.players}>
-        {v.order.map((id, i) => {
+        {v.order.map((id) => {
           const h = v.hands[id]
           return (
             <div
@@ -44,7 +43,7 @@ export function BlackjackTable({ view, onAction, onRestart, mode }: GameBoardPro
               className={cn(styles.player, id === v.turn && styles.active)}
             >
               <span className={styles.areaLabel}>
-                {label(id, i)} ({h.value})
+                {label(id)} {id === v.you && mode === 'online' && '(ti) '}({h.value})
               </span>
               <div className={styles.cards}>
                 {h.cards.map((c, j) => (
@@ -73,7 +72,7 @@ export function BlackjackTable({ view, onAction, onRestart, mode }: GameBoardPro
         </div>
       )}
       {v.phase === 'playing' && !v.yourTurn && (
-        <p className={styles.wait}>Potez protivnika…</p>
+        <p className={styles.wait}>Na potezu: {v.turn ? label(v.turn) : '…'}</p>
       )}
 
       {v.result && mode === 'local' && onRestart && (
