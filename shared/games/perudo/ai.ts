@@ -1,4 +1,5 @@
 import type { PerudoAction, PerudoState } from './engine'
+import type { Difficulty } from '../../types'
 
 const totalDice = (s: PerudoState) =>
   s.order.reduce((a, id) => a + (s.alive[id] ? s.dice[id].length : 0), 0)
@@ -8,7 +9,7 @@ function myMatches(s: PerudoState, p: string, face: number): number {
 }
 
 /** Liar's-dice bot: estimate expected matches and bid/challenge accordingly. */
-export function perudoAI(s: PerudoState, p: string): PerudoAction {
+export function perudoAI(s: PerudoState, p: string, difficulty: Difficulty = 'normal'): PerudoAction {
   const total = totalDice(s)
   const myCount = s.dice[p]?.length ?? 0
   const others = total - myCount
@@ -20,7 +21,10 @@ export function perudoAI(s: PerudoState, p: string): PerudoAction {
     const expected = mine + expectedOthers
     // probability the bid holds is low if expected well below the claim
     const gap = s.bid.count - expected
-    const challenge = gap > 1.0 + Math.random()
+    // easy believes bluffs (challenges rarely); hard challenges sharply
+    const base = difficulty === 'easy' ? 1.8 : difficulty === 'hard' ? 0.5 : 1.0
+    const spread = difficulty === 'hard' ? 0.6 : 1.0
+    const challenge = gap > base + Math.random() * spread
     if (challenge) return { type: 'challenge' }
     // otherwise raise: minimal legal raise, biased by our own dice
     let count = s.bid.count

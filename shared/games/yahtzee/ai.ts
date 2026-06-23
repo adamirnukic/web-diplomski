@@ -1,4 +1,5 @@
 import { CATEGORIES, scoreCategory, type Category, type YAction, type YState } from './engine'
+import type { Difficulty } from '../../types'
 
 function counts(dice: number[]): number[] {
   const c = [0, 0, 0, 0, 0, 0, 0]
@@ -38,8 +39,10 @@ function bestCategory(dice: number[], card: Partial<Record<Category, number>>): 
 
 /** Yahtzee bot. One action per call (AiLocal re-invokes after each):
  *  roll -> set holds -> reroll -> ... -> score. */
-export function yahtzeeAI(s: YState, p: string): YAction {
+export function yahtzeeAI(s: YState, p: string, difficulty: Difficulty = 'normal'): YAction {
   if (!s.rolled) return { type: 'roll' }
+  // easy: keep the first roll, never re-roll
+  if (difficulty === 'easy') return { type: 'score', category: bestCategory(s.dice, s.scores[p]) }
 
   const desired = desiredHolds(s.dice)
   const keepAll = desired.every((h) => h)

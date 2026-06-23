@@ -1,4 +1,5 @@
 import type { BSAction, BSState } from './engine'
+import type { Difficulty } from '../../types'
 
 /**
  * Battleships bot.
@@ -6,7 +7,7 @@ import type { BSAction, BSState } from './engine'
  *  - battle: hunt/target using ONLY information the bot legitimately has
  *    (the results of its own shots) — it never peeks at un-fired ship cells.
  */
-export function battleshipsAI(s: BSState, p: string): BSAction {
+export function battleshipsAI(s: BSState, p: string, difficulty: Difficulty = 'normal'): BSAction {
   if (s.phase === 'placement') {
     const board = s.boards[p]
     if (board.placed.length < s.fleet.length) return { type: 'randomize' }
@@ -19,6 +20,13 @@ export function battleshipsAI(s: BSState, p: string): BSAction {
   const shipCells = new Set<number>(board.placed.flat())
   const fired = (i: number) => board.hit[i]
   const inB = (r: number, c: number) => r >= 0 && r < size && c >= 0 && c < size
+
+  // easy: blind random fire — no hunt/target, no parity
+  if (difficulty === 'easy') {
+    const open: number[] = []
+    for (let i = 0; i < size * size; i++) if (!fired(i)) open.push(i)
+    return { type: 'fire', index: open[Math.floor(Math.random() * open.length)] }
+  }
 
   // ships we've already fully sunk (their cells stop being useful targets)
   const sunk = new Set<number>()

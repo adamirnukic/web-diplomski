@@ -1,4 +1,5 @@
 import { checkersEngine, type CheckersAction, type CheckersState, type Color, type Piece } from './engine'
+import type { Difficulty } from '../../types'
 
 const colorOf = (p: Piece): Color => (p === 'r' || p === 'R' ? 'r' : 'b')
 const isKing = (p: Piece): boolean => p === 'R' || p === 'B'
@@ -47,15 +48,18 @@ function negamax(s: CheckersState, depth: number, alpha: number, beta: number, m
   return best
 }
 
-/** Checkers bot: alpha-beta search on material + advancement. */
-export function checkersAI(s: CheckersState, p: string): CheckersAction {
+/** Checkers bot: alpha-beta search on material + advancement.
+ *  easy: random legal move; normal: depth 5; hard: depth 7. */
+export function checkersAI(s: CheckersState, p: string, difficulty: Difficulty = 'normal'): CheckersAction {
   const me = colorForPlayer(s, p)
   const moves = movesFor(s)
+  if (difficulty === 'easy') return moves[Math.floor(Math.random() * moves.length)]
+  const depth = difficulty === 'hard' ? 7 : 5
   let best = moves[0]
   let bestScore = -Infinity
   for (const move of moves) {
     const next = checkersEngine.applyAction(s, s.turn, move)
-    const score = negamax(next, 5, -Infinity, Infinity, me)
+    const score = negamax(next, depth, -Infinity, Infinity, me)
     if (score > bestScore) {
       bestScore = score
       best = move

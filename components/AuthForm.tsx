@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { BackButton } from '@/components/ui/back-button'
 import styles from './AuthForm.module.css'
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
@@ -37,6 +38,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 
   return (
     <div className={styles.wrap}>
+      <BackButton />
       <Link href="/" className={styles.brand}>
         <span className={`${styles.logo} neon-glow-cyan`}>
           <Gamepad2 size={22} />

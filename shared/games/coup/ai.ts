@@ -1,5 +1,5 @@
 import type { CoupAction, CoupCard, CoupState } from './engine'
-import type { PlayerId } from '../../types'
+import type { Difficulty, PlayerId } from '../../types'
 
 const ACTION_CARD: Record<string, CoupCard | undefined> = {
   tax: 'duke',
@@ -35,11 +35,16 @@ function visibleCount(s: CoupState, me: PlayerId, card: CoupCard): number {
 
 const rnd = () => Math.random()
 
-/** Coup bot — mostly honest play, sure-thing challenges, defensive blocks. */
-export function coupAI(s: CoupState, me: PlayerId): CoupAction {
+/** Coup bot — mostly honest play, sure-thing challenges, defensive blocks.
+ *  Difficulty scales how readily it challenges/bluffs. */
+export function coupAI(s: CoupState, me: PlayerId, difficulty: Difficulty = 'normal'): CoupAction {
   const hand = s.influence[me]
   const has = (c: CoupCard) => hand.includes(c)
   const p = s.pending
+  const passive = difficulty === 'easy'
+  const aggressive = difficulty === 'hard'
+  const chP = passive ? 0.15 : aggressive ? 0.85 : 0.5
+  const desperateP = passive ? 0.2 : aggressive ? 0.6 : 0.45
 
   switch (s.phase) {
     case 'action': {
@@ -59,7 +64,7 @@ export function coupAI(s: CoupState, me: PlayerId): CoupAction {
       if (has('duke')) return { type: 'tax' }
       if (has('captain') && richest) return { type: 'steal', target: richest }
       if (has('ambassador') && rnd() < 0.3) return { type: 'exchange' }
-      if (s.coins[me] < 3 && rnd() < 0.25) return { type: 'tax' } // light bluff to build up
+      if (!passive && s.coins[me] < 3 && rnd() < (aggressive ? 0.35 : 0.25)) return { type: 'tax' }
       return rnd() < 0.6 ? { type: 'foreign_aid' } : { type: 'income' }
     }
 
@@ -75,9 +80,9 @@ export function coupAI(s: CoupState, me: PlayerId): CoupAction {
         if (amTarget) return { type: 'block', card: haveBlock }
         if (p.action === 'foreign_aid' && rnd() < 0.4) return { type: 'block', card: haveBlock }
       }
-      if (claim && visibleCount(s, me, claim) === 2 && rnd() < 0.5) return { type: 'challenge' }
+      if (claim && visibleCount(s, me, claim) === 2 && rnd() < chP) return { type: 'challenge' }
       // desperate bluff to avoid being assassinated out
-      if (amTarget && p.action === 'assassinate' && hand.length === 1 && rnd() < 0.5) {
+      if (amTarget && p.action === 'assassinate' && hand.length === 1 && rnd() < desperateP) {
         return { type: 'block', card: 'contessa' }
       }
       return { type: 'pass' }
@@ -87,8 +92,8 @@ export function coupAI(s: CoupState, me: PlayerId): CoupAction {
       if (!p || !p.blockCard) return { type: 'pass' }
       if (visibleCount(s, me, p.blockCard) >= 3) return { type: 'challenge' }
       if (p.actor === me) {
-        if (visibleCount(s, me, p.blockCard) === 2 && rnd() < 0.5) return { type: 'challenge' }
-        if (rnd() < 0.15) return { type: 'challenge' }
+        if (visibleCount(s, me, p.blockCard) === 2 && rnd() < chP) return { type: 'challenge' }
+        if (rnd() < (aggressive ? 0.4 : passive ? 0.05 : 0.15)) return { type: 'challenge' }
       }
       return { type: 'pass' }
     }
@@ -97,7 +102,7 @@ export function coupAI(s: CoupState, me: PlayerId): CoupAction {
       if (!p) return { type: 'pass' }
       const haveBlock = blockCardsFor(p.action).find((c) => has(c))
       if (haveBlock) return { type: 'block', card: haveBlock }
-      if (p.action === 'assassinate' && hand.length === 1 && rnd() < 0.5) {
+      if (p.action === 'assassinate' && hand.length === 1 && rnd() < desperateP) {
         return { type: 'block', card: 'contessa' }
       }
       return { type: 'pass' }

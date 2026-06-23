@@ -1,6 +1,9 @@
+'use client'
+
 import Link from 'next/link'
-import { Gamepad2, Globe, Monitor, Trophy, ArrowRight, Zap } from 'lucide-react'
+import { Gamepad2, Globe, Monitor, Trophy, ArrowRight, Zap, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/lib/auth'
 import { GAMES } from '@/lib/games-catalog'
 import styles from './page.module.css'
 
@@ -26,6 +29,7 @@ const FEATURES = [
 ]
 
 export default function LandingPage() {
+  const { user, loading } = useAuth()
   const playable = GAMES.filter((g) => g.implemented).length
 
   return (
@@ -41,16 +45,34 @@ export default function LandingPage() {
             </span>
           </div>
           <div className={styles.navActions}>
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                Prijava
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button size="sm" className="neon-glow-cyan">
-                Registruj se
-              </Button>
-            </Link>
+            {!loading &&
+              (user ? (
+                <>
+                  <Link href="/games">
+                    <Button size="sm" className="neon-glow-cyan">
+                      Igraj
+                    </Button>
+                  </Link>
+                  <Link href="/profile">
+                    <Button variant="ghost" size="sm">
+                      <User size={16} /> {user.username}
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" size="sm">
+                      Prijava
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button size="sm" className="neon-glow-cyan">
+                      Registruj se
+                    </Button>
+                  </Link>
+                </>
+              ))}
           </div>
         </div>
       </nav>
@@ -70,14 +92,14 @@ export default function LandingPage() {
             Izazovi prijatelje online preko koda sobe ili igraj lokalno.
           </p>
           <div className={styles.heroActions}>
-            <Link href="/register">
+            <Link href={user ? '/games' : '/register'}>
               <Button size="lg" className="neon-glow-cyan animate-pulse-glow">
-                Počni igrati <ArrowRight size={18} />
+                {user ? 'Igraj' : 'Počni igrati'} <ArrowRight size={18} />
               </Button>
             </Link>
-            <Link href="/games">
+            <Link href={user ? '/leaderboard' : '/games'}>
               <Button size="lg" variant="outline">
-                Pogledaj igre
+                {user ? 'Rang-lista' : 'Pogledaj igre'}
               </Button>
             </Link>
           </div>

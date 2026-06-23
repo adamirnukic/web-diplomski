@@ -11,6 +11,7 @@ import { getGameComponent } from '@/components/games/registry'
 import { useAuth } from '@/lib/auth'
 import { useRoom } from '@/lib/useRoom'
 import { RoomLobby } from '@/components/RoomLobby'
+import { InviteFriends } from '@/components/games/InviteFriends'
 import { Button } from '@/components/ui/button'
 import styles from './online.module.css'
 
@@ -51,14 +52,17 @@ function OnlineRunner({ gameId }: { gameId: string }) {
       )}
 
       {room.lobby && status === 'lobby' && (
-        <RoomLobby
-          lobby={room.lobby}
-          meId={user.id}
-          minPlayers={game.minPlayers}
-          onReady={room.setReady}
-          onStart={room.start}
-          onLeave={backToMenu}
-        />
+        <>
+          <RoomLobby
+            lobby={room.lobby}
+            meId={user.id}
+            minPlayers={game.minPlayers}
+            onReady={room.setReady}
+            onStart={room.start}
+            onLeave={backToMenu}
+          />
+          <InviteFriends gameId={gameId} code={room.lobby.code} />
+        </>
       )}
 
       {room.lobby && status !== 'lobby' && (

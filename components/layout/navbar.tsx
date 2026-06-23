@@ -4,12 +4,14 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Gamepad2, LogOut, User } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
+import { useRealtime } from '@/lib/realtime'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import styles from './navbar.module.css'
 
 export function Navbar() {
   const { user, logout } = useAuth()
+  const { incomingCount } = useRealtime()
   const router = useRouter()
   const pathname = usePathname()
   const isActive = (href: string) =>
@@ -46,6 +48,24 @@ export function Navbar() {
               className={cn(styles.link, isActive('/friends') && styles.linkActive)}
             >
               Prijatelji
+              {incomingCount > 0 && (
+                <span
+                  style={{
+                    marginLeft: '0.35rem',
+                    background: 'var(--neon-magenta)',
+                    color: '#0a0a1a',
+                    borderRadius: '999px',
+                    fontSize: '0.7rem',
+                    fontWeight: 800,
+                    padding: '0 0.4rem',
+                    minWidth: '1.1rem',
+                    display: 'inline-block',
+                    textAlign: 'center',
+                  }}
+                >
+                  {incomingCount}
+                </span>
+              )}
             </Link>
           )}
         </div>

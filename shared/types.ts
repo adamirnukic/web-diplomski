@@ -3,6 +3,9 @@
 
 export type PlayerId = string
 
+/** Bot strength selectable in the local "vs bots" runner. */
+export type Difficulty = 'easy' | 'normal' | 'hard'
+
 export interface EnginePlayer {
   id: PlayerId
   username: string
