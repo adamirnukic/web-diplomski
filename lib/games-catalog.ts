@@ -63,6 +63,7 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+    aiLocal: true,
   },
   {
     id: 'connect-four',
@@ -76,6 +77,7 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+    aiLocal: true,
   },
   {
     id: 'dots-and-boxes',
@@ -89,6 +91,7 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+    aiLocal: true,
   },
   {
     id: 'battleships',
@@ -104,6 +107,7 @@ export const GAMES: GameMeta[] = [
     implemented: true,
     secret: true,
     reviewOnPass: true,
+    aiLocal: true,
   },
   {
     id: 'blackjack',
@@ -146,6 +150,7 @@ export const GAMES: GameMeta[] = [
     hasOnline: true,
     implemented: true,
     secret: true,
+    aiLocal: true,
   },
   {
     id: 'yahtzee',
@@ -159,6 +164,7 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+    aiLocal: true,
   },
   {
     id: 'memory',
@@ -185,6 +191,7 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+    aiLocal: true,
   },
   {
     id: 'rock-paper-scissors',
@@ -199,6 +206,7 @@ export const GAMES: GameMeta[] = [
     hasOnline: true,
     implemented: true,
     secret: true,
+    aiLocal: true,
   },
   {
     id: 'hangman',

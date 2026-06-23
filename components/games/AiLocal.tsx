@@ -17,10 +17,12 @@ interface Props {
   minPlayers: number
   maxPlayers: number
   secret: boolean
+  /** brief read-only review of the just-finished move before the device hand-off */
+  reviewOnPass?: boolean
 }
 
 /** Generic local runner for games that support bots + a player-count setup. */
-export function AiLocal({ gameId, minPlayers, maxPlayers, secret }: Props) {
+export function AiLocal({ gameId, minPlayers, maxPlayers, secret, reviewOnPass = false }: Props) {
   const [cfg, setCfg] = useState<{ total: number; bots: number } | null>(null)
   if (!cfg) {
     return <Setup minP={minPlayers} maxP={maxPlayers} onStart={(total, bots) => setCfg({ total, bots })} />
@@ -30,6 +32,7 @@ export function AiLocal({ gameId, minPlayers, maxPlayers, secret }: Props) {
       key={`${cfg.total}-${cfg.bots}`}
       gameId={gameId}
       secret={secret}
+      reviewOnPass={reviewOnPass}
       total={cfg.total}
       bots={cfg.bots}
       onExit={() => setCfg(null)}
@@ -97,12 +100,14 @@ function Setup({
 function Game({
   gameId,
   secret,
+  reviewOnPass,
   total,
   bots,
   onExit,
 }: {
   gameId: string
   secret: boolean
+  reviewOnPass: boolean
   total: number
   bots: number
   onExit: () => void
@@ -123,6 +128,7 @@ function Game({
 
   const [state, setState] = useState<any>(() => engine.createInitialState(players, { ai: aiIds }))
   const [viewer, setViewer] = useState<string>(humanIds[0])
+  const [reviewing, setReviewing] = useState(false)
 
   const dispatch = useCallback(
     (action: unknown, actor: string) => {
@@ -138,6 +144,7 @@ function Game({
   )
 
   const cp = engine.getCurrentPlayer(state)
+  const over = engine.getResult(state) != null
   const isAi = (id: string | null) => !!id && aiIds.includes(id)
 
   useEffect(() => {
@@ -150,13 +157,36 @@ function Game({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, cp])
 
+  // The device must move to a different human (hidden-information games only).
+  const needHandoff = secret && !!cp && !isAi(cp) && cp !== viewer && humanIds.length > 1
+
+  // Briefly keep the outgoing player's board on screen so they see the result.
+  useEffect(() => {
+    if (reviewOnPass && needHandoff) {
+      setReviewing(true)
+      const t = setTimeout(() => setReviewing(false), 1500)
+      return () => clearTimeout(t)
+    }
+    setReviewing(false)
+  }, [needHandoff, reviewOnPass])
+
   const restart = () => {
     setState(engine.createInitialState(players, { ai: aiIds }))
     setViewer(humanIds[0])
+    setReviewing(false)
   }
 
-  // Hand the device between human players in hidden-information games.
-  if (secret && cp && !isAi(cp) && cp !== viewer && humanIds.length > 1) {
+  // Read-only review of the just-finished move before the hand-off screen.
+  if (needHandoff && reviewing) {
+    return (
+      <div className={styles.wrap}>
+        <Comp view={engine.getView(state, viewer)} onAction={() => {}} mode="local" players={players} />
+      </div>
+    )
+  }
+
+  // Hand the device to the next human.
+  if (needHandoff && cp) {
     const name = players.find((p) => p.id === cp)?.username ?? 'Igrač'
     return <PassDevice name={name} onReady={() => setViewer(cp)} />
   }
@@ -169,6 +199,8 @@ function Game({
 
   const onAction = (action: unknown) => {
     if (cp && !isAi(cp)) dispatch(action, cp)
+    // round transitions with no "current" player (e.g. Love Letter "Next round")
+    else if (!cp && !over) dispatch(action, vId)
   }
 
   return (
