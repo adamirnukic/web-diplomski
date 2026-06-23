@@ -1,4 +1,5 @@
 import type { Cell, Mark, TttAction, TttState } from './engine'
+import type { Difficulty } from '../../types'
 
 const LINES = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -29,11 +30,17 @@ function minimax(b: Cell[], turn: Mark, me: Mark, opp: Mark, depth: number): num
   return best
 }
 
-/** Optimal (unbeatable) tic-tac-toe via full minimax — the board is tiny. */
-export function ticTacToeAI(s: TttState, p: string): TttAction {
+/** Optimal (unbeatable) tic-tac-toe via full minimax — the board is tiny.
+ *  easy: random; normal: optimal with the occasional slip; hard: optimal. */
+export function ticTacToeAI(s: TttState, p: string, difficulty: Difficulty = 'normal'): TttAction {
   const me = s.marks[p]
   const opp: Mark = me === 'X' ? 'O' : 'X'
   const b = s.board.slice()
+  const empties = b.map((c, i) => (c ? -1 : i)).filter((i) => i >= 0)
+  const randomMove = (): TttAction => ({ type: 'place', index: empties[Math.floor(Math.random() * empties.length)] })
+  if (difficulty === 'easy') return randomMove()
+  if (difficulty === 'normal' && Math.random() < 0.25) return randomMove()
+
   let bestScore = -Infinity
   let bestIdx = b.findIndex((x) => !x)
   for (let i = 0; i < 9; i++) {

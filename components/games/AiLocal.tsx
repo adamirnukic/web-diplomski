@@ -9,8 +9,10 @@ import { PassDevice } from '@/components/games/PassDevice'
 import { getEngine } from '@shared/games/registry'
 import { getGameComponent } from '@/components/games/registry'
 import { aiDecide } from '@shared/games/ai'
-import type { EnginePlayer } from '@shared/types'
+import type { Difficulty, EnginePlayer } from '@shared/types'
 import styles from './AiLocal.module.css'
+
+const DIFF_LABEL: Record<Difficulty, string> = { easy: 'Lako', normal: 'Normalno', hard: 'Teško' }
 
 interface Props {
   gameId: string
@@ -23,18 +25,25 @@ interface Props {
 
 /** Generic local runner for games that support bots + a player-count setup. */
 export function AiLocal({ gameId, minPlayers, maxPlayers, secret, reviewOnPass = false }: Props) {
-  const [cfg, setCfg] = useState<{ total: number; bots: number } | null>(null)
+  const [cfg, setCfg] = useState<{ total: number; bots: number; difficulty: Difficulty } | null>(null)
   if (!cfg) {
-    return <Setup minP={minPlayers} maxP={maxPlayers} onStart={(total, bots) => setCfg({ total, bots })} />
+    return (
+      <Setup
+        minP={minPlayers}
+        maxP={maxPlayers}
+        onStart={(total, bots, difficulty) => setCfg({ total, bots, difficulty })}
+      />
+    )
   }
   return (
     <Game
-      key={`${cfg.total}-${cfg.bots}`}
+      key={`${cfg.total}-${cfg.bots}-${cfg.difficulty}`}
       gameId={gameId}
       secret={secret}
       reviewOnPass={reviewOnPass}
       total={cfg.total}
       bots={cfg.bots}
+      difficulty={cfg.difficulty}
       onExit={() => setCfg(null)}
     />
   )
@@ -47,10 +56,11 @@ function Setup({
 }: {
   minP: number
   maxP: number
-  onStart: (total: number, bots: number) => void
+  onStart: (total: number, bots: number, difficulty: Difficulty) => void
 }) {
   const [total, setTotal] = useState(Math.max(2, minP))
   const [bots, setBots] = useState(1)
+  const [difficulty, setDifficulty] = useState<Difficulty>('normal')
   const humans = total - bots
   const totals: number[] = []
   for (let n = minP; n <= maxP; n++) totals.push(n)
@@ -87,10 +97,26 @@ function Setup({
           ))}
         </div>
       </div>
+      {bots > 0 && (
+        <div className={styles.field}>
+          <span className={styles.label}>Težina botova</span>
+          <div className={styles.opts}>
+            {(['easy', 'normal', 'hard'] as Difficulty[]).map((d) => (
+              <button
+                key={d}
+                className={cn(styles.opt, difficulty === d && styles.optActive)}
+                onClick={() => setDifficulty(d)}
+              >
+                {DIFF_LABEL[d]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <p className={styles.summary}>
         <User size={15} /> {humans} &nbsp;·&nbsp; <Bot size={15} /> {bots}
       </p>
-      <Button size="lg" className="neon-glow-cyan" onClick={() => onStart(total, bots)}>
+      <Button size="lg" className="neon-glow-cyan" onClick={() => onStart(total, bots, difficulty)}>
         Počni igru
       </Button>
     </div>
@@ -103,6 +129,7 @@ function Game({
   reviewOnPass,
   total,
   bots,
+  difficulty,
   onExit,
 }: {
   gameId: string
@@ -110,6 +137,7 @@ function Game({
   reviewOnPass: boolean
   total: number
   bots: number
+  difficulty: Difficulty
   onExit: () => void
 }) {
   const engine = getEngine(gameId)!
@@ -150,7 +178,7 @@ function Game({
   useEffect(() => {
     if (!cp || !isAi(cp)) return
     const t = setTimeout(() => {
-      const a = aiDecide(gameId, state, cp)
+      const a = aiDecide(gameId, state, cp, difficulty)
       if (a) dispatch(a, cp)
     }, 850)
     return () => clearTimeout(t)

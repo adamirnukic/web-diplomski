@@ -1,4 +1,5 @@
 import { COLS, ROWS, type C4Action, type C4State, type Cell, type Disc } from './engine'
+import type { Difficulty } from '../../types'
 
 const idx = (r: number, c: number) => r * COLS + c
 
@@ -86,8 +87,9 @@ function negamax(board: Cell[], depth: number, alpha: number, beta: number, turn
   return best
 }
 
-/** Connect Four bot: take a win, block a loss, otherwise alpha-beta search. */
-export function connectFourAI(s: C4State, p: string): C4Action {
+/** Connect Four bot: take a win, block a loss, otherwise alpha-beta search.
+ *  easy: only win/block then random; normal: depth 4; hard: depth 6. */
+export function connectFourAI(s: C4State, p: string, difficulty: Difficulty = 'normal'): C4Action {
   const me = s.discs[p]
   const opp: Disc = me === 'R' ? 'Y' : 'R'
   const board = s.board
@@ -100,11 +102,16 @@ export function connectFourAI(s: C4State, p: string): C4Action {
     if (hasFour(dropInto(board, c, opp)!, opp)) return { type: 'drop', col: c }
   }
 
+  if (difficulty === 'easy') {
+    return { type: 'drop', col: playable[Math.floor(Math.random() * playable.length)] }
+  }
+
+  const depth = difficulty === 'hard' ? 6 : 4
   let bestCol = playable[0]
   let bestScore = -Infinity
   for (const c of playable) {
     const b = dropInto(board, c, me)!
-    const score = negamax(b, 4, -Infinity, Infinity, opp, me, opp)
+    const score = negamax(b, depth, -Infinity, Infinity, opp, me, opp)
     if (score > bestScore) {
       bestScore = score
       bestCol = c

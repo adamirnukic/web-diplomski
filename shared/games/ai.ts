@@ -11,9 +11,10 @@ import { yahtzeeAI } from './yahtzee/ai'
 import { battleshipsAI } from './battleships/ai'
 import { loveLetterAI } from './love-letter/ai'
 import { coupAI } from './coup/ai'
+import type { Difficulty } from '../types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-type AiFn = (state: any, playerId: string) => any
+type AiFn = (state: any, playerId: string, difficulty: Difficulty) => any
 
 /** Per-game AI decision functions (used by the local "vs bots" runner). */
 export const AI_DECISIONS: Record<string, AiFn> = {
@@ -32,7 +33,12 @@ export const AI_DECISIONS: Record<string, AiFn> = {
   coup: coupAI,
 }
 
-export function aiDecide(gameId: string, state: any, playerId: string): any {
+export function aiDecide(
+  gameId: string,
+  state: any,
+  playerId: string,
+  difficulty: Difficulty = 'normal',
+): any {
   const fn = AI_DECISIONS[gameId]
-  return fn ? fn(state, playerId) : null
+  return fn ? fn(state, playerId, difficulty) : null
 }

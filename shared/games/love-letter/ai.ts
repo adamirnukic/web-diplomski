@@ -1,4 +1,5 @@
 import { CARD_VALUE, type CardName, type LLAction, type LLState } from './engine'
+import type { Difficulty } from '../../types'
 
 const DECK_COUNTS: Record<CardName, number> = {
   spy: 2, guard: 6, priest: 2, baron: 2, handmaid: 2,
@@ -40,7 +41,7 @@ function buildPlay(s: LLState, p: string, card: CardName, targetable: string[]):
 }
 
 /** Love Letter bot — handles every phase the engine can hand it. */
-export function loveLetterAI(s: LLState, p: string): LLAction {
+export function loveLetterAI(s: LLState, p: string, difficulty: Difficulty = 'normal'): LLAction {
   if (s.phase === 'peeking') return { type: 'ack' }
 
   if (s.phase === 'chancellor') {
@@ -61,6 +62,11 @@ export function loveLetterAI(s: LLState, p: string): LLAction {
 
   const playable = hand.filter((c) => c !== 'princess')
   const cards = playable.length ? playable : [...hand]
+
+  if (difficulty === 'easy') {
+    const card = cards[Math.floor(Math.random() * cards.length)]
+    return buildPlay(s, p, card, targetable)
+  }
 
   // default: lead with the lower-value card and keep the stronger one
   let card = [...cards].sort((a, b) => CARD_VALUE[a] - CARD_VALUE[b])[0]

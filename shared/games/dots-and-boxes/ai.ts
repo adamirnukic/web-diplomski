@@ -1,4 +1,5 @@
 import type { DBAction, DBState } from './engine'
+import type { Difficulty } from '../../types'
 
 interface Cand {
   kind: 'h' | 'v'
@@ -62,13 +63,18 @@ function pick<T>(arr: T[]): T {
 
 /** Dots & Boxes bot: take a box if you can, else play a "safe" edge that
  *  doesn't hand the opponent a third side; if none, give away the least. */
-export function dotsAndBoxesAI(s: DBState, _p: string): DBAction {
+export function dotsAndBoxesAI(s: DBState, _p: string, difficulty: Difficulty = 'normal'): DBAction {
   const cands = candidates(s)
   const scoring = cands.filter((c) => c.completes > 0)
   if (scoring.length) {
     const best = Math.max(...scoring.map((c) => c.completes))
     const top = scoring.filter((c) => c.completes === best)
     const { kind, index } = pick(top)
+    return { type: 'edge', kind, index }
+  }
+  // easy: ignore the "don't give away the 3rd side" rule, just play anywhere
+  if (difficulty === 'easy') {
+    const { kind, index } = pick(cands)
     return { type: 'edge', kind, index }
   }
   const safe = cands.filter((c) => c.creates3 === 0)

@@ -7,6 +7,7 @@ import { apiForgotPassword } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { BackButton } from '@/components/ui/back-button'
 import styles from '@/components/AuthForm.module.css'
 
 export default function ForgotPasswordPage() {
@@ -33,6 +34,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className={styles.wrap}>
+      <BackButton />
       <Link href="/" className={styles.brand}>
         <span className={`${styles.logo} neon-glow-cyan`}>
           <Gamepad2 size={22} />
