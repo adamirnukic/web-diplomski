@@ -28,6 +28,8 @@ import {
 } from './friends'
 import { getLeaderboard, getStatsForUser } from './stats'
 import { registerRoomHandlers } from './rooms'
+import { registerSocialHandlers } from './social'
+import { emitToUser, setIO } from './presence'
 
 const PORT = Number(process.env.API_PORT ?? 3001)
 const WEB_ORIGIN = process.env.WEB_ORIGIN ?? 'http://localhost:3000'
@@ -167,7 +169,12 @@ app.post('/api/friends/request', (req: Request, res: Response) => {
   if (!u) return
   try {
     const result = sendFriendRequest(u.id, req.body?.query)
-    res.json({ ok: true, ...result })
+    if (result.status === 'sent') {
+      emitToUser(result.targetId, 'friend:request:new', { fromName: u.username })
+    } else {
+      emitToUser(result.targetId, 'friend:accepted', { byName: u.username })
+    }
+    res.json({ ok: true, status: result.status })
   } catch (e) {
     res.status(400).json({ error: (e as Error).message })
   }
@@ -177,7 +184,8 @@ app.post('/api/friends/respond', (req: Request, res: Response) => {
   const u = requireAuth(req, res)
   if (!u) return
   try {
-    respondFriendRequest(u.id, req.body?.requestId, Boolean(req.body?.accept))
+    const r = respondFriendRequest(u.id, req.body?.requestId, Boolean(req.body?.accept))
+    if (r.accepted) emitToUser(r.requesterId, 'friend:accepted', { byName: u.username })
     res.json({ ok: true })
   } catch (e) {
     res.status(400).json({ error: (e as Error).message })
@@ -195,6 +203,7 @@ const httpServer = createServer(app)
 const io = new Server(httpServer, {
   cors: { origin: WEB_ORIGIN, credentials: true },
 })
+setIO(io)
 
 // Attach the authenticated user (if any) to each socket.
 io.use((socket, next) => {
@@ -205,6 +214,7 @@ io.use((socket, next) => {
 })
 
 io.on('connection', (socket) => {
+  registerSocialHandlers(io, socket)
   registerRoomHandlers(io, socket)
 })
 

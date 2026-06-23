@@ -37,6 +37,17 @@ export function friendIds(userId: string): string[] {
   return listFriends(userId).map((f) => f.id)
 }
 
+export function areFriends(a: string, b: string): boolean {
+  const row = db
+    .prepare(
+      `SELECT 1 FROM friendships
+       WHERE status = 'accepted'
+         AND ((requester = ? AND recipient = ?) OR (requester = ? AND recipient = ?))`,
+    )
+    .get(a, b, b, a)
+  return !!row
+}
+
 export function listIncoming(userId: string): FriendRequest[] {
   const rows = db
     .prepare(
@@ -70,7 +81,10 @@ export function listOutgoing(userId: string): FriendRequest[] {
 }
 
 /** Add a friend by their friend code OR username. Auto-accepts a reverse request. */
-export function sendFriendRequest(userId: string, codeOrUsername: string): { status: 'sent' | 'accepted' } {
+export function sendFriendRequest(
+  userId: string,
+  codeOrUsername: string,
+): { status: 'sent' | 'accepted'; targetId: string } {
   const q = String(codeOrUsername ?? '').trim()
   if (!q) throw new Error('Unesi friend kod ili korisničko ime')
   const target = db
@@ -93,24 +107,31 @@ export function sendFriendRequest(userId: string, codeOrUsername: string): { sta
     if (existing.requester === userId) throw new Error('Zahtjev je već poslan')
     // The other person already sent YOU a request — accept it.
     db.prepare("UPDATE friendships SET status = 'accepted' WHERE id = ?").run(existing.id)
-    return { status: 'accepted' }
+    return { status: 'accepted', targetId: target.id }
   }
 
   db.prepare(
     'INSERT INTO friendships (id, requester, recipient, status, created_at) VALUES (?, ?, ?, ?, ?)',
   ).run(randomUUID(), userId, target.id, 'pending', Date.now())
-  return { status: 'sent' }
+  return { status: 'sent', targetId: target.id }
 }
 
-export function respondFriendRequest(userId: string, requestId: string, accept: boolean): void {
+export function respondFriendRequest(
+  userId: string,
+  requestId: string,
+  accept: boolean,
+): { requesterId: string; accepted: boolean } {
   const row = db
-    .prepare('SELECT id, recipient, status FROM friendships WHERE id = ?')
-    .get(String(requestId ?? '')) as { id: string; recipient: string; status: string } | undefined
+    .prepare('SELECT id, requester, recipient, status FROM friendships WHERE id = ?')
+    .get(String(requestId ?? '')) as
+    | { id: string; requester: string; recipient: string; status: string }
+    | undefined
   if (!row || row.recipient !== userId || row.status !== 'pending') {
     throw new Error('Zahtjev ne postoji')
   }
   if (accept) db.prepare("UPDATE friendships SET status = 'accepted' WHERE id = ?").run(requestId)
   else db.prepare('DELETE FROM friendships WHERE id = ?').run(requestId)
+  return { requesterId: row.requester, accepted: accept }
 }
 
 export function removeFriend(userId: string, friendId: string): void {

@@ -13,6 +13,7 @@ import {
   type FriendUser,
   type FriendsData,
 } from '@/lib/api'
+import { useRealtime } from '@/lib/realtime'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import styles from './friends.module.css'
@@ -27,6 +28,7 @@ function Avatar({ u }: { u: FriendUser }) {
 
 export default function FriendsPage() {
   const { user, loading } = useAuth()
+  const { online, refreshSocial } = useRealtime()
   const router = useRouter()
   const [data, setData] = useState<FriendsData | null>(null)
   const [q, setQ] = useState('')
@@ -36,7 +38,8 @@ export default function FriendsPage() {
 
   const load = useCallback(() => {
     apiFriends().then(setData).catch(() => {})
-  }, [])
+    refreshSocial() // keep the navbar badge in sync
+  }, [refreshSocial])
 
   useEffect(() => {
     if (!loading && !user) router.push('/login')
@@ -175,7 +178,22 @@ export default function FriendsPage() {
             {data?.friends.map((f) => (
               <div key={f.id} className={styles.row}>
                 <Avatar u={f} />
-                <span className={styles.rowName}>{f.username}</span>
+                <span className={styles.rowName}>
+                  {f.username}
+                  {online.has(f.id) && (
+                    <span
+                      title="online"
+                      style={{
+                        display: 'inline-block',
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        background: 'var(--neon-green)',
+                        marginLeft: '0.5rem',
+                      }}
+                    />
+                  )}
+                </span>
                 <Button size="sm" variant="ghost" onClick={() => remove(f.id)} disabled={busy}>
                   Ukloni
                 </Button>
