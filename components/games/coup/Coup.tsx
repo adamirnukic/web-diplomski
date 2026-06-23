@@ -4,35 +4,20 @@ import { useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { CoupActionType, CoupCard, CoupView } from '@shared/games/coup/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Coup.module.css'
 
-const CARD_LABEL: Record<CoupCard, string> = {
-  duke: 'Vojvoda',
-  assassin: 'Ubica',
-  captain: 'Kapetan',
-  ambassador: 'Ambasador',
-  contessa: 'Grofica',
-}
-
-const ACTION_LABEL: Record<CoupActionType, string> = {
-  income: 'Prihod (+1)',
-  foreign_aid: 'Strana pomoć (+2)',
-  coup: 'Coup (7)',
-  tax: 'Porez · Vojvoda (+3)',
-  assassinate: 'Ubistvo · Ubica (3)',
-  steal: 'Krađa · Kapetan',
-  exchange: 'Zamjena · Ambasador',
-}
-
-const TARGET_ACTIONS: CoupActionType[] = ['coup', 'assassinate', 'steal']
-
 export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as CoupView | null
   const [choosing, setChoosing] = useState<CoupActionType | null>(null)
   const [keep, setKeep] = useState<number[]>([])
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
+
+  const cardLabel = (c: CoupCard) => t(`coup.card.${c}`)
+  const actLabel = (a: CoupActionType) => t(`coup.act.${a}`)
 
   const me = v.seats.find((s) => s.id === v.you)
   const myCoins = me?.coins ?? 0
@@ -53,13 +38,13 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
           <p className={styles.big}>
             {mode === 'online'
               ? v.result.winnerId === v.you
-                ? 'Pobijedio si! 🏆'
-                : `Pobjednik: ${winner?.name ?? ''}`
-              : `Pobjednik: ${winner?.name ?? ''} 🏆`}
+                ? t('g.youWinTrophy')
+                : t('g.winnerName', { name: winner?.name ?? '' })
+              : t('g.winnerTrophy', { name: winner?.name ?? '' })}
           </p>
           {mode === 'local' && onRestart && (
             <Button onClick={onRestart} className="neon-glow-cyan">
-              <RotateCcw size={16} /> Nova igra
+              <RotateCcw size={16} /> {t('g.newGame')}
             </Button>
           )}
         </div>
@@ -72,13 +57,13 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
 
   if (!v.yourTurn && v.phase === 'action') {
     const turnName = v.seats.find((s) => s.id === v.turn)?.name ?? ''
-    panel = <p className={styles.muted}>Na potezu: {turnName}…</p>
+    panel = <p className={styles.muted}>{t('g.turnOf', { name: turnName })}…</p>
   } else if (v.phase === 'action' && v.yourTurn) {
     panel = (
       <div className={styles.panel}>
         {choosing ? (
           <>
-            <p className={styles.prompt}>{ACTION_LABEL[choosing]} → izaberi metu:</p>
+            <p className={styles.prompt}>{t('coup.chooseTarget', { action: actLabel(choosing) })}</p>
             <div className={styles.actions}>
               {opponents.map((o) => (
                 <Button key={o.id} variant="outline" onClick={() => act(choosing, o.id)}>
@@ -86,42 +71,42 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
                 </Button>
               ))}
               <Button variant="ghost" onClick={() => setChoosing(null)}>
-                Otkaži
+                {t('common.cancel')}
               </Button>
             </div>
           </>
         ) : (
           <>
-            <p className={styles.prompt}>Tvoj potez{v.mustCoup ? ' — moraš izvesti Coup!' : ''}</p>
+            <p className={styles.prompt}>
+              {t('coup.yourTurn')}
+              {v.mustCoup ? t('coup.mustCoup') : ''}
+            </p>
             <div className={styles.actions}>
               {v.mustCoup ? (
                 <Button onClick={() => setChoosing('coup')} className="neon-glow-cyan">
-                  {ACTION_LABEL.coup}
+                  {actLabel('coup')}
                 </Button>
               ) : (
                 <>
-                  <Button onClick={() => act('income')}>{ACTION_LABEL.income}</Button>
-                  <Button onClick={() => act('foreign_aid')}>{ACTION_LABEL.foreign_aid}</Button>
-                  <Button onClick={() => act('tax')}>{ACTION_LABEL.tax}</Button>
-                  <Button onClick={() => act('exchange')}>{ACTION_LABEL.exchange}</Button>
-                  <Button
-                    onClick={() => setChoosing('steal')}
-                    disabled={opponents.length === 0}
-                  >
-                    {ACTION_LABEL.steal}
+                  <Button onClick={() => act('income')}>{actLabel('income')}</Button>
+                  <Button onClick={() => act('foreign_aid')}>{actLabel('foreign_aid')}</Button>
+                  <Button onClick={() => act('tax')}>{actLabel('tax')}</Button>
+                  <Button onClick={() => act('exchange')}>{actLabel('exchange')}</Button>
+                  <Button onClick={() => setChoosing('steal')} disabled={opponents.length === 0}>
+                    {actLabel('steal')}
                   </Button>
                   <Button
                     onClick={() => setChoosing('assassinate')}
                     disabled={myCoins < 3 || opponents.length === 0}
                   >
-                    {ACTION_LABEL.assassinate}
+                    {actLabel('assassinate')}
                   </Button>
                   <Button
                     onClick={() => setChoosing('coup')}
                     disabled={myCoins < 7 || opponents.length === 0}
                     className="neon-glow-cyan"
                   >
-                    {ACTION_LABEL.coup}
+                    {actLabel('coup')}
                   </Button>
                 </>
               )}
@@ -133,11 +118,11 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
   } else if (v.phase === 'lose' && v.yourTurn) {
     panel = (
       <div className={styles.panel}>
-        <p className={styles.prompt}>Gubiš uticaj — izaberi kartu koju otkrivaš:</p>
+        <p className={styles.prompt}>{t('coup.lose')}</p>
         <div className={styles.actions}>
           {(v.youCan?.loseChoices ?? []).map((c, i) => (
             <Button key={i} variant="outline" onClick={() => onAction({ type: 'lose', card: c })}>
-              {CARD_LABEL[c]}
+              {cardLabel(c)}
             </Button>
           ))}
         </div>
@@ -146,12 +131,10 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
   } else if (v.phase === 'exchange' && v.yourTurn && v.youCan?.exchange) {
     const ex = v.youCan.exchange
     const toggle = (i: number) =>
-      setKeep((k) =>
-        k.includes(i) ? k.filter((x) => x !== i) : k.length < ex.keep ? [...k, i] : k,
-      )
+      setKeep((k) => (k.includes(i) ? k.filter((x) => x !== i) : k.length < ex.keep ? [...k, i] : k))
     panel = (
       <div className={styles.panel}>
-        <p className={styles.prompt}>Zamjena — zadrži {ex.keep}:</p>
+        <p className={styles.prompt}>{t('coup.exchangeKeep', { n: ex.keep })}</p>
         <div className={styles.hand}>
           {ex.options.map((c, i) => (
             <button
@@ -159,7 +142,7 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
               className={cn(styles.chip, keep.includes(i) && styles.chipSel)}
               onClick={() => toggle(i)}
             >
-              {CARD_LABEL[c]}
+              {cardLabel(c)}
             </button>
           ))}
         </div>
@@ -171,7 +154,7 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
             setKeep([])
           }}
         >
-          Potvrdi
+          {t('common.confirm')}
         </Button>
       </div>
     )
@@ -183,23 +166,23 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
     const p = v.pending
     const desc =
       v.phase === 'blockResponse'
-        ? `${p.blocker} blokira (${p.blockCard ? CARD_LABEL[p.blockCard] : ''})`
-        : `${p.actor}: ${ACTION_LABEL[p.action]}${p.targetName ? ' → ' + p.targetName : ''}`
+        ? t('coup.blocks', { blocker: p.blocker ?? '', card: p.blockCard ? cardLabel(p.blockCard) : '' })
+        : `${p.actor}: ${actLabel(p.action)}${p.targetName ? ' → ' + p.targetName : ''}`
     panel = (
       <div className={styles.panel}>
         <p className={styles.prompt}>{desc}</p>
         <div className={styles.actions}>
           <Button variant="ghost" onClick={() => onAction({ type: 'pass' })}>
-            Propusti
+            {t('coup.pass')}
           </Button>
           {v.youCan?.canChallenge && (
             <Button variant="outline" onClick={() => onAction({ type: 'challenge' })}>
-              Izazovi
+              {t('coup.challenge')}
             </Button>
           )}
           {(v.youCan?.blockCards ?? []).map((c) => (
             <Button key={c} onClick={() => onAction({ type: 'block', card: c })}>
-              Blokiraj ({CARD_LABEL[c]})
+              {t('coup.block', { card: cardLabel(c) })}
             </Button>
           ))}
         </div>
@@ -210,8 +193,8 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
     const p = v.pending
     panel = (
       <p className={styles.muted}>
-        {p ? `${p.actor}: ${ACTION_LABEL[p.action]}${p.targetName ? ' → ' + p.targetName : ''} · ` : ''}
-        čeka se: {who}…
+        {p ? `${p.actor}: ${actLabel(p.action)}${p.targetName ? ' → ' + p.targetName : ''} · ` : ''}
+        {t('coup.waiting', { who })}
       </p>
     )
   }
@@ -226,6 +209,8 @@ export function CoupTable({ view, onAction, onRestart, mode }: GameBoardProps) {
 }
 
 function Seats({ v }: { v: CoupView }) {
+  const { t } = useT()
+  const cardLabel = (c: CoupCard) => t(`coup.card.${c}`)
   return (
     <div className={styles.seats}>
       {v.seats.map((s) => (
@@ -242,7 +227,7 @@ function Seats({ v }: { v: CoupView }) {
             <span className={styles.name}>
               {s.isAI ? '🤖 ' : ''}
               {s.name}
-              {s.id === v.you ? ' (ti)' : ''}
+              {s.id === v.you ? ` ${t('room.you')}` : ''}
             </span>
             <span className={styles.coins}>🪙 {s.coins}</span>
           </div>
@@ -250,7 +235,7 @@ function Seats({ v }: { v: CoupView }) {
             {s.id === v.you
               ? v.yourInfluence.map((c, i) => (
                   <span key={i} className={styles.card}>
-                    {CARD_LABEL[c]}
+                    {cardLabel(c)}
                   </span>
                 ))
               : Array.from({ length: s.influenceCount }).map((_, i) => (
@@ -258,11 +243,11 @@ function Seats({ v }: { v: CoupView }) {
                 ))}
             {s.revealed.map((c, i) => (
               <span key={`r${i}`} className={cn(styles.card, styles.cardLost)}>
-                {CARD_LABEL[c]}
+                {cardLabel(c)}
               </span>
             ))}
           </div>
-          {s.out && <span className={styles.tag}>ispao/la</span>}
+          {s.out && <span className={styles.tag}>{t('g.out')}</span>}
         </div>
       ))}
     </div>

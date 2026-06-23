@@ -5,21 +5,9 @@ import { RotateCcw, Shield, Heart, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { CARD_VALUE, type CardName, type LLView } from '@shared/games/love-letter/engine'
+import { useT } from '@/lib/i18n'
 import type { GameBoardProps } from '../registry'
 import styles from './LoveLetter.module.css'
-
-const LABEL: Record<CardName, string> = {
-  spy: 'Špijun',
-  guard: 'Stražar',
-  priest: 'Sveštenik',
-  baron: 'Baron',
-  handmaid: 'Sluškinja',
-  prince: 'Princ',
-  chancellor: 'Kancelar',
-  king: 'Kralj',
-  countess: 'Grofica',
-  princess: 'Princeza',
-}
 
 const NON_GUARD: CardName[] = [
   'spy', 'priest', 'baron', 'handmaid', 'prince', 'chancellor', 'king', 'countess', 'princess',
@@ -38,11 +26,12 @@ function Card({
   selected?: boolean
   small?: boolean
 }) {
+  const { t } = useT()
   const cls = cn(styles.card, small && styles.cardSmall, selected && styles.cardSel)
   const body = (
     <>
       <span className={styles.cardVal}>{CARD_VALUE[card]}</span>
-      <span className={styles.cardName}>{LABEL[card]}</span>
+      <span className={styles.cardName}>{t(`ll.card.${card}`)}</span>
     </>
   )
   if (onClick) {
@@ -56,11 +45,12 @@ function Card({
 }
 
 export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as LLView | null
   const [sel, setSel] = useState<{ card: CardName; step: 'target' | 'guess'; target?: string } | null>(
     null,
   )
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   const nameOf = (id: string) => v.players.find((p) => p.id === id)?.name ?? 'Igrač'
 
@@ -131,11 +121,11 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
           {p.revealedCard ? (
             <Card card={p.revealedCard} small />
           ) : (
-            <span className={styles.handBack}>{p.out ? 'ispao/la' : `${p.handCount} 🂠`}</span>
+            <span className={styles.handBack}>{p.out ? t('g.out') : `${p.handCount} 🂠`}</span>
           )}
           {p.discards.length > 0 && (
             <span className={styles.lastDiscard}>
-              bacio: {LABEL[p.discards[p.discards.length - 1]]}
+              {t('ll.discarded', { card: t(`ll.card.${p.discards[p.discards.length - 1]}`) })}
             </span>
           )}
         </div>
@@ -151,13 +141,13 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
         <p className={styles.big}>
           {mode === 'online'
             ? v.result?.winnerId === v.you
-              ? 'Pobijedio si! 🏆'
-              : `Pobjednik: ${nameOf(v.result?.winnerId ?? '')}`
-            : `Pobjednik meča: ${nameOf(v.result?.winnerId ?? '')} 🏆`}
+              ? t('g.youWinTrophy')
+              : t('g.winnerName', { name: nameOf(v.result?.winnerId ?? '') })
+            : t('ll.matchWinner', { name: nameOf(v.result?.winnerId ?? '') })}
         </p>
         {mode === 'local' && onRestart && (
           <Button onClick={onRestart} className="neon-glow-cyan">
-            <RotateCcw size={16} /> Nova igra
+            <RotateCcw size={16} /> {t('g.newGame')}
           </Button>
         )}
       </div>
@@ -165,10 +155,10 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
   } else if (v.phase === 'roundover' && v.round) {
     panel = (
       <div className={styles.panel}>
-        <p className={styles.big}>Kraj runde</p>
+        <p className={styles.big}>{t('ll.roundEnd')}</p>
         <p className={styles.roundReason}>{v.round.reason}</p>
         <Button onClick={() => onAction({ type: 'next' })} className="neon-glow-cyan">
-          Sljedeća runda
+          {t('ll.nextRound')}
         </Button>
       </div>
     )
@@ -176,17 +166,18 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
     panel = (
       <div className={styles.panel}>
         <p className={styles.peek}>
-          <Eye size={16} /> {v.peek.targetName} ima: <strong>{LABEL[v.peek.card]}</strong>
+          <Eye size={16} /> {t('ll.peekHas', { name: v.peek.targetName })}{' '}
+          <strong>{t(`ll.card.${v.peek.card}`)}</strong>
         </p>
         <Button onClick={() => onAction({ type: 'ack' })} className="neon-glow-cyan">
-          Nastavi
+          {t('ll.continue')}
         </Button>
       </div>
     )
   } else if (v.choosingKeep) {
     panel = (
       <div className={styles.panel}>
-        <p className={styles.prompt}>Kancelar — zadrži jednu kartu (ostale idu na dno špila):</p>
+        <p className={styles.prompt}>{t('ll.chancellorKeep')}</p>
         <div className={styles.hand}>
           {v.yourHand.map((c, i) => (
             <Card key={i} card={c} onClick={() => onAction({ type: 'keep', index: i })} />
@@ -198,19 +189,19 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
     if (sel?.step === 'target') {
       const targets =
         sel.card === 'prince'
-          ? [...v.targetable, { id: v.you, name: 'Sebe' }]
+          ? [...v.targetable, { id: v.you, name: t('ll.self') }]
           : v.targetable
       panel = (
         <div className={styles.panel}>
-          <p className={styles.prompt}>{LABEL[sel.card]} → izaberi metu:</p>
+          <p className={styles.prompt}>{t('ll.chooseTarget', { card: t(`ll.card.${sel.card}`) })}</p>
           <div className={styles.choices}>
-            {targets.map((t) => (
-              <Button key={t.id} variant="outline" onClick={() => chooseTarget(t.id)}>
-                {t.name}
+            {targets.map((tg) => (
+              <Button key={tg.id} variant="outline" onClick={() => chooseTarget(tg.id)}>
+                {tg.name}
               </Button>
             ))}
             <Button variant="ghost" onClick={() => setSel(null)}>
-              Otkaži
+              {t('ll.cancel')}
             </Button>
           </div>
         </div>
@@ -218,15 +209,15 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
     } else if (sel?.step === 'guess') {
       panel = (
         <div className={styles.panel}>
-          <p className={styles.prompt}>Pogodi kartu igrača {nameOf(sel.target as string)}:</p>
+          <p className={styles.prompt}>{t('ll.guessPrompt', { name: nameOf(sel.target as string) })}</p>
           <div className={styles.choices}>
             {NON_GUARD.map((c) => (
               <Button key={c} variant="outline" onClick={() => chooseGuess(c)}>
-                {LABEL[c]} ({CARD_VALUE[c]})
+                {t(`ll.card.${c}`)} ({CARD_VALUE[c]})
               </Button>
             ))}
             <Button variant="ghost" onClick={() => setSel(null)}>
-              Otkaži
+              {t('ll.cancel')}
             </Button>
           </div>
         </div>
@@ -234,10 +225,8 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
     } else {
       panel = (
         <div className={styles.panel}>
-          <p className={styles.prompt}>Tvoj potez — odigraj kartu:</p>
-          {v.mustPlayCountess && (
-            <p className={styles.hint}>Moraš odigrati Groficu (uz Kralja/Princa).</p>
-          )}
+          <p className={styles.prompt}>{t('ll.yourTurnPlay')}</p>
+          {v.mustPlayCountess && <p className={styles.hint}>{t('ll.mustCountess')}</p>}
           <div className={styles.hand}>
             {v.yourHand.map((c, i) => (
               <Card
@@ -255,7 +244,7 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
     const turnP = v.players.find((p) => p.isTurn)
     panel = (
       <div className={styles.panel}>
-        <p className={styles.prompt}>Na potezu: {turnP?.name ?? '…'}</p>
+        <p className={styles.prompt}>{t('g.turnOf', { name: turnP?.name ?? '…' })}</p>
         <div className={styles.hand}>
           {v.yourHand.map((c, i) => (
             <Card key={i} card={c} small />
@@ -269,7 +258,7 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
     <div className={styles.root}>
       {playersRow}
       <div className={styles.center}>
-        <span className={styles.deck}>Špil: {v.deckCount}</span>
+        <span className={styles.deck}>{t('ll.deck', { n: v.deckCount })}</span>
         {v.log.length > 0 && <p className={styles.log}>{v.log[v.log.length - 1]}</p>}
       </div>
       {panel}

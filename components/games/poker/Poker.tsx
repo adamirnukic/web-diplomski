@@ -5,6 +5,7 @@ import { RotateCcw, Bot, CircleDot } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useT } from '@/lib/i18n'
 import type { PokerSeat, PokerView } from '@shared/games/poker/engine'
 import type { GameBoardProps } from '../registry'
 import { PlayingCard } from '../card'
@@ -18,9 +19,10 @@ const STREET_LABEL: Record<string, string> = {
 }
 
 export function PokerTable({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as PokerView | null
   const [raiseAmt, setRaiseAmt] = useState(0)
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   const nameOf = (id: string) => v.seats.find((s) => s.id === id)?.name ?? 'Igrač'
   const turnSeat = v.seats.find((s) => s.isTurn)
@@ -47,18 +49,24 @@ export function PokerTable({ view, onAction, onRestart, mode }: GameBoardProps) 
             : v.community.map((c, i) => <PlayingCard key={i} card={c} />)}
         </div>
         <span className={styles.pot}>Pot: {v.pot} 🪙</span>
-        {v.yourHandName && <span className={styles.handName}>Tvoja ruka: {v.yourHandName}</span>}
+        {v.yourHandName && (
+          <span className={styles.handName}>
+            {t('poker.yourHand')} {v.yourHandName}
+          </span>
+        )}
       </div>
 
       {/* Controls */}
       {v.phase === 'matchover' || v.result ? (
         <div className={styles.panel}>
           <p className={styles.bigText}>
-            {v.result ? `Pobjednik meča: ${nameOf(v.result.winnerId ?? '')} 🏆` : 'Kraj meča'}
+            {v.result
+              ? t('ll.matchWinner', { name: nameOf(v.result.winnerId ?? '') })
+              : t('poker.matchEnd')}
           </p>
           {mode === 'local' && onRestart && (
             <Button onClick={onRestart} className="neon-glow-cyan">
-              <RotateCcw size={16} /> Nova igra
+              <RotateCcw size={16} /> {t('g.newGame')}
             </Button>
           )}
         </div>
@@ -67,25 +75,25 @@ export function PokerTable({ view, onAction, onRestart, mode }: GameBoardProps) 
           <p className={styles.handInfo}>
             {v.hand
               ? v.hand.winners.length > 1
-                ? `Podijeljen pot (${v.hand.reason})`
-                : `${nameOf(v.hand.winners[0])} dobija pot — ${v.hand.reason}`
-              : 'Kraj ruke'}
+                ? t('poker.splitPot', { reason: v.hand.reason })
+                : t('poker.winsPot', { name: nameOf(v.hand.winners[0]), reason: v.hand.reason })
+              : t('poker.handEnd')}
           </p>
           <Button onClick={() => onAction({ type: 'next' })} className="neon-glow-cyan">
-            Sljedeća ruka
+            {t('poker.nextHand')}
           </Button>
         </div>
       ) : v.canAct ? (
         <div className={styles.panel}>
           <div className={styles.actions}>
             <Button variant="outline" onClick={() => onAction({ type: 'fold' })}>
-              Odustani
+              {t('poker.fold')}
             </Button>
             {v.canCheck ? (
-              <Button onClick={() => onAction({ type: 'check' })}>Čekiraj</Button>
+              <Button onClick={() => onAction({ type: 'check' })}>{t('poker.check')}</Button>
             ) : (
               <Button onClick={() => onAction({ type: 'call' })} className="neon-glow-cyan">
-                Prati ({v.toCall})
+                {t('poker.call', { n: v.toCall })}
               </Button>
             )}
           </div>
@@ -105,12 +113,12 @@ export function PokerTable({ view, onAction, onRestart, mode }: GameBoardProps) 
                   onClick={() => onAction({ type: 'raise', amount: amt })}
                   className="neon-glow-green"
                 >
-                  {amt >= v.maxRaise ? 'All-in' : `Podigni na ${amt}`}
+                  {amt >= v.maxRaise ? 'All-in' : t('poker.raiseTo', { n: amt })}
                 </Button>
               </div>
               <div className={styles.quick}>
                 <button className={styles.chip} onClick={() => quick(v.minRaise)}>Min</button>
-                <button className={styles.chip} onClick={() => quick(v.currentBet + Math.round(v.pot / 2))}>½ pota</button>
+                <button className={styles.chip} onClick={() => quick(v.currentBet + Math.round(v.pot / 2))}>{t('poker.halfPot')}</button>
                 <button className={styles.chip} onClick={() => quick(v.currentBet + v.pot)}>Pot</button>
                 <button className={styles.chip} onClick={() => quick(v.maxRaise)}>All-in</button>
               </div>
@@ -119,7 +127,9 @@ export function PokerTable({ view, onAction, onRestart, mode }: GameBoardProps) 
         </div>
       ) : (
         <p className={styles.wait}>
-          {turnSeat ? `Na potezu: ${turnSeat.name}${turnSeat.isAI ? ' 🤖' : ''}…` : 'Čekanje…'}
+          {turnSeat
+            ? `${t('g.turnOf', { name: turnSeat.name })}${turnSeat.isAI ? ' 🤖' : ''}…`
+            : t('poker.waiting')}
         </p>
       )}
     </div>
@@ -127,6 +137,7 @@ export function PokerTable({ view, onAction, onRestart, mode }: GameBoardProps) 
 }
 
 function Seat({ seat, isYou }: { seat: PokerSeat; isYou: boolean }) {
+  const { t } = useT()
   return (
     <div
       className={cn(
@@ -152,7 +163,7 @@ function Seat({ seat, isYou }: { seat: PokerSeat; isYou: boolean }) {
         <span className={styles.seatChips}>
           <CircleDot size={12} /> {seat.chips}
         </span>
-        {seat.committed > 0 && <span className={styles.seatBet}>ulog {seat.committed}</span>}
+        {seat.committed > 0 && <span className={styles.seatBet}>{t('poker.bet', { n: seat.committed })}</span>}
         {seat.allIn && <span className={styles.allIn}>ALL-IN</span>}
         {seat.folded && !seat.out && <span className={styles.foldTag}>fold</span>}
       </div>
