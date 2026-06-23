@@ -110,7 +110,7 @@ export function PerudoTable({ view, onAction, onRestart, mode }: GameBoardProps)
       <div className={styles.yourDice}>
         <span className={styles.yourLabel}>{t('perudo.yourDice')}</span>
         {v.yourDice.map((d, i) => (
-          <span key={i} className={styles.die}>
+          <span key={`${i}:${d}`} className={styles.die}>
             {PIPS[d]}
           </span>
         ))}

@@ -57,7 +57,7 @@ export function CantStopBoard({ view, onAction, onRestart, mode }: GameBoardProp
       {v.dice.length > 0 && (
         <div className={styles.dice}>
           {v.dice.map((d, i) => (
-            <span key={i} className={styles.die}>
+            <span key={`${i}:${d}`} className={styles.die}>
               {PIPS[d]}
             </span>
           ))}
