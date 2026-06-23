@@ -4,13 +4,15 @@ import type { ReactNode } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { DBView } from '@shared/games/dots-and-boxes/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './DotsAndBoxes.module.css'
 
 export function DotsAndBoxesBoard({ view, onAction, onRestart, mode, players }: GameBoardProps) {
+  const { t } = useT()
   const v = view as DBView | null
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
   const { rows, cols } = v
   const nameOf = (id: string) => players?.find((p) => p.id === id)?.username ?? 'Igrač'
 
@@ -18,19 +20,19 @@ export function DotsAndBoxesBoard({ view, onAction, onRestart, mode, players }: 
   if (v.result) {
     status =
       v.result.status === 'draw'
-        ? 'Neriješeno!'
+        ? t('g.draw')
         : mode === 'online'
           ? v.result.winnerId === v.you
-            ? 'Pobijedio si! 🎉'
-            : 'Izgubio si.'
-          : `Pobjeda: ${nameOf(v.result.winnerId ?? '')} 🎉`
+            ? t('g.youWin')
+            : t('g.youLose')
+          : t('g.winnerName', { name: nameOf(v.result.winnerId ?? '') })
   } else {
     status =
       mode === 'online'
         ? v.yourTurn
-          ? 'Tvoj potez'
-          : `${nameOf(v.turn)} je na potezu…`
-        : `Na potezu: ${nameOf(v.turn)}`
+          ? t('g.yourTurn')
+          : t('g.nameTurn', { name: nameOf(v.turn) })
+        : t('g.turnOf', { name: nameOf(v.turn) })
   }
 
   const cells: ReactNode[] = []
@@ -50,7 +52,7 @@ export function DotsAndBoxesBoard({ view, onAction, onRestart, mode, players }: 
             className={cn(styles.hEdge, drawn && styles.drawn)}
             disabled={drawn || !v.yourTurn}
             onClick={() => onAction({ type: 'edge', kind: 'h', index: idx })}
-            aria-label="vodoravna ivica"
+            aria-label={t('dnb.hEdge')}
           />,
         )
       } else if (!evenR && evenC) {
@@ -62,7 +64,7 @@ export function DotsAndBoxesBoard({ view, onAction, onRestart, mode, players }: 
             className={cn(styles.vEdge, drawn && styles.drawn)}
             disabled={drawn || !v.yourTurn}
             onClick={() => onAction({ type: 'edge', kind: 'v', index: idx })}
-            aria-label="uspravna ivica"
+            aria-label={t('dnb.vEdge')}
           />,
         )
       } else {
@@ -99,7 +101,7 @@ export function DotsAndBoxesBoard({ view, onAction, onRestart, mode, players }: 
       </div>
       {v.result && mode === 'local' && onRestart && (
         <Button onClick={onRestart} className="neon-glow-cyan">
-          <RotateCcw size={16} /> Nova igra
+          <RotateCcw size={16} /> {t('g.newGame')}
         </Button>
       )}
     </div>

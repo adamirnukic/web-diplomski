@@ -228,6 +228,9 @@ const bs: Dict = {
   'hm.oppFailed': 'Protivnik nije pogodio! 🎉',
   'hm.wordWas': 'Riječ je bila: {w}',
   'hm.oppGuessing': 'Protivnik pogađa…',
+  'g.gameOver': 'Kraj igre!',
+  'dnb.hEdge': 'vodoravna ivica',
+  'dnb.vEdge': 'uspravna ivica',
 }
 
 const en: Dict = {
@@ -452,6 +455,9 @@ const en: Dict = {
   'hm.oppFailed': "The opponent didn't guess! 🎉",
   'hm.wordWas': 'The word was: {w}',
   'hm.oppGuessing': 'Opponent is guessing…',
+  'g.gameOver': 'Game over!',
+  'dnb.hEdge': 'horizontal edge',
+  'dnb.vEdge': 'vertical edge',
 }
 
 const DICTS: Record<Lang, Dict> = { bs, en }
