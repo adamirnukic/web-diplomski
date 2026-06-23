@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Bot, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { getGameComponent } from '@/components/games/registry'
 import { aiDecide } from '@shared/games/ai'
 import type { Difficulty, EnginePlayer } from '@shared/types'
 import { useT } from '@/lib/i18n'
+import { useSound } from '@/lib/sound'
 import styles from './AiLocal.module.css'
 
 interface Props {
@@ -141,6 +142,7 @@ function Game({
   onExit: () => void
 }) {
   const { t } = useT()
+  const { play } = useSound()
   const engine = getEngine(gameId)!
   const Comp = getGameComponent(gameId)!
   const players = useMemo<EnginePlayer[]>(() => {
@@ -158,6 +160,7 @@ function Game({
   const [state, setState] = useState<any>(() => engine.createInitialState(players, { ai: aiIds }))
   const [viewer, setViewer] = useState<string>(humanIds[0])
   const [reviewing, setReviewing] = useState(false)
+  const resultPlayed = useRef(false)
 
   const dispatch = useCallback(
     (action: unknown, actor: string) => {
@@ -186,6 +189,20 @@ function Game({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, cp])
 
+  // Win/lose/draw chime, once per finished game.
+  useEffect(() => {
+    const res = engine.getResult(state)
+    if (!res) {
+      resultPlayed.current = false
+      return
+    }
+    if (resultPlayed.current) return
+    resultPlayed.current = true
+    if (res.status === 'draw') play('draw')
+    else play(res.winnerId && aiIds.includes(res.winnerId) ? 'lose' : 'win')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state])
+
   // The device must move to a different human (hidden-information games only).
   const needHandoff = secret && !!cp && !isAi(cp) && cp !== viewer && humanIds.length > 1
 
@@ -203,6 +220,7 @@ function Game({
     setState(engine.createInitialState(players, { ai: aiIds }))
     setViewer(humanIds[0])
     setReviewing(false)
+    resultPlayed.current = false
   }
 
   // Read-only review of the just-finished move before the hand-off screen.
@@ -227,7 +245,10 @@ function Game({
       : humanIds[0] ?? players[0].id
 
   const onAction = (action: unknown) => {
-    if (cp && !isAi(cp)) dispatch(action, cp)
+    if (cp && !isAi(cp)) {
+      play('move')
+      dispatch(action, cp)
+    }
     // round transitions with no "current" player (e.g. Love Letter "Next round")
     else if (!cp && !over) dispatch(action, vId)
   }

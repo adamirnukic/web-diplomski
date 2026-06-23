@@ -9,6 +9,7 @@ import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { LangToggle } from '@/components/ui/lang-toggle'
+import { SoundToggle } from '@/components/ui/sound-toggle'
 import styles from './navbar.module.css'
 
 export function Navbar() {
@@ -74,6 +75,7 @@ export function Navbar() {
         </div>
 
         <div className={styles.actions}>
+          <SoundToggle />
           <LangToggle />
           {user ? (
             <>

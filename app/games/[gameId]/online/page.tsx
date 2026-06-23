@@ -10,6 +10,7 @@ import { getEngine } from '@shared/games/registry'
 import { getGameComponent } from '@/components/games/registry'
 import { useAuth } from '@/lib/auth'
 import { useT } from '@/lib/i18n'
+import { useSound } from '@/lib/sound'
 import { useRoom } from '@/lib/useRoom'
 import { RoomLobby } from '@/components/RoomLobby'
 import { InviteFriends } from '@/components/games/InviteFriends'
@@ -22,6 +23,7 @@ function OnlineRunner({ gameId }: { gameId: string }) {
   const Comp = getGameComponent(gameId)!
   const { user } = useAuth()
   const { t } = useT()
+  const { play } = useSound()
   const search = useSearchParams()
   const joinCode = search.get('code')
   const router = useRouter()
@@ -42,6 +44,15 @@ function OnlineRunner({ gameId }: { gameId: string }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.connected])
+
+  // win/lose/draw chime when the online game ends
+  useEffect(() => {
+    if (!room.result || !user) return
+    if (room.result.status === 'draw') play('draw')
+    else if (room.result.coop) play(room.result.status === 'win' ? 'win' : 'lose')
+    else play(room.result.winnerId === user.id ? 'win' : 'lose')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.result])
 
   if (!user) return null
   const status = room.lobby?.status ?? 'lobby'
@@ -81,7 +92,10 @@ function OnlineRunner({ gameId }: { gameId: string }) {
         <div className={styles.gameWrap}>
           <Comp
             view={room.view}
-            onAction={room.sendAction}
+            onAction={(a: unknown) => {
+              play('move')
+              room.sendAction(a)
+            }}
             mode="online"
             players={room.lobby?.players.map((p) => ({ id: p.id, username: p.username }))}
           />
