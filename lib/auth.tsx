@@ -22,6 +22,10 @@ interface AuthContextValue {
   login: (identifier: string, password: string) => Promise<void>
   register: (email: string, username: string, password: string) => Promise<void>
   logout: () => void
+  /** re-fetch the current profile from the server */
+  refresh: () => Promise<void>
+  /** apply an updated user (and optionally a fresh token) to the session */
+  applySession: (user: AuthUser, token?: string) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -58,8 +62,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  const refresh = async () => {
+    try {
+      const r = await apiMe()
+      setUser(r.user)
+    } catch {
+      // ignore — keep current state
+    }
+  }
+
+  const applySession = (u: AuthUser, token?: string) => {
+    if (token) setToken(token)
+    setUser(u)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, register, logout, refresh, applySession }}
+    >
       {children}
     </AuthContext.Provider>
   )

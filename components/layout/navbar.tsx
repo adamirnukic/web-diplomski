@@ -40,13 +40,32 @@ export function Navbar() {
           >
             Rang-lista
           </Link>
+          {user && (
+            <Link
+              href="/friends"
+              className={cn(styles.link, isActive('/friends') && styles.linkActive)}
+            >
+              Prijatelji
+            </Link>
+          )}
         </div>
 
         <div className={styles.actions}>
           {user ? (
             <>
               <Link href="/profile" className={styles.userChip}>
-                <User size={16} />
+                {user.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.avatar}
+                    alt=""
+                    width={20}
+                    height={20}
+                    style={{ borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <User size={16} />
+                )}
                 <span>{user.username}</span>
               </Link>
               <Button

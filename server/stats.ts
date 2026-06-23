@@ -63,18 +63,24 @@ export function getStatsForUser(userId: string): unknown[] {
     .all(userId)
 }
 
-export function getLeaderboard(): unknown[] {
-  return db
-    .prepare(`
+export function getLeaderboard(userIds?: string[]): unknown[] {
+  const select = `
       SELECT u.username                       AS username,
+             u.avatar                         AS avatar,
              COALESCE(SUM(s.xp), 0)           AS xp,
              COALESCE(SUM(s.wins), 0)         AS wins,
              COALESCE(SUM(s.games_played), 0) AS games_played
       FROM users u
-      LEFT JOIN game_stats s ON s.user_id = u.id
+      LEFT JOIN game_stats s ON s.user_id = u.id`
+  const tail = `
       GROUP BY u.id
       ORDER BY xp DESC, wins DESC
-      LIMIT 100
-    `)
-    .all()
+      LIMIT 100`
+
+  if (userIds) {
+    if (userIds.length === 0) return []
+    const placeholders = userIds.map(() => '?').join(', ')
+    return db.prepare(`${select} WHERE u.id IN (${placeholders}) ${tail}`).all(...userIds)
+  }
+  return db.prepare(`${select} ${tail}`).all()
 }

@@ -5,6 +5,8 @@ export interface AuthUser {
   id: string
   email: string
   username: string
+  avatar: string | null
+  friend_code: string
 }
 
 export interface GameStatRow {
@@ -18,9 +20,29 @@ export interface GameStatRow {
 
 export interface LeaderboardRow {
   username: string
+  avatar?: string | null
   xp: number
   wins: number
   games_played: number
+}
+
+export interface FriendUser {
+  id: string
+  username: string
+  avatar: string | null
+}
+
+export interface FriendRequest {
+  id: string
+  user: FriendUser
+  created_at: number
+}
+
+export interface FriendsData {
+  friendCode: string
+  friends: FriendUser[]
+  incoming: FriendRequest[]
+  outgoing: FriendRequest[]
 }
 
 export function getToken(): string | null {
@@ -73,6 +95,57 @@ export function apiStats(userId: string) {
   return request<{ stats: GameStatRow[] }>(`/api/stats/${userId}`)
 }
 
-export function apiLeaderboard() {
-  return request<{ leaderboard: LeaderboardRow[] }>('/api/leaderboard')
+export function apiLeaderboard(scope?: 'friends') {
+  const q = scope === 'friends' ? '?scope=friends' : ''
+  return request<{ leaderboard: LeaderboardRow[] }>(`/api/leaderboard${q}`)
+}
+
+export function apiChangePassword(currentPassword: string, newPassword: string) {
+  return request<{ ok: true }>('/api/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  })
+}
+
+export function apiForgotPassword(email: string) {
+  return request<{ ok: true; link?: string }>('/api/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
+}
+
+export function apiResetPassword(token: string, password: string) {
+  return request<{ user: AuthUser; token: string }>('/api/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  })
+}
+
+export function apiUpdateProfile(updates: { username?: string; avatar?: string | null }) {
+  return request<{ user: AuthUser; token: string }>('/api/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(updates),
+  })
+}
+
+export function apiFriends() {
+  return request<FriendsData>('/api/friends')
+}
+
+export function apiFriendRequest(query: string) {
+  return request<{ ok: true; status: 'sent' | 'accepted' }>('/api/friends/request', {
+    method: 'POST',
+    body: JSON.stringify({ query }),
+  })
+}
+
+export function apiFriendRespond(requestId: string, accept: boolean) {
+  return request<{ ok: true }>('/api/friends/respond', {
+    method: 'POST',
+    body: JSON.stringify({ requestId, accept }),
+  })
+}
+
+export function apiRemoveFriend(friendId: string) {
+  return request<{ ok: true }>(`/api/friends/${friendId}`, { method: 'DELETE' })
 }
