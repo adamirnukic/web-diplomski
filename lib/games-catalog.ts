@@ -108,15 +108,16 @@ export const GAMES: GameMeta[] = [
   {
     id: 'blackjack',
     name: 'Blackjack',
-    description: 'Priđi što bliže 21 a da ne pređeš.',
+    description: 'Priđi što bliže 21 a da ne pređeš. 1-6 igrača protiv djelitelja, botovi lokalno.',
     category: 'cards',
     minPlayers: 1,
-    maxPlayers: 2,
+    maxPlayers: 6,
     icon: CircleDot,
     color: 'cyan',
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+    aiLocal: true,
   },
   {
     id: 'poker',

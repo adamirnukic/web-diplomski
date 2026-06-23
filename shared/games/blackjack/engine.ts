@@ -3,6 +3,8 @@ import { type Card, freshDeck, shuffle } from '../_cards'
 
 export interface BJState {
   order: PlayerId[]
+  names: Record<PlayerId, string>
+  ai: Record<PlayerId, boolean>
   deck: Card[]
   hands: Record<PlayerId, Card[]>
   standing: Record<PlayerId, boolean>
@@ -26,6 +28,8 @@ export interface BJHandView {
 export interface BJView {
   order: PlayerId[]
   you: PlayerId
+  names: Record<PlayerId, string>
+  ai: Record<PlayerId, boolean>
   hands: Record<PlayerId, BJHandView>
   dealer: { cards: (Card | null)[]; value: number | null; busted: boolean }
   turn: PlayerId | null
@@ -102,11 +106,18 @@ function getResult(state: BJState): GameResult | null {
 export const blackjackEngine: GameEngine<BJState, BJAction, BJView> = {
   id: 'blackjack',
   minPlayers: 1,
-  maxPlayers: 2,
+  maxPlayers: 6,
 
-  createInitialState(players) {
+  createInitialState(players, options) {
     if (players.length < 1) throw new Error('Potreban je bar 1 igrač')
     const order = players.map((p) => p.id)
+    const names: Record<PlayerId, string> = {}
+    const ai: Record<PlayerId, boolean> = {}
+    const aiIds = (options?.ai as string[] | undefined) ?? []
+    for (const p of players) {
+      names[p.id] = p.username
+      ai[p.id] = aiIds.includes(p.id)
+    }
     const deck = shuffle(freshDeck())
     const hands: Record<PlayerId, Card[]> = {}
     const standing: Record<PlayerId, boolean> = {}
@@ -115,7 +126,7 @@ export const blackjackEngine: GameEngine<BJState, BJAction, BJView> = {
       standing[id] = false
     }
     const dealer = [deck.pop() as Card, deck.pop() as Card]
-    return { order, deck, hands, standing, dealer, dealerDone: false, turn: order[0] }
+    return { order, names, ai, deck, hands, standing, dealer, dealerDone: false, turn: order[0] }
   },
 
   applyAction(state, playerId, action) {
@@ -170,6 +181,8 @@ export const blackjackEngine: GameEngine<BJState, BJAction, BJView> = {
     return {
       order: state.order,
       you: playerId,
+      names: state.names,
+      ai: state.ai,
       hands,
       dealer,
       turn: state.turn,
