@@ -5,13 +5,16 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Gamepad2, LogOut, User } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { useRealtime } from '@/lib/realtime'
+import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { LangToggle } from '@/components/ui/lang-toggle'
 import styles from './navbar.module.css'
 
 export function Navbar() {
   const { user, logout } = useAuth()
   const { incomingCount } = useRealtime()
+  const { t } = useT()
   const router = useRouter()
   const pathname = usePathname()
   const isActive = (href: string) =>
@@ -34,20 +37,20 @@ export function Navbar() {
             href="/games"
             className={cn(styles.link, isActive('/games') && styles.linkActive)}
           >
-            Igre
+            {t('nav.games')}
           </Link>
           <Link
             href="/leaderboard"
             className={cn(styles.link, isActive('/leaderboard') && styles.linkActive)}
           >
-            Rang-lista
+            {t('nav.leaderboard')}
           </Link>
           {user && (
             <Link
               href="/friends"
               className={cn(styles.link, isActive('/friends') && styles.linkActive)}
             >
-              Prijatelji
+              {t('nav.friends')}
               {incomingCount > 0 && (
                 <span
                   style={{
@@ -71,6 +74,7 @@ export function Navbar() {
         </div>
 
         <div className={styles.actions}>
+          <LangToggle />
           {user ? (
             <>
               <Link href="/profile" className={styles.userChip}>
@@ -104,12 +108,12 @@ export function Navbar() {
             <>
               <Link href="/login">
                 <Button variant="ghost" size="sm">
-                  Prijava
+                  {t('nav.login')}
                 </Button>
               </Link>
               <Link href="/register">
                 <Button size="sm" className="neon-glow-cyan">
-                  Registracija
+                  {t('nav.register')}
                 </Button>
               </Link>
             </>

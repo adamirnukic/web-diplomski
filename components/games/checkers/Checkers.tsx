@@ -4,14 +4,16 @@ import { useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { CheckersView, Piece } from '@shared/games/checkers/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Checkers.module.css'
 
 export function CheckersBoard({ view, onAction, onRestart, mode, players }: GameBoardProps) {
+  const { t } = useT()
   const v = view as CheckersView | null
   const [selected, setSelected] = useState<number | null>(null)
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   const { board, moves, result } = v
   const fromSquares = new Set(moves.map((m) => m.from))
@@ -32,18 +34,18 @@ export function CheckersBoard({ view, onAction, onRestart, mode, players }: Game
   const turnName = players?.find((p) => p.id === v.turn)?.username ?? 'Igrač'
   let status: string
   if (result) {
-    if (result.status === 'draw') status = 'Neriješeno!'
+    if (result.status === 'draw') status = t('g.draw')
     else if (mode === 'local') {
       const w = players?.find((p) => p.id === result.winnerId)?.username ?? 'Igrač'
-      status = `Pobjeda: ${w} 🎉`
-    } else status = 'Kraj igre!'
+      status = t('g.winnerName', { name: w })
+    } else status = t('g.gameOver')
   } else {
     status =
       mode === 'online'
         ? v.yourTurn
-          ? 'Tvoj potez'
-          : `${turnName} je na potezu…`
-        : `Na potezu: ${turnName}`
+          ? t('g.yourTurn')
+          : t('g.nameTurn', { name: turnName })
+        : t('g.turnOf', { name: turnName })
   }
 
   const pieceClass = (p: Piece) =>
@@ -83,7 +85,7 @@ export function CheckersBoard({ view, onAction, onRestart, mode, players }: Game
 
       {result && mode === 'local' && onRestart && (
         <Button onClick={onRestart} className="neon-glow-cyan">
-          <RotateCcw size={16} /> Nova igra
+          <RotateCcw size={16} /> {t('g.newGame')}
         </Button>
       )}
     </div>

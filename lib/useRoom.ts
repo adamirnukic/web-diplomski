@@ -22,6 +22,14 @@ export interface LobbyState {
   players: RoomPlayerInfo[]
 }
 
+export interface ChatMessage {
+  id: string
+  userId: string
+  username: string
+  text: string
+  ts: number
+}
+
 interface AckResponse {
   error?: string
   code?: string
@@ -43,6 +51,7 @@ export function useRoom(gameId: string) {
   const [view, setView] = useState<unknown>(null)
   const [result, setResult] = useState<GameResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [chat, setChat] = useState<ChatMessage[]>([])
 
   useEffect(() => {
     const token = getToken()
@@ -73,6 +82,8 @@ export function useRoom(gameId: string) {
       setResult(null)
     })
     socket.on('game:over', (r: GameResult) => setResult(r))
+    socket.on('chat:history', (h: ChatMessage[]) => setChat(Array.isArray(h) ? h : []))
+    socket.on('chat:message', (m: ChatMessage) => setChat((prev) => [...prev, m].slice(-100)))
     socket.on('error', (e: { message?: string }) => setError(e?.message ?? 'Greška'))
 
     return () => {
@@ -134,6 +145,10 @@ export function useRoom(gameId: string) {
     return emit('room:leave', {})
   }, [emit])
 
+  const sendChat = useCallback((text: string) => {
+    socketRef.current?.emit('chat:send', { text })
+  }, [])
+
   return {
     connected,
     reconnecting,
@@ -142,6 +157,8 @@ export function useRoom(gameId: string) {
     result,
     error,
     setError,
+    chat,
+    sendChat,
     createRoom,
     joinRoom,
     setReady,

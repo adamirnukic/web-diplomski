@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Check, Copy, Crown, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useT } from '@/lib/i18n'
 import type { LobbyState } from '@/lib/useRoom'
 import styles from './RoomLobby.module.css'
 
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function RoomLobby({ lobby, meId, minPlayers, onReady, onStart, onLeave }: Props) {
+  const { t } = useT()
   const [copied, setCopied] = useState(false)
   const me = lobby.players.find((p) => p.id === meId)
   const isHost = lobby.hostId === meId
@@ -36,19 +38,19 @@ export function RoomLobby({ lobby, meId, minPlayers, onReady, onStart, onLeave }
   return (
     <div className={styles.lobby}>
       <div className={styles.codeBox}>
-        <span className={styles.codeLabel}>Kod sobe</span>
+        <span className={styles.codeLabel}>{t('room.code')}</span>
         <div className={styles.codeRow}>
           <span className={`${styles.code} neon-text-cyan`}>{lobby.code}</span>
-          <Button variant="outline" size="icon-sm" onClick={copy} aria-label="Kopiraj kod">
+          <Button variant="outline" size="icon-sm" onClick={copy} aria-label={t('room.copyCode')}>
             {copied ? <Check size={16} /> : <Copy size={16} />}
           </Button>
         </div>
-        <p className={styles.hint}>Podijeli ovaj kod da se prijatelj pridruži.</p>
+        <p className={styles.hint}>{t('room.share')}</p>
       </div>
 
       <div>
         <h3 className={styles.playersTitle}>
-          Igrači ({connected.length}/{minPlayers})
+          {t('room.players')} ({connected.length}/{minPlayers})
         </h3>
         <ul className={styles.playerList}>
           {lobby.players.map((p) => (
@@ -56,10 +58,10 @@ export function RoomLobby({ lobby, meId, minPlayers, onReady, onStart, onLeave }
               <span className={styles.playerName}>
                 {p.isHost && <Crown size={14} className="text-neon-green" />}
                 {p.username}
-                {p.id === meId && ' (ti)'}
+                {p.id === meId && ` ${t('room.you')}`}
               </span>
               <span className={cn(styles.status, p.ready ? styles.ready : styles.notReady)}>
-                {p.ready ? 'Spreman' : 'Čeka'}
+                {p.ready ? t('room.ready') : t('room.waiting')}
               </span>
             </li>
           ))}
@@ -72,7 +74,7 @@ export function RoomLobby({ lobby, meId, minPlayers, onReady, onStart, onLeave }
           onClick={() => onReady(!me?.ready)}
           className={!me?.ready ? 'neon-glow-cyan' : undefined}
         >
-          {me?.ready ? 'Poništi spremnost' : 'Spreman sam'}
+          {me?.ready ? t('room.unready') : t('room.imReady')}
         </Button>
         {isHost && (
           <Button
@@ -80,17 +82,15 @@ export function RoomLobby({ lobby, meId, minPlayers, onReady, onStart, onLeave }
             disabled={!allReady}
             className={allReady ? 'neon-glow-green' : undefined}
           >
-            Pokreni igru
+            {t('room.start')}
           </Button>
         )}
         <Button variant="ghost" onClick={onLeave}>
-          <LogOut size={16} /> Napusti
+          <LogOut size={16} /> {t('room.leave')}
         </Button>
       </div>
 
-      {isHost && !allReady && (
-        <p className={styles.waitNote}>Čeka se da svi igrači budu spremni…</p>
-      )}
+      {isHost && !allReady && <p className={styles.waitNote}>{t('room.waitAll')}</p>}
     </div>
   )
 }

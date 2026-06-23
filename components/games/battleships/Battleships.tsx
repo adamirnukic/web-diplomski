@@ -4,22 +4,24 @@ import { useState } from 'react'
 import { Eraser, RotateCcw, RotateCw, Shuffle, Undo2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { BSView, CellOpp, CellSelf } from '@shared/games/battleships/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Battleships.module.css'
 
 export function BattleshipsBoard({ view, onAction, mode, onRestart }: GameBoardProps) {
+  const { t } = useT()
   const v = view as BSView | null
   const [horizontal, setHorizontal] = useState(true)
   const [hover, setHover] = useState<number | null>(null)
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   const cols = { gridTemplateColumns: `repeat(${v.size}, 1fr)` }
 
   // ----- Placement phase -----
   if (v.phase === 'placement') {
     if (v.youReady) {
-      return <p className={styles.wait}>Čeka se da protivnik rasporedi flotu…</p>
+      return <p className={styles.wait}>{t('bs.waitFleet')}</p>
     }
 
     // cells the next ship would occupy at the hovered cell
@@ -72,11 +74,14 @@ export function BattleshipsBoard({ view, onAction, mode, onRestart }: GameBoardP
 
     return (
       <div className={styles.root}>
-        <h2 className={styles.heading}>Rasporedi flotu</h2>
+        <h2 className={styles.heading}>{t('bs.placeFleet')}</h2>
         <p className={styles.hint}>
           {v.nextSize
-            ? `Sljedeći brod: ${v.nextSize} polja (${horizontal ? 'vodoravno' : 'uspravno'})`
-            : 'Svi brodovi su postavljeni!'}{' '}
+            ? t('bs.nextShip', {
+                n: v.nextSize,
+                dir: horizontal ? t('bs.horizontal') : t('bs.vertical'),
+              })
+            : t('bs.allPlaced')}{' '}
           · {v.placedCount}/{v.fleet.length}
         </p>
 
@@ -101,10 +106,10 @@ export function BattleshipsBoard({ view, onAction, mode, onRestart }: GameBoardP
 
         <div className={styles.actions}>
           <Button variant="outline" size="sm" onClick={() => setHorizontal((h) => !h)}>
-            <RotateCw size={16} /> Rotiraj
+            <RotateCw size={16} /> {t('bs.rotate')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => onAction({ type: 'randomize' })}>
-            <Shuffle size={16} /> Slučajno
+            <Shuffle size={16} /> {t('bs.random')}
           </Button>
           <Button
             variant="outline"
@@ -112,7 +117,7 @@ export function BattleshipsBoard({ view, onAction, mode, onRestart }: GameBoardP
             onClick={() => onAction({ type: 'undo' })}
             disabled={v.placedCount === 0}
           >
-            <Undo2 size={16} /> Poništi
+            <Undo2 size={16} /> {t('bs.undo')}
           </Button>
           <Button
             variant="outline"
@@ -120,14 +125,14 @@ export function BattleshipsBoard({ view, onAction, mode, onRestart }: GameBoardP
             onClick={() => onAction({ type: 'clear' })}
             disabled={v.placedCount === 0}
           >
-            <Eraser size={16} /> Obriši
+            <Eraser size={16} /> {t('bs.clear')}
           </Button>
           <Button
             onClick={() => onAction({ type: 'ready' })}
             disabled={v.placedCount !== v.fleet.length}
             className="neon-glow-cyan"
           >
-            Spreman
+            {t('bs.ready')}
           </Button>
         </div>
       </div>
@@ -136,17 +141,17 @@ export function BattleshipsBoard({ view, onAction, mode, onRestart }: GameBoardP
 
   // ----- Battle phase -----
   const status = v.result
-    ? 'Kraj igre!'
+    ? t('g.gameOver')
     : v.yourTurn
-      ? 'Tvoj red — gađaj!'
-      : 'Protivnik gađa…'
+      ? t('bs.yourTurnFire')
+      : t('bs.oppFiring')
 
   return (
     <div className={styles.root}>
       <p className={cn(styles.status, v.result && styles.statusDone)}>{status}</p>
       <div className={styles.boards}>
         <div className={styles.boardWrap}>
-          <span className={styles.boardLabel}>Protivnik (gađaj)</span>
+          <span className={styles.boardLabel}>{t('bs.oppBoard')}</span>
           <div className={styles.grid} style={cols}>
             {v.oppBoard.map((c, i) => (
               <button
@@ -154,13 +159,13 @@ export function BattleshipsBoard({ view, onAction, mode, onRestart }: GameBoardP
                 className={cn(styles.cell, oppClass(c))}
                 disabled={!v.yourTurn || c !== 'unknown' || !!v.result}
                 onClick={() => onAction({ type: 'fire', index: i })}
-                aria-label={`Gađaj polje ${i + 1}`}
+                aria-label={t('bs.fireCell', { n: i + 1 })}
               />
             ))}
           </div>
         </div>
         <div className={styles.boardWrap}>
-          <span className={styles.boardLabel}>Tvoja flota</span>
+          <span className={styles.boardLabel}>{t('bs.yourFleet')}</span>
           <div className={styles.grid} style={cols}>
             {v.yourBoard.map((c, i) => (
               <span key={i} className={cn(styles.cell, selfClass(c))} />
@@ -171,7 +176,7 @@ export function BattleshipsBoard({ view, onAction, mode, onRestart }: GameBoardP
 
       {v.result && mode === 'local' && onRestart && (
         <Button onClick={onRestart} className="neon-glow-cyan">
-          <RotateCcw size={16} /> Nova igra
+          <RotateCcw size={16} /> {t('g.newGame')}
         </Button>
       )}
     </div>

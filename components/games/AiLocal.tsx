@@ -10,9 +10,8 @@ import { getEngine } from '@shared/games/registry'
 import { getGameComponent } from '@/components/games/registry'
 import { aiDecide } from '@shared/games/ai'
 import type { Difficulty, EnginePlayer } from '@shared/types'
+import { useT } from '@/lib/i18n'
 import styles from './AiLocal.module.css'
-
-const DIFF_LABEL: Record<Difficulty, string> = { easy: 'Lako', normal: 'Normalno', hard: 'Teško' }
 
 interface Props {
   gameId: string
@@ -58,6 +57,7 @@ function Setup({
   maxP: number
   onStart: (total: number, bots: number, difficulty: Difficulty) => void
 }) {
+  const { t } = useT()
   const [total, setTotal] = useState(Math.max(2, minP))
   const [bots, setBots] = useState(1)
   const [difficulty, setDifficulty] = useState<Difficulty>('normal')
@@ -73,7 +73,7 @@ function Setup({
   return (
     <div className={styles.setup}>
       <div className={styles.field}>
-        <span className={styles.label}>Broj igrača</span>
+        <span className={styles.label}>{t('setup.players')}</span>
         <div className={styles.opts}>
           {totals.map((n) => (
             <button key={n} className={cn(styles.opt, total === n && styles.optActive)} onClick={() => changeTotal(n)}>
@@ -83,7 +83,7 @@ function Setup({
         </div>
       </div>
       <div className={styles.field}>
-        <span className={styles.label}>Botovi (AI)</span>
+        <span className={styles.label}>{t('setup.bots')}</span>
         <div className={styles.opts}>
           {Array.from({ length: total }).map((_, n) => (
             <button
@@ -99,7 +99,7 @@ function Setup({
       </div>
       {bots > 0 && (
         <div className={styles.field}>
-          <span className={styles.label}>Težina botova</span>
+          <span className={styles.label}>{t('setup.difficulty')}</span>
           <div className={styles.opts}>
             {(['easy', 'normal', 'hard'] as Difficulty[]).map((d) => (
               <button
@@ -107,7 +107,7 @@ function Setup({
                 className={cn(styles.opt, difficulty === d && styles.optActive)}
                 onClick={() => setDifficulty(d)}
               >
-                {DIFF_LABEL[d]}
+                {t(`diff.${d}`)}
               </button>
             ))}
           </div>
@@ -117,7 +117,7 @@ function Setup({
         <User size={15} /> {humans} &nbsp;·&nbsp; <Bot size={15} /> {bots}
       </p>
       <Button size="lg" className="neon-glow-cyan" onClick={() => onStart(total, bots, difficulty)}>
-        Počni igru
+        {t('setup.start')}
       </Button>
     </div>
   )
@@ -140,6 +140,7 @@ function Game({
   difficulty: Difficulty
   onExit: () => void
 }) {
+  const { t } = useT()
   const engine = getEngine(gameId)!
   const Comp = getGameComponent(gameId)!
   const players = useMemo<EnginePlayer[]>(() => {
@@ -241,7 +242,7 @@ function Game({
         players={players}
       />
       <button className={styles.exit} onClick={onExit}>
-        ↩ Promijeni postavke
+        ↩ {t('setup.change')}
       </button>
     </div>
   )

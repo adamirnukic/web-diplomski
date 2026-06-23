@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { PerudoView } from '@shared/games/perudo/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Perudo.module.css'
@@ -11,6 +12,7 @@ import styles from './Perudo.module.css'
 const PIPS = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
 
 function SeatRow({ v }: { v: PerudoView }) {
+  const { t } = useT()
   return (
     <div className={styles.seats}>
       {v.seats.map((s) => (
@@ -34,7 +36,7 @@ function SeatRow({ v }: { v: PerudoView }) {
               ))}
             </span>
           ) : (
-            <span className={styles.seatCount}>{s.alive ? `${s.diceCount} 🎲` : 'ispao'}</span>
+            <span className={styles.seatCount}>{s.alive ? `${s.diceCount} 🎲` : t('g.out')}</span>
           )}
         </div>
       ))}
@@ -43,6 +45,7 @@ function SeatRow({ v }: { v: PerudoView }) {
 }
 
 export function PerudoTable({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as PerudoView | null
   const [count, setCount] = useState(1)
   const [face, setFace] = useState(2)
@@ -66,7 +69,7 @@ export function PerudoTable({ view, onAction, onRestart, mode }: GameBoardProps)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bidKey])
 
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   if (v.phase === 'matchover' || v.result) {
     const winner = v.seats.find((s) => s.id === v.result?.winnerId)
@@ -76,13 +79,13 @@ export function PerudoTable({ view, onAction, onRestart, mode }: GameBoardProps)
         <p className={styles.big}>
           {mode === 'online'
             ? v.result?.winnerId === v.you
-              ? 'Pobijedio si! 🏆'
-              : `Pobjednik: ${winner?.name}`
-            : `Pobjednik: ${winner?.name} 🏆`}
+              ? t('g.youWinTrophy')
+              : t('g.winnerName', { name: winner?.name ?? '' })
+            : t('g.winnerTrophy', { name: winner?.name ?? '' })}
         </p>
         {mode === 'local' && onRestart && (
           <Button onClick={onRestart} className="neon-glow-cyan">
-            <RotateCcw size={16} /> Nova igra
+            <RotateCcw size={16} /> {t('g.newGame')}
           </Button>
         )}
       </div>
@@ -95,13 +98,17 @@ export function PerudoTable({ view, onAction, onRestart, mode }: GameBoardProps)
 
       {v.lastRound && (
         <div className={styles.reveal}>
-          Bilo je <strong>{v.lastRound.actual}</strong> × {PIPS[v.lastRound.bid.face]} (licitirano{' '}
-          {v.lastRound.bid.count}). {v.lastRound.loserName} gubi kockicu.
+          {t('perudo.reveal', {
+            actual: v.lastRound.actual,
+            face: PIPS[v.lastRound.bid.face],
+            count: v.lastRound.bid.count,
+            loser: v.lastRound.loserName,
+          })}
         </div>
       )}
 
       <div className={styles.yourDice}>
-        <span className={styles.yourLabel}>Tvoje kockice:</span>
+        <span className={styles.yourLabel}>{t('perudo.yourDice')}</span>
         {v.yourDice.map((d, i) => (
           <span key={i} className={styles.die}>
             {PIPS[d]}
@@ -110,13 +117,9 @@ export function PerudoTable({ view, onAction, onRestart, mode }: GameBoardProps)
       </div>
 
       <div className={styles.bidNow}>
-        {v.bid ? (
-          <>
-            Trenutno: <strong>{v.bid.count} × {PIPS[v.bid.face]}</strong> — {v.bid.byName}
-          </>
-        ) : (
-          'Nema licitacije — ti otvaraš'
-        )}
+        {v.bid
+          ? t('perudo.current', { bid: `${v.bid.count} × ${PIPS[v.bid.face]}`, by: v.bid.byName })
+          : t('perudo.noBid')}
       </div>
 
       {v.yourTurn ? (
@@ -140,15 +143,15 @@ export function PerudoTable({ view, onAction, onRestart, mode }: GameBoardProps)
               ))}
             </div>
             <Button onClick={() => onAction({ type: 'bid', count, face })} className="neon-glow-cyan">
-              Licitiraj
+              {t('perudo.bid')}
             </Button>
           </div>
           {v.canChallenge && (
             <Button variant="outline" onClick={() => onAction({ type: 'challenge' })} className={styles.challenge}>
-              Laž! (izazov)
+              {t('perudo.challenge')}
             </Button>
           )}
-          <p className={styles.hint}>Jedinice (⚀) su džoker — broje se za svako lice.</p>
+          <p className={styles.hint}>{t('perudo.hint')}</p>
         </div>
       ) : (
         <p className={styles.wait}>{v.message}</p>

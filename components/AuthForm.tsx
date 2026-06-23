@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Gamepad2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
+import { useT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,6 +14,7 @@ import styles from './AuthForm.module.css'
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const { login, register } = useAuth()
+  const { t } = useT()
   const router = useRouter()
   const [identifier, setIdentifier] = useState('')
   const [email, setEmail] = useState('')
@@ -50,16 +52,16 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 
       <div className={styles.card}>
         <h1 className={styles.title}>
-          {mode === 'login' ? 'Prijava' : 'Napravi nalog'}
+          {mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
         </h1>
         <p className={styles.subtitle}>
-          {mode === 'login' ? 'Dobrodošao nazad!' : 'Pridruži se i počni igrati.'}
+          {mode === 'login' ? t('auth.loginSubtitle') : t('auth.registerSubtitle')}
         </p>
 
         <form onSubmit={submit} className={styles.form}>
           {mode === 'login' ? (
             <div className={styles.field}>
-              <Label htmlFor="identifier">Email ili korisničko ime</Label>
+              <Label htmlFor="identifier">{t('auth.identifier')}</Label>
               <Input
                 id="identifier"
                 value={identifier}
@@ -71,7 +73,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
           ) : (
             <>
               <div className={styles.field}>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -82,7 +84,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                 />
               </div>
               <div className={styles.field}>
-                <Label htmlFor="username">Korisničko ime</Label>
+                <Label htmlFor="username">{t('auth.username')}</Label>
                 <Input
                   id="username"
                   value={username}
@@ -96,7 +98,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
           )}
 
           <div className={styles.field}>
-            <Label htmlFor="password">Lozinka</Label>
+            <Label htmlFor="password">{t('auth.password')}</Label>
             <Input
               id="password"
               type="password"
@@ -114,30 +116,30 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
               className="neon-text-cyan"
               style={{ fontSize: '0.85rem', alignSelf: 'flex-end' }}
             >
-              Zaboravili ste lozinku?
+              {t('auth.forgot')}
             </Link>
           )}
 
           {error && <p className={styles.error}>{error}</p>}
 
           <Button type="submit" disabled={loading} className="neon-glow-cyan">
-            {loading ? 'Sačekaj…' : mode === 'login' ? 'Prijavi se' : 'Registruj se'}
+            {loading ? t('auth.wait') : mode === 'login' ? t('auth.signIn') : t('auth.signUp')}
           </Button>
         </form>
 
         <p className={styles.switch}>
           {mode === 'login' ? (
             <>
-              Nemaš nalog?{' '}
+              {t('auth.noAccount')}{' '}
               <Link href="/register" className="neon-text-cyan">
-                Registruj se
+                {t('auth.signUp')}
               </Link>
             </>
           ) : (
             <>
-              Već imaš nalog?{' '}
+              {t('auth.haveAccount')}{' '}
               <Link href="/login" className="neon-text-cyan">
-                Prijavi se
+                {t('auth.signIn')}
               </Link>
             </>
           )}

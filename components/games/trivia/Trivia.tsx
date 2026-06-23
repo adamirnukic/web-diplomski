@@ -3,13 +3,15 @@
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { TriviaView } from '@shared/games/trivia-quiz/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Trivia.module.css'
 
 export function TriviaQuizGame({ view, onAction, onRestart, mode, players }: GameBoardProps) {
+  const { t } = useT()
   const v = view as TriviaView | null
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   const turnName = players?.find((p) => p.id === v.turn)?.username ?? 'Igrač'
   const scoreLine =
@@ -23,17 +25,19 @@ export function TriviaQuizGame({ view, onAction, onRestart, mode, players }: Gam
       <div className={styles.root}>
         <p className={styles.final}>
           {v.result.status === 'draw'
-            ? 'Neriješeno!'
+            ? t('g.draw')
             : mode === 'online'
               ? v.yourScore > v.oppScore
-                ? 'Pobijedio si! 🎉'
-                : 'Izgubio si.'
-              : `Pobjeda: ${winnerName} 🎉`}
+                ? t('g.youWin')
+                : t('g.youLose')
+              : t('g.winnerName', { name: winnerName })}
         </p>
-        <p className={styles.scoreLine}>Rezultat — {scoreLine}</p>
+        <p className={styles.scoreLine}>
+          {t('tr.score')} {scoreLine}
+        </p>
         {mode === 'local' && onRestart && (
           <Button onClick={onRestart} className="neon-glow-cyan">
-            <RotateCcw size={16} /> Nova igra
+            <RotateCcw size={16} /> {t('g.newGame')}
           </Button>
         )}
       </div>
@@ -43,17 +47,15 @@ export function TriviaQuizGame({ view, onAction, onRestart, mode, players }: Gam
   return (
     <div className={styles.root}>
       <div className={styles.top}>
-        <span>
-          Pitanje {v.questionNumber}/{v.total}
-        </span>
+        <span>{t('tr.question', { n: v.questionNumber, total: v.total })}</span>
         <span className={styles.scores}>{scoreLine}</span>
       </div>
       <p className={styles.turnInfo}>
         {mode === 'online'
           ? v.yourTurn
-            ? 'Ti odgovaraš'
-            : `${turnName} odgovara…`
-          : `Na potezu: ${turnName}`}
+            ? t('tr.youAnswer')
+            : t('tr.nameAnswers', { name: turnName })
+          : t('g.turnOf', { name: turnName })}
       </p>
 
       {v.question && (
@@ -82,7 +84,7 @@ export function TriviaQuizGame({ view, onAction, onRestart, mode, players }: Gam
 
           {v.phase === 'revealed' && v.yourTurn && (
             <Button onClick={() => onAction({ type: 'next' })} className="neon-glow-cyan">
-              Dalje
+              {t('tr.next')}
             </Button>
           )}
         </>

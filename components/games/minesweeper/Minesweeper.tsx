@@ -3,6 +3,7 @@
 import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/lib/i18n'
 import type { MineView } from '@shared/games/minesweeper/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Minesweeper.module.css'
@@ -20,14 +21,15 @@ const NUM_COLOR = [
 ]
 
 export function MinesweeperBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
+  const { t } = useT()
   const v = view as MineView | null
-  if (!v) return <div className={styles.loading}>Učitavanje…</div>
+  if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
 
   let status: string
   if (v.result) {
-    status = v.exploded ? '💥 Bum! Aktivirana mina.' : 'Polje očišćeno! 🎉'
+    status = v.exploded ? t('ms.boom') : t('ms.cleared')
   } else {
-    status = 'Otkrivaj polja i izbjegavaj mine.'
+    status = t('ms.hint')
   }
 
   return (
@@ -35,7 +37,7 @@ export function MinesweeperBoard({ view, onAction, onRestart, mode }: GameBoardP
       <div className={styles.scores}>
         <span>💣 {v.mines}</span>
         <span>
-          Očišćeno: {v.cleared}/{v.safeTotal}
+          {t('ms.clearedCount')}: {v.cleared}/{v.safeTotal}
         </span>
       </div>
       <p className={cn(styles.status, v.result && styles.statusDone)}>{status}</p>
@@ -59,7 +61,7 @@ export function MinesweeperBoard({ view, onAction, onRestart, mode }: GameBoardP
                 ? { color: NUM_COLOR[cell.adjacent] }
                 : undefined
             }
-            aria-label={`Polje ${i + 1}`}
+            aria-label={t('ms.cell', { n: i + 1 })}
           >
             {cell.mine ? '💣' : cell.revealed && cell.adjacent > 0 ? cell.adjacent : ''}
           </button>
@@ -68,7 +70,7 @@ export function MinesweeperBoard({ view, onAction, onRestart, mode }: GameBoardP
 
       {v.result && mode === 'local' && onRestart && (
         <Button onClick={onRestart} className="neon-glow-cyan">
-          <RotateCcw size={16} /> Nova igra
+          <RotateCcw size={16} /> {t('g.newGame')}
         </Button>
       )}
     </div>
