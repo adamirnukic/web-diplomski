@@ -12,6 +12,14 @@ interface RoomPlayer {
   connected: boolean
 }
 
+interface ChatMessage {
+  id: string
+  userId: string
+  username: string
+  text: string
+  ts: number
+}
+
 interface Room {
   code: string
   gameId: string
@@ -20,10 +28,31 @@ interface Room {
   status: 'lobby' | 'playing' | 'finished'
   engine: GameEngine | null
   state: unknown
+  chat: ChatMessage[]
+  deleteTimer?: ReturnType<typeof setTimeout>
 }
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 const rooms = new Map<string, Room>()
+
+// Keep an emptied room alive briefly so a refreshing player (esp. the host,
+// who may be the only one connected) can reclaim it instead of losing it.
+const DELETE_GRACE_MS = 45_000
+
+function scheduleDeletion(room: Room) {
+  if (room.deleteTimer) return
+  room.deleteTimer = setTimeout(() => {
+    const r = rooms.get(room.code)
+    if (r && ![...r.players.values()].some((p) => p.connected)) rooms.delete(room.code)
+  }, DELETE_GRACE_MS)
+}
+
+function cancelDeletion(room: Room) {
+  if (room.deleteTimer) {
+    clearTimeout(room.deleteTimer)
+    room.deleteTimer = undefined
+  }
+}
 
 function generateCode(): string {
   let code = ''
@@ -88,6 +117,7 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
       status: 'lobby',
       engine: null,
       state: null,
+      chat: [],
     }
     room.players.set(user.id, {
       id: user.id,
@@ -109,6 +139,7 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
     const code = String(payload.code ?? '').toUpperCase().trim()
     const room = rooms.get(code)
     if (!room) return ack?.({ error: 'Soba sa tim kodom ne postoji' })
+    cancelDeletion(room)
 
     const engine = getEngine(room.gameId)
     const alreadyIn = room.players.has(user.id)
@@ -137,7 +168,25 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
 
     ack?.({ code, gameId: room.gameId })
     broadcastLobby(io, room)
+    socket.emit('chat:history', room.chat)
     if (room.status === 'playing') broadcastGameState(io, room)
+  })
+
+  socket.on('chat:send', (payload: { text?: string } = {}) => {
+    const room = getRoom()
+    if (!room || !user) return
+    const text = String(payload.text ?? '').trim().slice(0, 300)
+    if (!text) return
+    const msg: ChatMessage = {
+      id: randomBytes(6).toString('hex'),
+      userId: user.id,
+      username: user.username,
+      text,
+      ts: Date.now(),
+    }
+    room.chat.push(msg)
+    if (room.chat.length > 60) room.chat = room.chat.slice(-60)
+    io.to(room.code).emit('chat:message', msg)
   })
 
   socket.on('room:ready', (payload: { ready?: boolean } = {}, ack?: Ack) => {
@@ -237,7 +286,7 @@ function leaveRoom(io: Server, socket: Socket, disconnected: boolean) {
 
   const anyConnected = [...room.players.values()].some((pp) => pp.connected)
   if (room.players.size === 0 || !anyConnected) {
-    rooms.delete(code)
+    scheduleDeletion(room)
     return
   }
 

@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/auth'
 import { useRoom } from '@/lib/useRoom'
 import { RoomLobby } from '@/components/RoomLobby'
 import { InviteFriends } from '@/components/games/InviteFriends'
+import { ChatBox } from '@/components/ChatBox'
 import { Button } from '@/components/ui/button'
 import styles from './online.module.css'
 
@@ -28,8 +29,15 @@ function OnlineRunner({ gameId }: { gameId: string }) {
   useEffect(() => {
     if (!room.connected || setupDone.current) return
     setupDone.current = true
-    if (joinCode) room.joinRoom(joinCode)
-    else room.createRoom()
+    if (joinCode) {
+      room.joinRoom(joinCode)
+    } else {
+      // Put the code in the URL so a host refresh re-joins the same room
+      // instead of spawning a brand-new one.
+      room.createRoom().then((r) => {
+        if (r.code) router.replace(`/games/${gameId}/online?code=${r.code}`)
+      })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.connected])
 
@@ -63,6 +71,10 @@ function OnlineRunner({ gameId }: { gameId: string }) {
           />
           <InviteFriends gameId={gameId} code={room.lobby.code} />
         </>
+      )}
+
+      {room.lobby && (
+        <ChatBox messages={room.chat} meId={user.id} onSend={room.sendChat} />
       )}
 
       {room.lobby && status !== 'lobby' && (

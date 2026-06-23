@@ -119,6 +119,9 @@ const bs: Dict = {
   'res.win': 'Pobjeda',
   'res.loss': 'Poraz',
   'res.draw': 'Neriješeno',
+
+  'chat.title': 'Razgovor',
+  'chat.placeholder': 'Napiši poruku…',
 }
 
 const en: Dict = {
@@ -234,6 +237,9 @@ const en: Dict = {
   'res.win': 'Win',
   'res.loss': 'Loss',
   'res.draw': 'Draw',
+
+  'chat.title': 'Chat',
+  'chat.placeholder': 'Type a message…',
 }
 
 const DICTS: Record<Lang, Dict> = { bs, en }
