@@ -60,7 +60,7 @@ export function SkullBoard({ view, onAction, onRestart, mode }: GameBoardProps) 
           {v.lastReveal.type === 'skull' ? t('skull.skullRevealed') : ''}
         </p>
       )}
-      <p className={styles.msg}>{v.message}</p>
+      <p className={styles.msg}>{t(v.message.k, v.message.p)}</p>
 
       {/* Your hand */}
       {v.yourHand.flowers + (v.yourHand.skull ? 1 : 0) > 0 && (
@@ -154,7 +154,7 @@ export function SkullBoard({ view, onAction, onRestart, mode }: GameBoardProps) 
           </div>
         </div>
       ) : (
-        <p className={styles.wait}>{v.message}</p>
+        <p className={styles.wait}>{t(v.message.k, v.message.p)}</p>
       )}
     </div>
   )

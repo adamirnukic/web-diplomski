@@ -1,4 +1,4 @@
-import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, LogLine, PlayerId } from '../../types'
 
 const COLS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 const TOP: Record<number, number> = {
@@ -17,7 +17,7 @@ export interface CantStopState {
   phase: 'rolling' | 'choosing' | 'deciding' | 'matchover'
   dice: number[]
   pairings: { sums: [number, number]; advance: number[] }[]
-  message: string
+  message: LogLine
   events: GameEvent[]
 }
 
@@ -48,7 +48,7 @@ export interface CantStopView {
   pairings: { sums: [number, number]; advance: number[] }[]
   runnersUsed: number
   yourTurn: boolean
-  message: string
+  message: LogLine
   result: GameResult | null
 }
 
@@ -123,7 +123,7 @@ export const cantStopEngine: GameEngine<CantStopState, CantStopAction, CantStopV
       phase: 'rolling',
       dice: [],
       pairings: [],
-      message: `${names[order[0]]} je na potezu — baci kockice`,
+      message: { k: 'cs.msg.turn', p: { name: names[order[0]] } },
       events: [],
     }
   },
@@ -147,10 +147,10 @@ export const cantStopEngine: GameEngine<CantStopState, CantStopAction, CantStopV
           pairings: [],
           turn: nextPlayer(s),
           phase: 'rolling',
-          message: `${s.names[p]} je bustao! (nema poteza) — sljedeći igra`,
+          message: { k: 'cs.msg.bust', p: { name: s.names[p] } },
         }
       }
-      return { ...rolled, pairings, phase: 'choosing', message: 'Izaberi par' }
+      return { ...rolled, pairings, phase: 'choosing', message: { k: 'cs.choosePair' } }
     }
 
     if (action.type === 'choose') {
@@ -167,7 +167,7 @@ export const cantStopEngine: GameEngine<CantStopState, CantStopAction, CantStopV
         if (cur >= TOP[col]) continue
         temp[col] = cur + 1
       }
-      return { ...s, temp, phase: 'deciding', message: 'Baci ponovo ili stani' }
+      return { ...s, temp, phase: 'deciding', message: { k: 'cs.decide' } }
     }
 
     // stop -> bank progress
@@ -188,7 +188,7 @@ export const cantStopEngine: GameEngine<CantStopState, CantStopAction, CantStopV
       newlyClaimed > 0 ? [...s.events, { player: p, tag: 'cs.column' }] : s.events
     const won = COLS.filter((c) => claimed[c] === p).length >= COLUMNS_TO_WIN
     if (won) {
-      return { ...s, progress, claimed, temp: {}, phase: 'matchover', message: `${s.names[p]} pobjeđuje!`, events }
+      return { ...s, progress, claimed, temp: {}, phase: 'matchover', message: { k: 'cs.msg.wins', p: { name: s.names[p] } }, events }
     }
     return {
       ...s,
@@ -197,7 +197,7 @@ export const cantStopEngine: GameEngine<CantStopState, CantStopAction, CantStopV
       temp: {},
       turn: nextPlayer(s),
       phase: 'rolling',
-      message: `${s.names[p]} staje. Sljedeći na potezu.`,
+      message: { k: 'cs.msg.stops', p: { name: s.names[p] } },
       events,
     }
   },

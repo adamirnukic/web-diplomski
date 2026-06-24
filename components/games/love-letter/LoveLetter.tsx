@@ -156,7 +156,7 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
     panel = (
       <div className={styles.panel}>
         <p className={styles.big}>{t('ll.roundEnd')}</p>
-        <p className={styles.roundReason}>{v.round.reason}</p>
+        <p className={styles.roundReason}>{t(v.round.reason.k, v.round.reason.p)}</p>
         <Button onClick={() => onAction({ type: 'next' })} className="neon-glow-cyan">
           {t('ll.nextRound')}
         </Button>
@@ -259,7 +259,11 @@ export function LoveLetterBoard({ view, onAction, onRestart, mode }: GameBoardPr
       {playersRow}
       <div className={styles.center}>
         <span className={styles.deck}>{t('ll.deck', { n: v.deckCount })}</span>
-        {v.log.length > 0 && <p className={styles.log}>{v.log[v.log.length - 1]}</p>}
+        {v.log.length > 0 && (
+          <p className={styles.log}>
+            {t(v.log[v.log.length - 1].k, v.log[v.log.length - 1].p)}
+          </p>
+        )}
       </div>
       {panel}
     </div>

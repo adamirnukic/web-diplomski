@@ -1,4 +1,4 @@
-import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, LogLine, PlayerId } from '../../types'
 
 /**
  * Coup (2-6). Full character set, actions, challenges and blocks.
@@ -81,7 +81,7 @@ export interface CoupState {
   lose: Lose | null
   exchange: Exchange | null
   winnerId: PlayerId | null
-  log: string[]
+  log: LogLine[]
   /** event-based achievement signals collected during the match */
   events: GameEvent[]
 }
@@ -119,7 +119,7 @@ export interface CoupView {
     loseChoices: CoupCard[]
     exchange: { options: CoupCard[]; keep: number } | null
   } | null
-  log: string[]
+  log: LogLine[]
   result: GameResult | null
 }
 
@@ -182,7 +182,7 @@ function responders(s: CoupState, from: PlayerId, exclude: PlayerId): PlayerId[]
   return out
 }
 
-function pushLog(s: CoupState, line: string) {
+function pushLog(s: CoupState, line: LogLine) {
   s.log.push(line)
   if (s.log.length > 12) s.log = s.log.slice(-12)
 }
@@ -205,7 +205,7 @@ function checkWin(s: CoupState): boolean {
     s.lose = null
     s.exchange = null
     if (s.winnerId) {
-      pushLog(s, `${nm(s, s.winnerId)} pobjeđuje!`)
+      pushLog(s, { k: 'coup.log.wins', p: { name: nm(s, s.winnerId) } })
       // won without ever revealing/losing an influence
       if (s.revealed[s.winnerId].length === 0) {
         s.events.push({ player: s.winnerId, tag: 'coup.flawless' })
@@ -231,7 +231,7 @@ function applyLoss(s: CoupState, player: PlayerId, card: CoupCard) {
   if (i < 0) throw new Error('Nemaš tu kartu')
   hand.splice(i, 1)
   s.revealed[player].push(card)
-  pushLog(s, `${nm(s, player)} otkriva ${card} i gubi uticaj`)
+  pushLog(s, { k: 'coup.log.reveal', p: { name: nm(s, player), card } })
 }
 
 function runThen(s: CoupState, then: Then) {
@@ -276,22 +276,22 @@ function resolveEffect(s: CoupState) {
   switch (p.action) {
     case 'foreign_aid':
       s.coins[a] += 2
-      pushLog(s, `${nm(s, a)} uzima stranu pomoć (+2)`)
+      pushLog(s, { k: 'coup.log.foreignAid', p: { name: nm(s, a) } })
       return endTurn(s)
     case 'tax':
       s.coins[a] += 3
-      pushLog(s, `${nm(s, a)} uzima porez (+3, Duke)`)
+      pushLog(s, { k: 'coup.log.tax', p: { name: nm(s, a) } })
       return endTurn(s)
     case 'steal': {
       const t = p.target as PlayerId
       const amt = Math.min(2, s.coins[t])
       s.coins[t] -= amt
       s.coins[a] += amt
-      pushLog(s, `${nm(s, a)} krade ${amt} od ${nm(s, t)} (Captain)`)
+      pushLog(s, { k: 'coup.log.steal', p: { name: nm(s, a), amt, target: nm(s, t) } })
       return endTurn(s)
     }
     case 'assassinate':
-      pushLog(s, `${nm(s, a)} ubija ${nm(s, p.target as PlayerId)} (Assassin)`)
+      pushLog(s, { k: 'coup.log.assassinate', p: { name: nm(s, a), target: nm(s, p.target as PlayerId) } })
       return setLose(s, p.target as PlayerId, 'ubijen', 'endTurn')
     case 'exchange': {
       const inf = s.influence[a]
@@ -302,7 +302,7 @@ function resolveEffect(s: CoupState) {
       }
       s.exchange = { options: [...inf, ...drawn], keep: inf.length }
       s.phase = 'exchange'
-      pushLog(s, `${nm(s, a)} mijenja karte (Ambassador)`)
+      pushLog(s, { k: 'coup.log.exchange', p: { name: nm(s, a) } })
       return
     }
     default:
@@ -327,12 +327,12 @@ function doActionChallenge(s: CoupState, challenger: PlayerId) {
   const actor = p.actor
   const card = ACTION_CARD[p.action] as CoupCard
   if (s.influence[actor].includes(card)) {
-    pushLog(s, `${nm(s, challenger)} izaziva — ${nm(s, actor)} ZAISTA ima ${card}`)
+    pushLog(s, { k: 'coup.log.challengeReal', p: { name: nm(s, challenger), actor: nm(s, actor), card } })
     swapCard(s, actor, card)
     const then: Then = isBlockable(p.action) ? 'targetBlock' : 'resolveEffect'
     setLose(s, challenger, 'neuspio izazov', then)
   } else {
-    pushLog(s, `${nm(s, challenger)} izaziva — ${nm(s, actor)} BLEFIRA i gubi`)
+    pushLog(s, { k: 'coup.log.challengeBluff', p: { name: nm(s, challenger), actor: nm(s, actor) } })
     setLose(s, actor, 'uhvaćen u blefu', 'endTurn')
   }
 }
@@ -343,7 +343,7 @@ function doBlock(s: CoupState, blocker: PlayerId, card: CoupCard) {
   p.blockCard = card
   p.toAct = responders(s, blocker, blocker)
   s.phase = 'blockResponse'
-  pushLog(s, `${nm(s, blocker)} blokira (${card})`)
+  pushLog(s, { k: 'coup.log.block', p: { name: nm(s, blocker), card } })
 }
 
 function doBlockChallenge(s: CoupState, challenger: PlayerId) {
@@ -351,11 +351,11 @@ function doBlockChallenge(s: CoupState, challenger: PlayerId) {
   const blocker = p.blocker as PlayerId
   const card = p.blockCard as CoupCard
   if (s.influence[blocker].includes(card)) {
-    pushLog(s, `${nm(s, challenger)} izaziva blok — ${nm(s, blocker)} ZAISTA ima ${card}`)
+    pushLog(s, { k: 'coup.log.blockReal', p: { name: nm(s, challenger), blocker: nm(s, blocker), card } })
     swapCard(s, blocker, card)
     setLose(s, challenger, 'neuspio izazov bloka', 'endTurn')
   } else {
-    pushLog(s, `${nm(s, challenger)} izaziva blok — ${nm(s, blocker)} BLEFIRA`)
+    pushLog(s, { k: 'coup.log.blockBluff', p: { name: nm(s, challenger), blocker: nm(s, blocker) } })
     setLose(s, blocker, 'blok je blef', 'resolveEffect')
   }
 }
@@ -403,7 +403,7 @@ export const coupEngine: GameEngine<CoupState, CoupAction, CoupView> = {
       lose: null,
       exchange: null,
       winnerId: null,
-      log: [`Početak — na potezu ${names[order[0]]}`],
+      log: [{ k: 'coup.log.start', p: { name: names[order[0]] } }],
       events: [],
     }
   },
@@ -422,7 +422,7 @@ export const coupEngine: GameEngine<CoupState, CoupAction, CoupView> = {
         switch (action.type) {
           case 'income':
             s.coins[playerId] += 1
-            pushLog(s, `${nm(s, playerId)} uzima prihod (+1)`)
+            pushLog(s, { k: 'coup.log.income', p: { name: nm(s, playerId) } })
             endTurn(s)
             break
           case 'foreign_aid':
@@ -438,7 +438,7 @@ export const coupEngine: GameEngine<CoupState, CoupAction, CoupView> = {
             if (s.coins[playerId] < 7) throw new Error('Coup košta 7 novčića')
             const t = requireTarget(s, playerId, action.target)
             s.coins[playerId] -= 7
-            pushLog(s, `${nm(s, playerId)} izvodi Coup na ${nm(s, t)}`)
+            pushLog(s, { k: 'coup.log.coup', p: { name: nm(s, playerId), target: nm(s, t) } })
             setLose(s, t, 'Coup', 'endTurn')
             break
           }
@@ -494,7 +494,7 @@ export const coupEngine: GameEngine<CoupState, CoupAction, CoupView> = {
             if (p.blocker && p.blockCard && !s.influence[p.blocker].includes(p.blockCard)) {
               s.events.push({ player: p.blocker, tag: 'coup.bluff' })
             }
-            pushLog(s, `Blok prolazi — akcija otkazana`)
+            pushLog(s, { k: 'coup.log.blockPass' })
             endTurn(s)
           }
         } else if (action.type === 'challenge') {

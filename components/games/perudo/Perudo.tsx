@@ -154,7 +154,7 @@ export function PerudoTable({ view, onAction, onRestart, mode }: GameBoardProps)
           <p className={styles.hint}>{t('perudo.hint')}</p>
         </div>
       ) : (
-        <p className={styles.wait}>{v.message}</p>
+        <p className={styles.wait}>{t(v.message.k, v.message.p)}</p>
       )}
     </div>
   )

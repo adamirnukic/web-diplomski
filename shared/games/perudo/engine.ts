@@ -1,4 +1,4 @@
-import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, LogLine, PlayerId } from '../../types'
 
 const START_DICE = 5
 
@@ -24,7 +24,7 @@ export interface PerudoState {
     loser: PlayerId
     bidderWasTruthful: boolean
   } | null
-  message: string
+  message: LogLine
   events: GameEvent[]
 }
 
@@ -57,7 +57,7 @@ export interface PerudoView {
     loserName: string
     bidderWasTruthful: boolean
   } | null
-  message: string
+  message: LogLine
   result: GameResult | null
 }
 
@@ -121,7 +121,7 @@ export const perudoEngine: GameEngine<PerudoState, PerudoAction, PerudoView> = {
       turn: order[0],
       bid: null,
       lastRound: null,
-      message: `${names[order[0]]} otvara licitaciju`,
+      message: { k: 'perudo.msg.opens', p: { name: names[order[0]] } },
       events: [],
     }
   },
@@ -145,7 +145,7 @@ export const perudoEngine: GameEngine<PerudoState, PerudoAction, PerudoView> = {
         bid,
         turn: nextAlive(s.order, s.alive, p),
         lastRound: null,
-        message: `${s.names[p]} licitira ${count} × ${face}`,
+        message: { k: 'perudo.msg.bid', p: { name: s.names[p], count, face } },
       }
     }
 
@@ -169,13 +169,16 @@ export const perudoEngine: GameEngine<PerudoState, PerudoAction, PerudoView> = {
     const lastRound = { revealed, bid: s.bid, actual, loser, bidderWasTruthful }
     const aliveCount = s.order.filter((id) => alive[id]).length
     if (aliveCount <= 1) {
-      return { ...s, dice, alive, phase: 'matchover', bid: null, lastRound, message: 'Kraj!', events }
+      return { ...s, dice, alive, phase: 'matchover', bid: null, lastRound, message: { k: 'perudo.msg.end' }, events }
     }
 
     const starter = alive[loser] ? loser : nextAlive(s.order, alive, loser)
     const rerolled = { ...dice }
     for (const id of s.order) if (alive[id]) rerolled[id] = rollDice(dice[id].length)
-    const msg = `${s.names[loser]} gubi kockicu (bilo ih je ${actual}, licitirano ${s.bid.count})`
+    const msg: LogLine = {
+      k: 'perudo.msg.loses',
+      p: { name: s.names[loser], actual, bid: s.bid.count },
+    }
     return {
       ...s,
       dice: rerolled,

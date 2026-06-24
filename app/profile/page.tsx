@@ -69,6 +69,7 @@ export default function ProfilePage() {
   const [achievements, setAchievements] = useState<AchievementRow[]>([])
   const [loaded, setLoaded] = useState(false)
   const [editing, setEditing] = useState(false)
+  const [openBadge, setOpenBadge] = useState<string | null>(null)
 
   const [username, setUsername] = useState('')
   const [profileMsg, setProfileMsg] = useState<{ ok?: string; err?: string }>({})
@@ -332,21 +333,31 @@ export default function ProfilePage() {
         )}
 
         <h2 className={styles.section}>{t('ach.title')}</h2>
+        <p className={styles.muted} style={{ fontSize: '0.8rem', marginBottom: '0.6rem' }}>
+          {t('ach.howHint')}
+        </p>
         <div className={styles.badges}>
-          {achievements.map((a) => (
-            <div
-              key={a.id}
-              className={cn(styles.badge, a.earned ? styles.badgeEarned : styles.badgeLocked)}
-            >
-              <span className={styles.badgeIcon}>{a.icon}</span>
-              <span>
-                <div className={styles.badgeName}>{t(`ach.${a.id}.name`)}</div>
-                <div className={styles.badgeDesc}>
-                  {a.earned ? t(`ach.${a.id}.desc`) : t('ach.locked')}
-                </div>
-              </span>
-            </div>
-          ))}
+          {achievements.map((a) => {
+            const open = openBadge === a.id
+            return (
+              <button
+                type="button"
+                key={a.id}
+                title={t(`ach.${a.id}.desc`)}
+                onClick={() => setOpenBadge(open ? null : a.id)}
+                className={cn(styles.badge, a.earned ? styles.badgeEarned : styles.badgeLocked)}
+                style={{ cursor: 'pointer', textAlign: 'left', font: 'inherit' }}
+              >
+                <span className={styles.badgeIcon}>{a.icon}</span>
+                <span>
+                  <div className={styles.badgeName}>{t(`ach.${a.id}.name`)}</div>
+                  <div className={styles.badgeDesc}>
+                    {open || a.earned ? t(`ach.${a.id}.desc`) : t('ach.locked')}
+                  </div>
+                </span>
+              </button>
+            )
+          })}
         </div>
       </main>
     </div>
