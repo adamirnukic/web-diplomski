@@ -157,7 +157,8 @@ export default function OnlineGamePage({
           <ArrowLeft size={16} /> {t('common.back')}
         </Link>
         <h1 className={styles.title}>
-          {game?.name ?? 'Game'} <span className={styles.muted}>— {t('games.onlineSuffix')}</span>
+          {game ? t(`game.${gameId}.name`) : 'Game'}{' '}
+          <span className={styles.muted}>— {t('games.onlineSuffix')}</span>
         </h1>
 
         {loading || !user ? (

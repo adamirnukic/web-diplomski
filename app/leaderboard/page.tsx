@@ -68,7 +68,7 @@ export default function LeaderboardPage() {
             <option value="">{t('lb.allGames')}</option>
             {GAMES.filter((g) => g.implemented).map((g) => (
               <option key={g.id} value={g.id}>
-                {g.name}
+                {t(`game.${g.id}.name`)}
               </option>
             ))}
           </select>

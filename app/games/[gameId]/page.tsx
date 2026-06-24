@@ -48,8 +48,8 @@ export default function GameDetailPage({
             <Icon size={36} />
           </div>
           <div>
-            <h1 className={styles.title}>{game.name}</h1>
-            <p className={styles.desc}>{game.description}</p>
+            <h1 className={styles.title}>{t(`game.${game.id}.name`)}</h1>
+            <p className={styles.desc}>{t(`game.${game.id}.desc`)}</p>
           </div>
         </div>
 

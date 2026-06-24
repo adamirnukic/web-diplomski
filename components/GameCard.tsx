@@ -1,6 +1,9 @@
+'use client'
+
 import Link from 'next/link'
 import { Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useT } from '@/lib/i18n'
 import { Badge } from '@/components/ui/badge'
 import type { GameMeta } from '@/lib/games-catalog'
 import styles from './GameCard.module.css'
@@ -13,6 +16,7 @@ const colorClass: Record<GameMeta['color'], string> = {
 }
 
 export function GameCard({ game }: { game: GameMeta }) {
+  const { t } = useT()
   const Icon = game.icon
   const players =
     game.minPlayers === game.maxPlayers
@@ -26,13 +30,13 @@ export function GameCard({ game }: { game: GameMeta }) {
       </div>
       <div className={styles.body}>
         <div className={styles.titleRow}>
-          <h3 className={styles.title}>{game.name}</h3>
-          {!game.implemented && <Badge variant="outline">Uskoro</Badge>}
+          <h3 className={styles.title}>{t(`game.${game.id}.name`)}</h3>
+          {!game.implemented && <Badge variant="outline">{t('games.soon')}</Badge>}
         </div>
-        <p className={styles.desc}>{game.description}</p>
+        <p className={styles.desc}>{t(`game.${game.id}.desc`)}</p>
         <div className={styles.meta}>
           <span className={styles.players}>
-            <Users size={14} /> {players} igrača
+            <Users size={14} /> {t('games.players', { count: players })}
           </span>
         </div>
       </div>

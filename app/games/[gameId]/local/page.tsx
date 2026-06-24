@@ -128,7 +128,8 @@ export default function LocalGamePage({
           <ArrowLeft size={16} /> {t('common.back')}
         </Link>
         <h1 className={styles.title}>
-          {game?.name ?? 'Game'} <span className={styles.muted}>— {t('games.localSuffix')}</span>
+          {game ? t(`game.${gameId}.name`) : 'Game'}{' '}
+          <span className={styles.muted}>— {t('games.localSuffix')}</span>
         </h1>
         {!ready ? (
           <p className={styles.muted}>{t('games.unavailableLocal')}</p>

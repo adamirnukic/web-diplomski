@@ -4,11 +4,13 @@ import { useRouter } from 'next/navigation'
 import { Gamepad2, X } from 'lucide-react'
 import { useRealtime } from '@/lib/realtime'
 import { getGameMeta } from '@/lib/games-catalog'
+import { useT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 
 /** Floating toasts for incoming game invites, shown app-wide. */
 export function InviteToasts() {
   const { invites, dismissInvite } = useRealtime()
+  const { t } = useT()
   const router = useRouter()
   if (invites.length === 0) return null
 
@@ -27,6 +29,7 @@ export function InviteToasts() {
     >
       {invites.map((inv) => {
         const game = getGameMeta(inv.gameId)
+        const gameName = game ? t(`game.${inv.gameId}.name`) : inv.gameId
         return (
           <div
             key={inv.id}
@@ -40,18 +43,18 @@ export function InviteToasts() {
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
               <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Gamepad2 size={16} /> Poziv na igru
+                <Gamepad2 size={16} /> {t('invite.title')}
               </strong>
               <button
                 onClick={() => dismissInvite(inv.id)}
-                aria-label="Zatvori"
+                aria-label={t('invite.close')}
                 style={{ background: 'none', border: 0, color: 'var(--muted-foreground)', cursor: 'pointer' }}
               >
                 <X size={16} />
               </button>
             </div>
             <p style={{ fontSize: '0.9rem', margin: '0.4rem 0 0.7rem' }}>
-              <strong>{inv.fromName}</strong> te zove na <strong>{game?.name ?? inv.gameId}</strong>
+              <strong>{inv.fromName}</strong> {t('invite.to')} <strong>{gameName}</strong>
             </p>
             <Button
               size="sm"
@@ -61,7 +64,7 @@ export function InviteToasts() {
                 router.push(`/games/${inv.gameId}/online?code=${inv.code}`)
               }}
             >
-              Pridruži se
+              {t('invite.join')}
             </Button>
           </div>
         )

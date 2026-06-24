@@ -303,7 +303,7 @@ export default function ProfilePage() {
             <tbody>
               {stats.map((s) => (
                 <tr key={s.game_id}>
-                  <td>{getGameMeta(s.game_id)?.name ?? s.game_id}</td>
+                  <td>{getGameMeta(s.game_id) ? t(`game.${s.game_id}.name`) : s.game_id}</td>
                   <td>{s.wins}</td>
                   <td>{s.draws}</td>
                   <td>{s.losses}</td>
@@ -322,7 +322,7 @@ export default function ProfilePage() {
             <tbody>
               {history.map((m, i) => (
                 <tr key={i}>
-                  <td>{getGameMeta(m.game_id)?.name ?? m.game_id}</td>
+                  <td>{getGameMeta(m.game_id) ? t(`game.${m.game_id}.name`) : m.game_id}</td>
                   <td style={{ color: RES_COLOR[m.outcome], fontWeight: 700 }}>{t(RES_KEY[m.outcome])}</td>
                   <td>{new Date(m.created_at).toLocaleDateString()}</td>
                 </tr>
