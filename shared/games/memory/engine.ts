@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 import { shuffle } from '../_cards'
 
 const SYMBOLS = ['🍒', '⚡', '🎮', '🚀', '🌟', '🔥', '💎', '🎲']
@@ -16,6 +16,7 @@ export interface MemoryState {
   scores: Record<PlayerId, number>
   order: [PlayerId, PlayerId]
   turn: PlayerId
+  events: GameEvent[]
 }
 
 export type MemoryAction = { type: 'flip'; index: number }
@@ -68,6 +69,7 @@ export const memoryEngine: GameEngine<MemoryState, MemoryAction, MemoryView> = {
       scores: { [p1.id]: 0, [p2.id]: 0 },
       order: [p1.id, p2.id],
       turn: p1.id,
+      events: [],
     }
   },
 
@@ -94,6 +96,7 @@ export const memoryEngine: GameEngine<MemoryState, MemoryAction, MemoryView> = {
 
     let turn = state.turn
     const scores = { ...state.scores }
+    let events = state.events
 
     if (revealed.length === 2) {
       const [i, j] = revealed
@@ -103,12 +106,19 @@ export const memoryEngine: GameEngine<MemoryState, MemoryAction, MemoryView> = {
         revealed = []
         scores[playerId] = (scores[playerId] ?? 0) + 1
         // matching player keeps the turn
+        // last pair matched while the opponent never scored = total recall
+        if (cards.every((c) => c.matched)) {
+          const other = state.order.find((id) => id !== playerId) as PlayerId
+          if ((scores[other] ?? 0) === 0) {
+            events = [...state.events, { player: playerId, tag: 'mm.flawless' }]
+          }
+        }
       } else {
         turn = state.order.find((id) => id !== playerId) as PlayerId
       }
     }
 
-    return { ...state, cards, revealed, scores, turn }
+    return { ...state, cards, revealed, scores, turn, events }
   },
 
   getView(state, playerId) {

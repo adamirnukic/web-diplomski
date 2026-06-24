@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 export type Mark = 'X' | 'O'
 export type Cell = Mark | null
@@ -12,6 +12,7 @@ export interface TttState {
   /** whose turn it is */
   turn: PlayerId
   winningLine: number[] | null
+  events: GameEvent[]
 }
 
 export type TttAction = { type: 'place'; index: number }
@@ -68,6 +69,7 @@ export const ticTacToeEngine: GameEngine<TttState, TttAction, TttView> = {
       order: [p1.id, p2.id],
       turn: p1.id,
       winningLine: null,
+      events: [],
     }
   },
 
@@ -86,11 +88,19 @@ export const ticTacToeEngine: GameEngine<TttState, TttAction, TttView> = {
     const win = findWin(board)
     const nextTurn = state.order.find((id) => id !== playerId) as PlayerId
 
+    // fastest possible win: three-in-a-row using only your first 3 marks
+    const myMarks = board.filter((c) => c === state.marks[playerId]).length
+    const events =
+      win && myMarks === 3
+        ? [...state.events, { player: playerId, tag: 'ttt.fast' }]
+        : state.events
+
     return {
       ...state,
       board,
       turn: win ? state.turn : nextTurn,
       winningLine: win ? win.line : null,
+      events,
     }
   },
 

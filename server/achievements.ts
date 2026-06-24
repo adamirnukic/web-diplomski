@@ -48,6 +48,22 @@ export const EVENT_ACHIEVEMENTS: Record<string, EventDef> = {
   'coup.bluff': { id: 'coup_bluff', icon: '🎭' },
   'coup.flawless': { id: 'coup_flawless', icon: '💎' },
   'hm.clutch': { id: 'hm_clutch', icon: '😅' },
+  'ttt.fast': { id: 'ttt_fast', icon: '⚡' },
+  'c4.diagonal': { id: 'c4_diagonal', icon: '🔷' },
+  'ck.combo': { id: 'ck_combo', icon: '🔗' },
+  'bs.flawless': { id: 'bs_flawless', icon: '⚓' },
+  'bj.blackjack': { id: 'bj_blackjack', icon: '💰' },
+  'pk.bighand': { id: 'pk_bighand', icon: '🎰' },
+  'y.yahtzee': { id: 'y_yahtzee', icon: '🎲' },
+  'mm.flawless': { id: 'mm_flawless', icon: '🧩' },
+  'rps.flawless': { id: 'rps_flawless', icon: '🧹' },
+  'tq.perfect': { id: 'tq_perfect', icon: '🧠' },
+  'ms.clear': { id: 'ms_clear', icon: '💣' },
+  'll.guard': { id: 'll_guard', icon: '💂' },
+  'db.double': { id: 'db_double', icon: '📦' },
+  'pd.caught': { id: 'pd_caught', icon: '🔍' },
+  'sk.bid': { id: 'sk_bid', icon: '😎' },
+  'cs.column': { id: 'cs_column', icon: '🏔️' },
 }
 
 /** Distinct event-badge defs, in stable order, for listing/merging. */

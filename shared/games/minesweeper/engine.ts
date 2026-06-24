@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 const WIDTH = 9
 const HEIGHT = 9
@@ -11,6 +11,7 @@ export interface MineState {
   revealed: boolean[]
   order: PlayerId[]
   exploded: boolean
+  events: GameEvent[]
 }
 
 export type MineAction = { type: 'reveal'; index: number }
@@ -88,6 +89,7 @@ export const minesweeperEngine: GameEngine<MineState, MineAction, MineView> = {
       revealed: Array(size).fill(false),
       order: players.map((p) => p.id),
       exploded: false,
+      events: [],
     }
   },
 
@@ -115,7 +117,13 @@ export const minesweeperEngine: GameEngine<MineState, MineAction, MineView> = {
         }
       }
     }
-    return { ...state, revealed }
+    // cleared every safe cell -> cooperative win; credit everyone at the table
+    const safeTotal = state.width * state.height - MINES
+    const events =
+      revealed.filter(Boolean).length >= safeTotal
+        ? [...state.events, ...state.order.map((id) => ({ player: id, tag: 'ms.clear' }))]
+        : state.events
+    return { ...state, revealed, events }
   },
 
   getView(state) {

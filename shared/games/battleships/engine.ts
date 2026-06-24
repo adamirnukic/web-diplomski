@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 const SIZE = 8
 const FLEET = [4, 3, 3, 2, 2]
@@ -16,6 +16,7 @@ export interface BSState {
   ready: Record<PlayerId, boolean>
   phase: 'placement' | 'battle'
   turn: PlayerId
+  events: GameEvent[]
 }
 
 export type BSAction =
@@ -139,6 +140,7 @@ export const battleshipsEngine: GameEngine<BSState, BSAction, BSView> = {
       ready: { [p1.id]: false, [p2.id]: false },
       phase: 'placement',
       turn: p1.id,
+      events: [],
     }
   },
 
@@ -197,10 +199,22 @@ export const battleshipsEngine: GameEngine<BSState, BSAction, BSView> = {
     const hit = board.hit.slice()
     hit[action.index] = true
     const nextTurn = opp
+    const newOpp: Board = { ...board, hit }
+
+    // this shot just sank the enemy's last ship -> you win; if none of your own
+    // ships were ever fully sunk, that's a flawless naval victory
+    let events = state.events
+    if (allSunk(newOpp)) {
+      const mine = state.boards[playerId]
+      const lostShips = mine.placed.filter((ship) => ship.every((c) => mine.hit[c])).length
+      if (lostShips === 0) events = [...state.events, { player: playerId, tag: 'bs.flawless' }]
+    }
+
     return {
       ...state,
-      boards: { ...state.boards, [opp]: { ...board, hit } },
+      boards: { ...state.boards, [opp]: newOpp },
       turn: nextTurn,
+      events,
     }
   },
 

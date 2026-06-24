@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 export const COLS = 7
 export const ROWS = 6
@@ -12,6 +12,7 @@ export interface C4State {
   order: [PlayerId, PlayerId]
   turn: PlayerId
   winningLine: number[] | null
+  events: GameEvent[]
 }
 
 export type C4Action = { type: 'drop'; col: number }
@@ -88,6 +89,7 @@ export const connectFourEngine: GameEngine<C4State, C4Action, C4View> = {
       order: [p1.id, p2.id],
       turn: p1.id,
       winningLine: null,
+      events: [],
     }
   },
 
@@ -105,11 +107,21 @@ export const connectFourEngine: GameEngine<C4State, C4Action, C4View> = {
     const winningLine = findWinningLine(board, row, col)
     const nextTurn = state.order.find((id) => id !== playerId) as PlayerId
 
+    // a diagonal four steps by COLS±1 between consecutive cells
+    let events = state.events
+    if (winningLine) {
+      const step = winningLine[1] - winningLine[0]
+      if (step === COLS + 1 || step === COLS - 1) {
+        events = [...state.events, { player: playerId, tag: 'c4.diagonal' }]
+      }
+    }
+
     return {
       ...state,
       board,
       winningLine,
       turn: winningLine ? state.turn : nextTurn,
+      events,
     }
   },
 

@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 export type CardName =
   | 'spy'
@@ -57,6 +57,7 @@ export interface LLState {
   peek: { by: PlayerId; target: PlayerId; card: CardName } | null
   round: { winners: PlayerId[]; reason: string } | null
   log: string[]
+  events: GameEvent[]
 }
 
 export type LLAction =
@@ -278,6 +279,7 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
       peek: null,
       round: null,
       log: [],
+      events: [],
     }
     return startRound(base, order[0])
   },
@@ -328,6 +330,7 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
     const log = [...s.log]
     let peek: LLState['peek'] = null
     let enterChancellor = false
+    const events = [...s.events]
 
     const targetable = s.order.filter(
       (id) => id !== p && !out[id] && !prot[id] && s.hands[id].length > 0,
@@ -360,6 +363,7 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
       if (valid(tgt) && action.guess && action.guess !== 'guard') {
         if (s.hands[tgt as PlayerId][0] === action.guess) {
           out[tgt as PlayerId] = true
+          events.push({ player: p, tag: 'll.guard' })
           log.push(`${s.names[p]}: Stražar pogodio — ${s.names[tgt as PlayerId]} ispada!`)
         } else {
           log.push(`${s.names[p]}: Stražar promašio`)
@@ -427,6 +431,7 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
       setAsideUsed,
       log: log.slice(-8),
       peek,
+      events,
     }
 
     if (enterChancellor) return { ...next, phase: 'chancellor' }

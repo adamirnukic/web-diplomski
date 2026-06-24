@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 import { type Card, freshDeck, shuffle } from '../_cards'
 
 export interface BJState {
@@ -11,6 +11,7 @@ export interface BJState {
   dealer: Card[]
   dealerDone: boolean
   turn: PlayerId | null
+  events: GameEvent[]
 }
 
 export type BJAction = { type: 'hit' } | { type: 'stand' }
@@ -126,7 +127,14 @@ export const blackjackEngine: GameEngine<BJState, BJAction, BJView> = {
       standing[id] = false
     }
     const dealer = [deck.pop() as Card, deck.pop() as Card]
-    return { order, names, ai, deck, hands, standing, dealer, dealerDone: false, turn: order[0] }
+    // a two-card 21 is a natural blackjack
+    const events: GameEvent[] = []
+    for (const id of order) {
+      if (hands[id].length === 2 && handValue(hands[id]) === 21) {
+        events.push({ player: id, tag: 'bj.blackjack' })
+      }
+    }
+    return { order, names, ai, deck, hands, standing, dealer, dealerDone: false, turn: order[0], events }
   },
 
   applyAction(state, playerId, action) {

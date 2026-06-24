@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 const COLS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 const TOP: Record<number, number> = {
@@ -18,6 +18,7 @@ export interface CantStopState {
   dice: number[]
   pairings: { sums: [number, number]; advance: number[] }[]
   message: string
+  events: GameEvent[]
 }
 
 export type CantStopAction =
@@ -123,6 +124,7 @@ export const cantStopEngine: GameEngine<CantStopState, CantStopAction, CantStopV
       dice: [],
       pairings: [],
       message: `${names[order[0]]} je na potezu — baci kockice`,
+      events: [],
     }
   },
 
@@ -172,14 +174,21 @@ export const cantStopEngine: GameEngine<CantStopState, CantStopAction, CantStopV
     if (s.phase !== 'deciding') throw new Error('Sada ne možeš stati')
     const progress = { ...s.progress, [p]: { ...s.progress[p] } }
     const claimed = { ...s.claimed }
+    let newlyClaimed = 0
     for (const colStr of Object.keys(s.temp)) {
       const col = Number(colStr)
       progress[p][col] = s.temp[col]
-      if (s.temp[col] >= TOP[col] && claimed[col] == null) claimed[col] = p
+      if (s.temp[col] >= TOP[col] && claimed[col] == null) {
+        claimed[col] = p
+        newlyClaimed++
+      }
     }
+    // banking progress that completes (claims) a column to the top
+    const events =
+      newlyClaimed > 0 ? [...s.events, { player: p, tag: 'cs.column' }] : s.events
     const won = COLS.filter((c) => claimed[c] === p).length >= COLUMNS_TO_WIN
     if (won) {
-      return { ...s, progress, claimed, temp: {}, phase: 'matchover', message: `${s.names[p]} pobjeđuje!` }
+      return { ...s, progress, claimed, temp: {}, phase: 'matchover', message: `${s.names[p]} pobjeđuje!`, events }
     }
     return {
       ...s,
@@ -189,6 +198,7 @@ export const cantStopEngine: GameEngine<CantStopState, CantStopAction, CantStopV
       turn: nextPlayer(s),
       phase: 'rolling',
       message: `${s.names[p]} staje. Sljedeći na potezu.`,
+      events,
     }
   },
 

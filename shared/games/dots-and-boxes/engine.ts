@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 const ROWS = 4 // boxes vertically
 const COLS = 4 // boxes horizontally
@@ -11,6 +11,7 @@ export interface DBState {
   owner: (PlayerId | null)[] // rows*cols boxes
   order: [PlayerId, PlayerId]
   turn: PlayerId
+  events: GameEvent[]
 }
 
 export type DBAction = { type: 'edge'; kind: 'h' | 'v'; index: number }
@@ -72,6 +73,7 @@ export const dotsAndBoxesEngine: GameEngine<DBState, DBAction, DBView> = {
       owner: Array(ROWS * COLS).fill(null),
       order: [p1.id, p2.id],
       turn: p1.id,
+      events: [],
     }
   },
 
@@ -104,6 +106,9 @@ export const dotsAndBoxesEngine: GameEngine<DBState, DBAction, DBView> = {
     next.owner = owner
     // completing a box grants another turn
     next.turn = completed > 0 ? playerId : (s.order.find((id) => id !== playerId) as PlayerId)
+    // closing two boxes with a single line is a satisfying double
+    next.events =
+      completed >= 2 ? [...s.events, { player: playerId, tag: 'db.double' }] : s.events
     return next
   },
 

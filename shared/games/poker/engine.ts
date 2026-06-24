@@ -1,6 +1,6 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 import { type Card, freshDeck, shuffle } from '../_cards'
-import { compareHands, handName } from './evaluate'
+import { bestScore, compareHands, handName } from './evaluate'
 
 const START_CHIPS = 100
 const SB = 1
@@ -29,6 +29,7 @@ export interface PokerState {
   buttonId: PlayerId
   phase: 'betting' | 'handover' | 'matchover'
   hand: { winners: PlayerId[]; reason: string; revealed: PlayerId[] } | null
+  events: GameEvent[]
 }
 
 export type PokerAction =
@@ -304,7 +305,16 @@ function showdown(s: PokerState): PokerState {
     else if (c === 0) winners.push(live[i])
   }
   const reason = handName([...s.holes[winners[0]], ...s.community])
-  return awardPot(s, winners, reason, live)
+  const result = awardPot(s, winners, reason, live)
+  // winning a showdown with a flush or better (category >= 5)
+  const category = bestScore([...s.holes[winners[0]], ...s.community])[0]
+  if (category >= 5) {
+    return {
+      ...result,
+      events: [...result.events, ...winners.map((w) => ({ player: w, tag: 'pk.bighand' }))],
+    }
+  }
+  return result
 }
 
 function settle(s: PokerState, lastActor: PlayerId): PokerState {
@@ -365,6 +375,7 @@ export const pokerEngine: GameEngine<PokerState, PokerAction, PokerView> = {
       buttonId: order[0],
       phase: 'betting',
       hand: null,
+      events: [],
     }
     return startHand(base, order[0])
   },

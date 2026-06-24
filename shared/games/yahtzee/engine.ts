@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 export const CATEGORIES = [
   'ones', 'twos', 'threes', 'fours', 'fives', 'sixes',
@@ -16,6 +16,7 @@ export interface YState {
   rollsLeft: number
   rolled: boolean
   scores: Record<PlayerId, Partial<Record<Category, number>>>
+  events: GameEvent[]
 }
 
 export type YAction =
@@ -131,6 +132,7 @@ export const yahtzeeEngine: GameEngine<YState, YAction, YView> = {
       rollsLeft: 3,
       rolled: false,
       scores,
+      events: [],
     }
   },
 
@@ -169,6 +171,10 @@ export const yahtzeeEngine: GameEngine<YState, YAction, YView> = {
       }
       const idx = state.order.indexOf(playerId)
       const nextTurn = state.order[(idx + 1) % state.order.length]
+      // scoring while holding five of a kind = a Yahtzee
+      const events = counts(state.dice).some((x) => x === 5)
+        ? [...state.events, { player: playerId, tag: 'y.yahtzee' }]
+        : state.events
       return {
         ...state,
         scores,
@@ -177,6 +183,7 @@ export const yahtzeeEngine: GameEngine<YState, YAction, YView> = {
         held: [false, false, false, false, false],
         rollsLeft: 3,
         rolled: false,
+        events,
       }
     }
 
