@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Trophy } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { apiLeaderboard, type LeaderboardRow } from '@/lib/api'
@@ -79,9 +80,11 @@ export default function LeaderboardPage() {
         ) : (
           <ol className={styles.list}>
             {rows.map((r, i) => (
-              <li key={r.username} className={cn(styles.row, i < 3 && styles.top)}>
+              <li key={r.id} className={cn(styles.row, i < 3 && styles.top)}>
                 <span className={styles.rank}>{i + 1}</span>
-                <span className={styles.user}>{r.username}</span>
+                <Link href={`/users/${r.id}`} className={styles.user} style={{ color: 'inherit', textDecoration: 'none' }}>
+                  {r.username}
+                </Link>
                 <span className={styles.wins}>
                   {r.wins} {t('lb.wins')}
                 </span>

@@ -49,9 +49,9 @@ export function PokerTable({ view, onAction, onRestart, mode }: GameBoardProps) 
             : v.community.map((c, i) => <PlayingCard key={i} card={c} />)}
         </div>
         <span className={styles.pot}>Pot: {v.pot} 🪙</span>
-        {v.yourHandName && (
+        {v.yourHandRank !== null && (
           <span className={styles.handName}>
-            {t('poker.yourHand')} {v.yourHandName}
+            {t('poker.yourHand')} {t(`poker.hand.${v.yourHandRank}`)}
           </span>
         )}
       </div>
@@ -74,9 +74,13 @@ export function PokerTable({ view, onAction, onRestart, mode }: GameBoardProps) 
         <div className={styles.panel}>
           <p className={styles.handInfo}>
             {v.hand
-              ? v.hand.winners.length > 1
-                ? t('poker.splitPot', { reason: v.hand.reason })
-                : t('poker.winsPot', { name: nameOf(v.hand.winners[0]), reason: v.hand.reason })
+              ? (() => {
+                  const reason =
+                    v.hand.rank !== null ? t(`poker.hand.${v.hand.rank}`) : t('poker.allFolded')
+                  return v.hand.winners.length > 1
+                    ? t('poker.splitPot', { reason })
+                    : t('poker.winsPot', { name: nameOf(v.hand.winners[0]), reason })
+                })()
               : t('poker.handEnd')}
           </p>
           <Button onClick={() => onAction({ type: 'next' })} className="neon-glow-cyan">

@@ -2,17 +2,19 @@
 
 import { Volume2, VolumeX } from 'lucide-react'
 import { useSound } from '@/lib/sound'
+import { useT } from '@/lib/i18n'
 
 /** Speaker on/off button (persists in localStorage via SoundProvider). */
 export function SoundToggle() {
   const { enabled, toggle } = useSound()
+  const { t } = useT()
   return (
     <button
       type="button"
       onClick={toggle}
-      aria-label={enabled ? 'Isključi zvuk' : 'Uključi zvuk'}
+      aria-label={enabled ? t('sound.mute') : t('sound.unmute')}
       aria-pressed={enabled}
-      title={enabled ? 'Zvuk uključen' : 'Zvuk isključen'}
+      title={enabled ? t('sound.on') : t('sound.off')}
       style={{
         display: 'inline-grid',
         placeItems: 'center',

@@ -105,7 +105,7 @@ function Setup({
             {(['easy', 'normal', 'hard'] as Difficulty[]).map((d) => (
               <button
                 key={d}
-                className={cn(styles.opt, difficulty === d && styles.optActive)}
+                className={cn(styles.opt, styles.optWide, difficulty === d && styles.optActive)}
                 onClick={() => setDifficulty(d)}
               >
                 {t(`diff.${d}`)}
@@ -149,11 +149,11 @@ function Game({
     const humans = total - bots
     const list: EnginePlayer[] = []
     for (let i = 0; i < humans; i++) {
-      list.push({ id: `h${i}`, username: humans === 1 ? 'Ti' : `Igrač ${i + 1}` })
+      list.push({ id: `h${i}`, username: humans === 1 ? t('setup.you') : t('setup.player', { n: i + 1 }) })
     }
-    for (let i = 0; i < bots; i++) list.push({ id: `b${i}`, username: `Bot ${i + 1}` })
+    for (let i = 0; i < bots; i++) list.push({ id: `b${i}`, username: t('setup.bot', { n: i + 1 }) })
     return list
-  }, [total, bots])
+  }, [total, bots, t])
   const aiIds = useMemo(() => players.filter((p) => p.id[0] === 'b').map((p) => p.id), [players])
   const humanIds = useMemo(() => players.filter((p) => p.id[0] === 'h').map((p) => p.id), [players])
 

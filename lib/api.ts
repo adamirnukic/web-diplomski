@@ -19,6 +19,7 @@ export interface GameStatRow {
 }
 
 export interface LeaderboardRow {
+  id: string
   username: string
   avatar?: string | null
   xp: number
@@ -93,6 +94,18 @@ export function apiMe() {
 
 export function apiStats(userId: string) {
   return request<{ stats: GameStatRow[] }>(`/api/stats/${userId}`)
+}
+
+export interface PublicProfile {
+  id: string
+  username: string
+  avatar: string | null
+}
+
+export function apiUserProfile(id: string) {
+  return request<{ user: PublicProfile; stats: GameStatRow[]; achievements: AchievementRow[] }>(
+    `/api/users/${id}`,
+  )
 }
 
 export function apiLeaderboard(scope?: 'friends', gameId?: string) {

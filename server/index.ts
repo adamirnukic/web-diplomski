@@ -8,6 +8,7 @@ import {
   type AuthUser,
   changePassword,
   loginUser,
+  publicProfile,
   publicUser,
   registerUser,
   requestPasswordReset,
@@ -143,6 +144,17 @@ app.patch('/api/profile', (req: Request, res: Response) => {
 
 app.get('/api/stats/:userId', (req: Request, res: Response) => {
   res.json({ stats: getStatsForUser(req.params.userId) })
+})
+
+/** Public profile of any user: basic info + per-game stats + achievements. */
+app.get('/api/users/:id', (req: Request, res: Response) => {
+  const user = publicProfile(req.params.id)
+  if (!user) return res.status(404).json({ error: 'Korisnik nije pronađen' })
+  res.json({
+    user,
+    stats: getStatsForUser(req.params.id),
+    achievements: listAchievements(req.params.id),
+  })
 })
 
 app.get('/api/history', (req: Request, res: Response) => {

@@ -16,11 +16,6 @@ import { useSound } from '@/lib/sound'
 import type { EnginePlayer } from '@shared/types'
 import styles from './local.module.css'
 
-const LOCAL_PLAYERS: EnginePlayer[] = [
-  { id: 'p1', username: 'Igrač 1' },
-  { id: 'p2', username: 'Igrač 2' },
-]
-
 function LocalRunner({
   gameId,
   secret,
@@ -30,9 +25,16 @@ function LocalRunner({
   secret: boolean
   reviewOnPass: boolean
 }) {
+  const { t } = useT()
   const engine = getEngine(gameId)!
   const Comp = getGameComponent(gameId)!
-  const players = useMemo(() => LOCAL_PLAYERS, [])
+  const players = useMemo<EnginePlayer[]>(
+    () => [
+      { id: 'p1', username: t('setup.player', { n: 1 }) },
+      { id: 'p2', username: t('setup.player', { n: 2 }) },
+    ],
+    [t],
+  )
   const { play } = useSound()
   const { view, viewFor, dispatch, restart, currentPlayer } = useLocalGame(engine, players)
   const [viewerId, setViewerId] = useState<string | null>(currentPlayer)
@@ -78,7 +80,7 @@ function LocalRunner({
 
   const handleRestart = () => {
     restart()
-    setViewerId(LOCAL_PLAYERS[0].id)
+    setViewerId(players[0].id)
     setReviewing(false)
     resultPlayed.current = false
   }
@@ -102,7 +104,7 @@ function LocalRunner({
 
   // Hand the device to the next player before revealing their secret view.
   if (currentPlayer !== viewerId) {
-    const name = players.find((p) => p.id === currentPlayer)?.username ?? 'Igrač'
+    const name = players.find((p) => p.id === currentPlayer)?.username ?? t('setup.player', { n: 1 })
     return <PassDevice name={name} onReady={() => setViewerId(currentPlayer)} />
   }
 

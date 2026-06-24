@@ -103,6 +103,15 @@ export function publicUser(id: string): UserProfile | null {
   }
 }
 
+/** Public-facing profile of any user — no email or friend code exposed. */
+export function publicProfile(id: string): { id: string; username: string; avatar: string | null } | null {
+  const row = db
+    .prepare('SELECT id, username, avatar FROM users WHERE id = ?')
+    .get(id) as { id: string; username: string; avatar: string | null } | undefined
+  if (!row) return null
+  return { id: row.id, username: row.username, avatar: row.avatar }
+}
+
 export function changePassword(userId: string, currentPassword: string, newPassword: string): void {
   const row = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(userId) as
     | { password_hash: string }
