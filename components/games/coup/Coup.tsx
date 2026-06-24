@@ -255,11 +255,17 @@ function Seats({ v }: { v: CoupView }) {
 }
 
 function Log({ v }: { v: CoupView }) {
+  const { t } = useT()
   return (
     <div className={styles.log}>
-      {v.log.slice(-4).map((line, i) => (
-        <span key={i}>· {line}</span>
-      ))}
+      {v.log.slice(-4).map((line, i) => {
+        // card ids inside a line get localized before interpolation
+        const p =
+          line.p && typeof line.p.card === 'string'
+            ? { ...line.p, card: t(`coup.card.${line.p.card}`) }
+            : line.p
+        return <span key={i}>· {t(line.k, p)}</span>
+      })}
     </div>
   )
 }

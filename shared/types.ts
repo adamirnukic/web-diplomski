@@ -22,6 +22,18 @@ export interface GameResult {
 }
 
 /**
+ * A localizable narration line emitted by an engine (log / status message).
+ * The engine stays language-agnostic: it emits a stable i18n `k`ey plus any
+ * interpolation `p`arams, and the client renders it with `t(k, p)`. This keeps
+ * the shared engine free of UI language while still letting both BS and EN
+ * players read the play-by-play.
+ */
+export interface LogLine {
+  k: string
+  p?: Record<string, string | number>
+}
+
+/**
  * A noteworthy thing that happened during a match, recorded by some engines as
  * play unfolds (e.g. a successful bluff that nobody challenged). The server
  * reads `state.events` at game-over to hand out event-based achievements that

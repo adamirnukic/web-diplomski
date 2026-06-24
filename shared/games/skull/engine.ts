@@ -1,4 +1,4 @@
-import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, LogLine, PlayerId } from '../../types'
 
 type Disc = 'flower' | 'skull'
 const POINTS_TO_WIN = 2
@@ -21,7 +21,7 @@ export interface SkullState {
   challenger: PlayerId | null
   flippedFlowers: number
   lastReveal: { owner: PlayerId; type: Disc } | null
-  message: string
+  message: LogLine
   events: GameEvent[]
 }
 
@@ -61,7 +61,7 @@ export interface SkullView {
   flipTargets: { id: PlayerId; name: string }[]
   flippedFlowers: number
   lastReveal: { ownerName: string; type: Disc } | null
-  message: string
+  message: LogLine
   result: GameResult | null
 }
 
@@ -114,7 +114,7 @@ function startRound(s: SkullState, starter: PlayerId): SkullState {
     lastReveal: null,
     phase: 'placing',
     turn: first,
-    message: `Nova runda — ${s.names[first]} polaže prvi`,
+    message: { k: 'skull.msg.newRound', p: { name: s.names[first] } },
   }
 }
 
@@ -181,7 +181,7 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
       challenger: null,
       flippedFlowers: 0,
       lastReveal: null,
-      message: '',
+      message: { k: '' },
       events: [],
     }
     return startRound(base, order[0])
@@ -196,7 +196,7 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
         if (action.disc === 'flower' && handFlowers(s, p) <= 0) throw new Error('Nemaš cvijet')
         if (action.disc === 'skull' && !handHasSkull(s, p)) throw new Error('Nemaš lobanju')
         const stack = { ...s.stack, [p]: [...s.stack[p], action.disc] }
-        return { ...s, stack, turn: nextAlive(s, p), message: `${s.names[p]} polaže disk` }
+        return { ...s, stack, turn: nextAlive(s, p), message: { k: 'skull.msg.place', p: { name: s.names[p] } } }
       }
       if (action.type === 'bid') {
         if (!s.order.every((id) => !s.alive[id] || s.stack[id].length >= 1)) {
@@ -211,7 +211,7 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
           bidder: p,
           turn: nextBidder({ ...s, passed: resetPassed(s) }, p) ?? p,
           passed: resetPassed(s),
-          message: `${s.names[p]} licitira ${action.count}`,
+          message: { k: 'skull.msg.bid', p: { name: s.names[p], count: action.count } },
         }
       }
       throw new Error('Položi disk ili licitiraj')
@@ -228,7 +228,7 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
           bid: action.count,
           bidder: p,
           turn: next ?? p,
-          message: `${s.names[p]} licitira ${action.count}`,
+          message: { k: 'skull.msg.bid', p: { name: s.names[p], count: action.count } },
         }
       }
       if (action.type === 'pass') {
@@ -241,10 +241,10 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
             phase: 'revealing',
             challenger: s.bidder,
             turn: s.bidder,
-            message: `${s.names[s.bidder]} mora okrenuti ${s.bid} cvijeta`,
+            message: { k: 'skull.msg.mustFlip', p: { name: s.names[s.bidder], bid: s.bid } },
           }
         }
-        return { ...s2, turn: nextBidder(s2, p) ?? p, message: `${s.names[p]} pasira` }
+        return { ...s2, turn: nextBidder(s2, p) ?? p, message: { k: 'skull.msg.pass', p: { name: s.names[p] } } }
       }
       throw new Error('Licitiraj ili pasiraj')
     }
@@ -267,7 +267,7 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
       let s2 = removeDisc({ ...s, revealedN, lastReveal }, challenger)
       s2 = {
         ...s2,
-        message: `Lobanja! ${s.names[challenger]} gubi disk`,
+        message: { k: 'skull.msg.skull', p: { name: s.names[challenger] } },
       }
       if (aliveCount(s2) <= 1) {
         return { ...s2, phase: 'matchover' }
@@ -289,7 +289,7 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
         events: [...s.events, { player: challenger, tag: 'sk.bid' }],
       }
       if (points[challenger] >= POINTS_TO_WIN) {
-        return { ...s2, phase: 'matchover', message: `${s.names[challenger]} pobjeđuje!` }
+        return { ...s2, phase: 'matchover', message: { k: 'skull.msg.wins', p: { name: s.names[challenger] } } }
       }
       return startRound(s2, challenger)
     }
@@ -298,7 +298,7 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
       revealedN,
       flippedFlowers,
       lastReveal,
-      message: `Cvijet! (${flippedFlowers}/${s.bid})`,
+      message: { k: 'skull.msg.flower', p: { n: flippedFlowers, bid: s.bid } },
     }
   },
 

@@ -1,4 +1,4 @@
-import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, LogLine, PlayerId } from '../../types'
 
 export type CardName =
   | 'spy'
@@ -55,8 +55,8 @@ export interface LLState {
   phase: 'turn' | 'peeking' | 'chancellor' | 'roundover' | 'matchover'
   drawn: boolean
   peek: { by: PlayerId; target: PlayerId; card: CardName } | null
-  round: { winners: PlayerId[]; reason: string } | null
-  log: string[]
+  round: { winners: PlayerId[]; reason: LogLine } | null
+  log: LogLine[]
   events: GameEvent[]
 }
 
@@ -89,9 +89,9 @@ export interface LLView {
   targetable: { id: PlayerId; name: string }[]
   mustPlayCountess: boolean
   peek: { targetName: string; card: CardName } | null
-  round: { winnerNames: string[]; reason: string } | null
+  round: { winnerNames: string[]; reason: LogLine } | null
   tokensToWin: number
-  log: string[]
+  log: LogLine[]
   result: GameResult | null
 }
 
@@ -151,7 +151,7 @@ function startRound(prev: LLState, firstPlayer: PlayerId): LLState {
     drawn: true,
     peek: null,
     round: null,
-    log: [`Nova runda — počinje ${prev.names[firstPlayer]}`],
+    log: [{ k: 'll.log.newRound', p: { name: prev.names[firstPlayer] } }],
   }
 }
 
@@ -170,7 +170,7 @@ function drawForPrince(s: { deck: CardName[]; setAside: CardName | null; setAsid
   return { card: null, deck: [...s.deck], setAsideUsed: s.setAsideUsed }
 }
 
-function endRound(s: LLState, winners: PlayerId[], reason: string): LLState {
+function endRound(s: LLState, winners: PlayerId[], reason: LogLine): LLState {
   const tokens = { ...s.tokens }
   for (const w of winners) tokens[w] = (tokens[w] ?? 0) + 1
   const log = [...s.log, reason]
@@ -179,7 +179,7 @@ function endRound(s: LLState, winners: PlayerId[], reason: string): LLState {
   const spies = s.order.filter((id) => !s.out[id] && s.discards[id].includes('spy'))
   if (spies.length === 1) {
     tokens[spies[0]] = (tokens[spies[0]] ?? 0) + 1
-    log.push(`${s.names[spies[0]]} dobija bonus token (Špijun)`)
+    log.push({ k: 'll.log.spyBonus', p: { name: s.names[spies[0]] } })
   }
 
   const champ = s.order.find((id) => tokens[id] >= s.target)
@@ -196,7 +196,7 @@ function endRound(s: LLState, winners: PlayerId[], reason: string): LLState {
 function showdown(s: LLState): LLState {
   const active = activePlayers(s)
   if (active.length <= 1) {
-    return endRound(s, [active[0]], `${s.names[active[0]]} osvaja rundu (posljednji preživjeli)`)
+    return endRound(s, [active[0]], { k: 'll.log.lastSurvivor', p: { name: s.names[active[0]] } })
   }
   let best = -1
   let top: PlayerId[] = []
@@ -221,13 +221,13 @@ function showdown(s: LLState): LLState {
     top = winners
   }
   const names = top.map((w) => s.names[w]).join(', ')
-  return endRound(s, top, `Špil prazan — pobjeđuje ${names}`)
+  return endRound(s, top, { k: 'll.log.deckEmpty', p: { names } })
 }
 
 function advanceTurn(s: LLState): LLState {
   const active = activePlayers(s)
   if (active.length <= 1) {
-    return endRound(s, [active[0]], `${s.names[active[0]]} osvaja rundu (posljednji preživjeli)`)
+    return endRound(s, [active[0]], { k: 'll.log.lastSurvivor', p: { name: s.names[active[0]] } })
   }
   const next = nextActive(s, s.turn)
   const prot = { ...s.protected, [next]: false }
@@ -305,7 +305,7 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
       const others = hand.filter((_, i) => i !== action.index)
       const deck = [...others, ...s.deck] // returned to the bottom
       const hands = { ...s.hands, [p]: [kept] }
-      return advanceTurn({ ...s, deck, hands, log: [...s.log, `${s.names[p]} zadržava kartu (Kancelar)`].slice(-8) })
+      return advanceTurn({ ...s, deck, hands, log: [...s.log, { k: 'll.log.chancellorKeep', p: { name: s.names[p] } }].slice(-8) })
     }
     // phase 'turn'
     if (action.type !== 'play') throw new Error('Odigraj kartu')
@@ -339,15 +339,15 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
     const valid = (id?: PlayerId) => id != null && targetable.includes(id)
 
     if (action.card === 'spy') {
-      log.push(`${s.names[p]} igra Špijuna`)
+      log.push({ k: 'll.log.spy', p: { name: s.names[p] } })
     } else if (action.card === 'princess') {
       out[p] = true
-      log.push(`${s.names[p]} je odigrao/la Princezu i ispada!`)
+      log.push({ k: 'll.log.princess', p: { name: s.names[p] } })
     } else if (action.card === 'handmaid') {
       prot[p] = true
-      log.push(`${s.names[p]} je zaštićen/a (Sluškinja)`)
+      log.push({ k: 'll.log.handmaid', p: { name: s.names[p] } })
     } else if (action.card === 'countess') {
-      log.push(`${s.names[p]} igra Groficu`)
+      log.push({ k: 'll.log.countess', p: { name: s.names[p] } })
     } else if (action.card === 'chancellor') {
       const drawCount = Math.min(2, deck.length)
       const drawn: CardName[] = []
@@ -355,28 +355,28 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
       hands[p] = [remaining, ...drawn]
       if (hands[p].length > 1) {
         enterChancellor = true
-        log.push(`${s.names[p]} igra Kancelara (vuče ${drawCount})`)
+        log.push({ k: 'll.log.chancellor', p: { name: s.names[p], n: drawCount } })
       } else {
-        log.push(`${s.names[p]} igra Kancelara (špil prazan)`)
+        log.push({ k: 'll.log.chancellorEmpty', p: { name: s.names[p] } })
       }
     } else if (action.card === 'guard') {
       if (valid(tgt) && action.guess && action.guess !== 'guard') {
         if (s.hands[tgt as PlayerId][0] === action.guess) {
           out[tgt as PlayerId] = true
           events.push({ player: p, tag: 'll.guard' })
-          log.push(`${s.names[p]}: Stražar pogodio — ${s.names[tgt as PlayerId]} ispada!`)
+          log.push({ k: 'll.log.guardHit', p: { name: s.names[p], target: s.names[tgt as PlayerId] } })
         } else {
-          log.push(`${s.names[p]}: Stražar promašio`)
+          log.push({ k: 'll.log.guardMiss', p: { name: s.names[p] } })
         }
       } else {
-        log.push(`${s.names[p]} igra Stražara (bez efekta)`)
+        log.push({ k: 'll.log.guardNone', p: { name: s.names[p] } })
       }
     } else if (action.card === 'priest') {
       if (valid(tgt)) {
         peek = { by: p, target: tgt as PlayerId, card: s.hands[tgt as PlayerId][0] }
-        log.push(`${s.names[p]} gleda kartu igrača ${s.names[tgt as PlayerId]}`)
+        log.push({ k: 'll.log.priest', p: { name: s.names[p], target: s.names[tgt as PlayerId] } })
       } else {
-        log.push(`${s.names[p]} igra Sveštenika (bez efekta)`)
+        log.push({ k: 'll.log.priestNone', p: { name: s.names[p] } })
       }
     } else if (action.card === 'baron') {
       if (valid(tgt)) {
@@ -384,15 +384,15 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
         const theirs = CARD_VALUE[s.hands[tgt as PlayerId][0]]
         if (mine > theirs) {
           out[tgt as PlayerId] = true
-          log.push(`${s.names[p]}: Baron — ${s.names[tgt as PlayerId]} ispada`)
+          log.push({ k: 'll.log.baronOut', p: { name: s.names[p], target: s.names[tgt as PlayerId] } })
         } else if (theirs > mine) {
           out[p] = true
-          log.push(`${s.names[p]}: Baron — ${s.names[p]} ispada`)
+          log.push({ k: 'll.log.baronOut', p: { name: s.names[p], target: s.names[p] } })
         } else {
-          log.push(`${s.names[p]}: Baron — neriješeno`)
+          log.push({ k: 'll.log.baronTie', p: { name: s.names[p] } })
         }
       } else {
-        log.push(`${s.names[p]} igra Barona (bez efekta)`)
+        log.push({ k: 'll.log.baronNone', p: { name: s.names[p] } })
       }
     } else if (action.card === 'king') {
       if (valid(tgt)) {
@@ -400,9 +400,9 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
         hands[p] = [theirCard]
         hands[tgt as PlayerId] = [remaining]
         remaining = theirCard
-        log.push(`${s.names[p]} mijenja karte s ${s.names[tgt as PlayerId]} (Kralj)`)
+        log.push({ k: 'll.log.king', p: { name: s.names[p], target: s.names[tgt as PlayerId] } })
       } else {
-        log.push(`${s.names[p]} igra Kralja (bez efekta)`)
+        log.push({ k: 'll.log.kingNone', p: { name: s.names[p] } })
       }
     } else if (action.card === 'prince') {
       const tp = tgt === p ? p : valid(tgt) ? (tgt as PlayerId) : p
@@ -410,14 +410,14 @@ export const loveLetterEngine: GameEngine<LLState, LLAction, LLView> = {
       discards[tp] = [...discards[tp], discardCard]
       if (discardCard === 'princess') {
         out[tp] = true
-        log.push(`${s.names[p]} (Princ): ${s.names[tp]} baca Princezu i ispada!`)
+        log.push({ k: 'll.log.princePrincess', p: { name: s.names[p], target: s.names[tp] } })
       } else {
         const d = drawForPrince({ deck, setAside: s.setAside, setAsideUsed })
         deck = d.deck
         setAsideUsed = d.setAsideUsed
         hands[tp] = d.card ? [d.card] : []
         if (tp === p) remaining = d.card ?? remaining
-        log.push(`${s.names[p]} (Princ): ${s.names[tp]} baca kartu i vuče novu`)
+        log.push({ k: 'll.log.prince', p: { name: s.names[p], target: s.names[tp] } })
       }
     }
 

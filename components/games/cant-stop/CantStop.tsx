@@ -80,10 +80,10 @@ export function CantStopBoard({ view, onAction, onRestart, mode }: GameBoardProp
           )}
         </div>
       ) : !v.yourTurn ? (
-        <p className={styles.wait}>{v.message}</p>
+        <p className={styles.wait}>{t(v.message.k, v.message.p)}</p>
       ) : v.phase === 'rolling' ? (
         <div className={styles.panel}>
-          <p className={styles.msg}>{v.message}</p>
+          <p className={styles.msg}>{t(v.message.k, v.message.p)}</p>
           <Button onClick={() => onAction({ type: 'roll' })} className="neon-glow-cyan">
             {t('cs.roll')}
           </Button>
