@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Send } from 'lucide-react'
+import { Send, MessageCircle, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n'
 import type { ChatMessage } from '@/lib/useRoom'
@@ -20,11 +20,12 @@ export function ChatBox({
 }) {
   const { t } = useT()
   const [text, setText] = useState('')
+  const [open, setOpen] = useState(true)
   const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight })
-  }, [messages])
+    if (open) listRef.current?.scrollTo({ top: listRef.current.scrollHeight })
+  }, [messages, open])
 
   const submit = () => {
     const v = text.trim()
@@ -33,9 +34,27 @@ export function ChatBox({
     setText('')
   }
 
+  // Minimized: a small floating pill that reopens the chat.
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className={styles.fab}
+        onClick={() => setOpen(true)}
+        aria-label={t('chat.expand')}
+      >
+        <MessageCircle size={18} />
+        {messages.length > 0 && <span className={styles.fabCount}>{messages.length}</span>}
+      </button>
+    )
+  }
+
   return (
     <div className={styles.box}>
-      <div className={styles.head}>{t('chat.title')}</div>
+      <button type="button" className={styles.head} onClick={() => setOpen(false)} aria-label={t('chat.minimize')}>
+        <span>{t('chat.title')}</span>
+        <ChevronDown size={16} />
+      </button>
       <div ref={listRef} className={styles.list}>
         {messages.length === 0 ? (
           <span className={styles.empty}>—</span>
@@ -66,7 +85,7 @@ export function ChatBox({
             if (e.key === 'Enter') submit()
           }}
         />
-        <button className={styles.send} onClick={submit} aria-label={t('chat.title')} type="button">
+        <button className={styles.send} onClick={submit} aria-label={t('common.send')} type="button">
           <Send size={16} />
         </button>
       </div>

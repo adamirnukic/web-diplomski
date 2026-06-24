@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Check, Copy, UserPlus, X } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
@@ -151,8 +152,10 @@ export default function FriendsPage() {
             <div className={styles.list}>
               {data.incoming.map((req) => (
                 <div key={req.id} className={styles.row}>
-                  <Avatar u={req.user} />
-                  <span className={styles.rowName}>{req.user.username}</span>
+                  <Link href={`/users/${req.user.id}`}><Avatar u={req.user} /></Link>
+                  <Link href={`/users/${req.user.id}`} className={styles.rowName} style={{ color: 'inherit', textDecoration: 'none' }}>
+                    {req.user.username}
+                  </Link>
                   <div className={styles.actions}>
                     <Button
                       size="sm"
@@ -181,8 +184,8 @@ export default function FriendsPage() {
           <div className={styles.list}>
             {data?.friends.map((f) => (
               <div key={f.id} className={styles.row}>
-                <Avatar u={f} />
-                <span className={styles.rowName}>
+                <Link href={`/users/${f.id}`}><Avatar u={f} /></Link>
+                <Link href={`/users/${f.id}`} className={styles.rowName} style={{ color: 'inherit', textDecoration: 'none' }}>
                   {f.username}
                   {online.has(f.id) && (
                     <span
@@ -197,7 +200,7 @@ export default function FriendsPage() {
                       }}
                     />
                   )}
-                </span>
+                </Link>
                 <Button size="sm" variant="ghost" onClick={() => remove(f.id)} disabled={busy}>
                   {t('fr.remove')}
                 </Button>
@@ -212,8 +215,10 @@ export default function FriendsPage() {
             <div className={styles.list}>
               {data.outgoing.map((req) => (
                 <div key={req.id} className={styles.row}>
-                  <Avatar u={req.user} />
-                  <span className={styles.rowName}>{req.user.username}</span>
+                  <Link href={`/users/${req.user.id}`}><Avatar u={req.user} /></Link>
+                  <Link href={`/users/${req.user.id}`} className={styles.rowName} style={{ color: 'inherit', textDecoration: 'none' }}>
+                    {req.user.username}
+                  </Link>
                   <span className={styles.muted}>{t('fr.pending')}</span>
                 </div>
               ))}

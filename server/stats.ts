@@ -109,7 +109,7 @@ export function getLeaderboard(userIds?: string[], gameId?: string): unknown[] {
 
   if (gameId) {
     // ranking within a single game
-    sql = `SELECT u.username AS username, u.avatar AS avatar,
+    sql = `SELECT u.id AS id, u.username AS username, u.avatar AS avatar,
                   s.xp AS xp, s.wins AS wins, s.games_played AS games_played
            FROM game_stats s JOIN users u ON u.id = s.user_id
            WHERE s.game_id = ?`
@@ -121,7 +121,7 @@ export function getLeaderboard(userIds?: string[], gameId?: string): unknown[] {
     sql += ` ORDER BY s.xp DESC, s.wins DESC LIMIT 100`
   } else {
     // aggregate across all games
-    sql = `SELECT u.username AS username, u.avatar AS avatar,
+    sql = `SELECT u.id AS id, u.username AS username, u.avatar AS avatar,
                   COALESCE(SUM(s.xp), 0) AS xp,
                   COALESCE(SUM(s.wins), 0) AS wins,
                   COALESCE(SUM(s.games_played), 0) AS games_played

@@ -13,6 +13,7 @@ import {
 } from '@shared/games/poker/engine'
 import { pokerAIDecision } from '@shared/games/poker/ai'
 import type { EnginePlayer } from '@shared/types'
+import { useT } from '@/lib/i18n'
 import { PokerTable } from './Poker'
 import styles from './PokerLocal.module.css'
 
@@ -30,13 +31,14 @@ export function PokerLocal() {
 }
 
 function Setup({ onStart }: { onStart: (total: number, bots: number) => void }) {
+  const { t } = useT()
   const [total, setTotal] = useState(2)
   const [bots, setBots] = useState(1)
   const humans = total - bots
 
-  const changeTotal = (t: number) => {
-    setTotal(t)
-    if (bots > t - 1) setBots(t - 1)
+  const changeTotal = (n: number) => {
+    setTotal(n)
+    if (bots > n - 1) setBots(n - 1)
   }
 
   return (
@@ -44,7 +46,7 @@ function Setup({ onStart }: { onStart: (total: number, bots: number) => void }) 
       <h2 className={styles.setupTitle}>Texas Hold&apos;em</h2>
 
       <div className={styles.field}>
-        <span className={styles.label}>Broj igrača</span>
+        <span className={styles.label}>{t('setup.players')}</span>
         <div className={styles.opts}>
           {[2, 3, 4, 5, 6].map((n) => (
             <button
@@ -59,7 +61,7 @@ function Setup({ onStart }: { onStart: (total: number, bots: number) => void }) 
       </div>
 
       <div className={styles.field}>
-        <span className={styles.label}>Botovi (AI)</span>
+        <span className={styles.label}>{t('setup.bots')}</span>
         <div className={styles.opts}>
           {Array.from({ length: total }).map((_, n) => (
             <button
@@ -75,12 +77,11 @@ function Setup({ onStart }: { onStart: (total: number, bots: number) => void }) 
       </div>
 
       <p className={styles.summary}>
-        <User size={15} /> {humans} {humans === 1 ? 'čovjek' : 'ljudi'} &nbsp;·&nbsp;
-        <Bot size={15} /> {bots} {bots === 1 ? 'bot' : 'botova'}
+        <User size={15} /> {humans} &nbsp;·&nbsp; <Bot size={15} /> {bots}
       </p>
 
       <Button onClick={() => onStart(total, bots)} size="lg" className="neon-glow-cyan">
-        Počni igru
+        {t('setup.start')}
       </Button>
     </div>
   )
@@ -95,15 +96,16 @@ function PokerGame({
   bots: number
   onExit: () => void
 }) {
+  const { t } = useT()
   const players = useMemo<EnginePlayer[]>(() => {
     const humans = total - bots
     const list: EnginePlayer[] = []
     for (let i = 0; i < humans; i++) {
-      list.push({ id: `h${i}`, username: humans === 1 ? 'Ti' : `Igrač ${i + 1}` })
+      list.push({ id: `h${i}`, username: humans === 1 ? t('setup.you') : t('setup.player', { n: i + 1 }) })
     }
-    for (let i = 0; i < bots; i++) list.push({ id: `b${i}`, username: `Bot ${i + 1}` })
+    for (let i = 0; i < bots; i++) list.push({ id: `b${i}`, username: t('setup.bot', { n: i + 1 }) })
     return list
-  }, [total, bots])
+  }, [total, bots, t])
 
   const aiIds = useMemo(() => players.filter((p) => p.id.startsWith('b')).map((p) => p.id), [players])
   const humanIds = useMemo(() => players.filter((p) => p.id.startsWith('h')).map((p) => p.id), [players])
@@ -164,7 +166,7 @@ function PokerGame({
     current !== viewer
 
   if (needHandoff && current) {
-    const name = players.find((p) => p.id === current)?.username ?? 'Igrač'
+    const name = players.find((p) => p.id === current)?.username ?? t('setup.player', { n: 1 })
     return <PassDevice name={name} onReady={() => setViewer(current)} />
   }
 
@@ -186,7 +188,7 @@ function PokerGame({
       <PokerTable view={view} onAction={onAction} mode="local" onRestart={restart} />
       {error && <p className={styles.err}>{error}</p>}
       <button className={styles.exit} onClick={onExit}>
-        ↩ Promijeni postavke
+        ↩ {t('setup.change')}
       </button>
     </div>
   )

@@ -66,8 +66,10 @@ export interface PokerView {
   canAct: boolean
   street: Street
   phase: 'betting' | 'handover' | 'matchover'
-  hand: { winners: PlayerId[]; reason: string } | null
-  yourHandName: string | null
+  /** rank is the hand category index (0-8) at showdown, or null when all folded */
+  hand: { winners: PlayerId[]; rank: number | null } | null
+  /** your current best-hand category index (0-8), or null pre-flop */
+  yourHandRank: number | null
   result: GameResult | null
 }
 
@@ -430,10 +432,18 @@ export const pokerEngine: GameEngine<PokerState, PokerAction, PokerView> = {
       canAct: s.phase === 'betting' && s.toAct === playerId,
       street: s.street,
       phase: s.phase,
-      hand: s.hand ? { winners: s.hand.winners, reason: s.hand.reason } : null,
-      yourHandName:
+      hand: s.hand
+        ? {
+            winners: s.hand.winners,
+            rank:
+              s.hand.revealed.length > 0
+                ? bestScore([...s.holes[s.hand.winners[0]], ...s.community])[0]
+                : null,
+          }
+        : null,
+      yourHandRank:
         s.community.length >= 3 && s.holes[playerId]?.length
-          ? handName([...s.holes[playerId], ...s.community])
+          ? bestScore([...s.holes[playerId], ...s.community])[0]
           : null,
       result,
     }
