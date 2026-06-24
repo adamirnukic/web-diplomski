@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 type Disc = 'flower' | 'skull'
 const POINTS_TO_WIN = 2
@@ -22,6 +22,7 @@ export interface SkullState {
   flippedFlowers: number
   lastReveal: { owner: PlayerId; type: Disc } | null
   message: string
+  events: GameEvent[]
 }
 
 export type SkullAction =
@@ -181,6 +182,7 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
       flippedFlowers: 0,
       lastReveal: null,
       message: '',
+      events: [],
     }
     return startRound(base, order[0])
   },
@@ -277,7 +279,15 @@ export const skullEngine: GameEngine<SkullState, SkullAction, SkullView> = {
     const flippedFlowers = s.flippedFlowers + 1
     if (flippedFlowers >= s.bid) {
       const points = { ...s.points, [challenger]: s.points[challenger] + 1 }
-      const s2 = { ...s, revealedN, lastReveal, flippedFlowers, points }
+      // flipped the whole bid in flowers without hitting a skull
+      const s2 = {
+        ...s,
+        revealedN,
+        lastReveal,
+        flippedFlowers,
+        points,
+        events: [...s.events, { player: challenger, tag: 'sk.bid' }],
+      }
       if (points[challenger] >= POINTS_TO_WIN) {
         return { ...s2, phase: 'matchover', message: `${s.names[challenger]} pobjeđuje!` }
       }

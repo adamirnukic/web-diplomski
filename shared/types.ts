@@ -22,6 +22,18 @@ export interface GameResult {
 }
 
 /**
+ * A noteworthy thing that happened during a match, recorded by some engines as
+ * play unfolds (e.g. a successful bluff that nobody challenged). The server
+ * reads `state.events` at game-over to hand out event-based achievements that
+ * can't be derived from win/loss stats alone. `player` is the seat/user id;
+ * `tag` is a stable key such as `'coup.bluff'`.
+ */
+export interface GameEvent {
+  player: PlayerId
+  tag: string
+}
+
+/**
  * A pure, deterministic game engine.
  *
  * The same engine instance powers both modes:

@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 /**
  * Coup (2-6). Full character set, actions, challenges and blocks.
@@ -82,6 +82,8 @@ export interface CoupState {
   exchange: Exchange | null
   winnerId: PlayerId | null
   log: string[]
+  /** event-based achievement signals collected during the match */
+  events: GameEvent[]
 }
 
 export interface CoupSeat {
@@ -185,6 +187,15 @@ function pushLog(s: CoupState, line: string) {
   if (s.log.length > 12) s.log = s.log.slice(-12)
 }
 
+/** A challengeable action claim went unchallenged — if the actor never had the
+ *  card it required, they just got away with a bluff. */
+function recordUnchallengedClaim(s: CoupState, p: Pending) {
+  const card = ACTION_CARD[p.action]
+  if (card && !s.influence[p.actor].includes(card)) {
+    s.events.push({ player: p.actor, tag: 'coup.bluff' })
+  }
+}
+
 function checkWin(s: CoupState): boolean {
   const alive = activePlayers(s)
   if (alive.length <= 1) {
@@ -193,7 +204,13 @@ function checkWin(s: CoupState): boolean {
     s.pending = null
     s.lose = null
     s.exchange = null
-    if (s.winnerId) pushLog(s, `${nm(s, s.winnerId)} pobjeđuje!`)
+    if (s.winnerId) {
+      pushLog(s, `${nm(s, s.winnerId)} pobjeđuje!`)
+      // won without ever revealing/losing an influence
+      if (s.revealed[s.winnerId].length === 0) {
+        s.events.push({ player: s.winnerId, tag: 'coup.flawless' })
+      }
+    }
     return true
   }
   return false
@@ -387,6 +404,7 @@ export const coupEngine: GameEngine<CoupState, CoupAction, CoupView> = {
       exchange: null,
       winnerId: null,
       log: [`Početak — na potezu ${names[order[0]]}`],
+      events: [],
     }
   },
 
@@ -446,7 +464,10 @@ export const coupEngine: GameEngine<CoupState, CoupAction, CoupView> = {
         const p = s.pending as Pending
         if (action.type === 'pass') {
           p.toAct.shift()
-          if (p.toAct.length === 0) resolveEffect(s)
+          if (p.toAct.length === 0) {
+            recordUnchallengedClaim(s, p)
+            resolveEffect(s)
+          }
         } else if (action.type === 'challenge') {
           if (!isChallengeable(p.action)) throw new Error('Ova akcija se ne može izazvati')
           doActionChallenge(s, playerId)
@@ -469,6 +490,10 @@ export const coupEngine: GameEngine<CoupState, CoupAction, CoupView> = {
         if (action.type === 'pass') {
           p.toAct.shift()
           if (p.toAct.length === 0) {
+            // an unchallenged block from someone who never had the card = bluff
+            if (p.blocker && p.blockCard && !s.influence[p.blocker].includes(p.blockCard)) {
+              s.events.push({ player: p.blocker, tag: 'coup.bluff' })
+            }
             pushLog(s, `Blok prolazi — akcija otkazana`)
             endTurn(s)
           }

@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 export type Choice = 'rock' | 'paper' | 'scissors'
 const TARGET = 3 // best of 5
@@ -9,6 +9,7 @@ export interface RpsState {
   round: number
   choices: Partial<Record<PlayerId, Choice>>
   last: { choices: Record<PlayerId, Choice>; winnerId: PlayerId | null } | null
+  events: GameEvent[]
 }
 
 export type RpsAction = { type: 'choose'; choice: Choice }
@@ -60,6 +61,7 @@ export const rockPaperScissorsEngine: GameEngine<RpsState, RpsAction, RpsView> =
       round: 1,
       choices: {},
       last: null,
+      events: [],
     }
   },
 
@@ -82,12 +84,23 @@ export const rockPaperScissorsEngine: GameEngine<RpsState, RpsAction, RpsView> =
       const scores = { ...state.scores }
       if (winnerId) scores[winnerId] = (scores[winnerId] ?? 0) + 1
 
+      // match-winning round with the opponent still on zero = a clean sweep
+      let events = state.events
+      const sa = scores[a] ?? 0
+      const sb = scores[b] ?? 0
+      if (sa >= TARGET || sb >= TARGET) {
+        const champ = sa > sb ? a : b
+        const loserScore = champ === a ? sb : sa
+        if (loserScore === 0) events = [...state.events, { player: champ, tag: 'rps.flawless' }]
+      }
+
       return {
         ...state,
         scores,
         round: state.round + 1,
         choices: {},
         last: { choices: { [a]: ca, [b]: cb }, winnerId },
+        events,
       }
     }
 

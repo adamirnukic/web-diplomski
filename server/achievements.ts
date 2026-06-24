@@ -32,6 +32,43 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'poker_win', icon: '♠️', test: (a) => (a.perGameWins['poker'] ?? 0) >= 1 },
 ]
 
+interface EventDef {
+  id: string
+  icon: string
+}
+
+/**
+ * Level-3 achievements. These can't be derived from win/loss stats — they fire
+ * on a specific moment an engine records into `state.events` during play (see
+ * `GameEvent`). The map key is the engine's event tag; `grantEvent` awards the
+ * matching badge when the server processes a finished match. Names/descriptions
+ * are localized client-side via `ach.<id>.name` / `ach.<id>.desc`.
+ */
+export const EVENT_ACHIEVEMENTS: Record<string, EventDef> = {
+  'coup.bluff': { id: 'coup_bluff', icon: '🎭' },
+  'coup.flawless': { id: 'coup_flawless', icon: '💎' },
+  'hm.clutch': { id: 'hm_clutch', icon: '😅' },
+  'ttt.fast': { id: 'ttt_fast', icon: '⚡' },
+  'c4.diagonal': { id: 'c4_diagonal', icon: '🔷' },
+  'ck.combo': { id: 'ck_combo', icon: '🔗' },
+  'bs.flawless': { id: 'bs_flawless', icon: '⚓' },
+  'bj.blackjack': { id: 'bj_blackjack', icon: '💰' },
+  'pk.bighand': { id: 'pk_bighand', icon: '🎰' },
+  'y.yahtzee': { id: 'y_yahtzee', icon: '🎲' },
+  'mm.flawless': { id: 'mm_flawless', icon: '🧩' },
+  'rps.flawless': { id: 'rps_flawless', icon: '🧹' },
+  'tq.perfect': { id: 'tq_perfect', icon: '🧠' },
+  'ms.clear': { id: 'ms_clear', icon: '💣' },
+  'll.guard': { id: 'll_guard', icon: '💂' },
+  'db.double': { id: 'db_double', icon: '📦' },
+  'pd.caught': { id: 'pd_caught', icon: '🔍' },
+  'sk.bid': { id: 'sk_bid', icon: '😎' },
+  'cs.column': { id: 'cs_column', icon: '🏔️' },
+}
+
+/** Distinct event-badge defs, in stable order, for listing/merging. */
+const EVENT_DEFS: EventDef[] = [...new Map(Object.values(EVENT_ACHIEVEMENTS).map((d) => [d.id, d])).values()]
+
 function aggregate(userId: string): Agg {
   const rows = db
     .prepare('SELECT game_id, wins, games_played, xp FROM game_stats WHERE user_id = ?')
@@ -90,6 +127,17 @@ export function awardAchievements(userId: string): { id: string; icon: string }[
   return newly
 }
 
+/** Award the event-based badge for a given engine event tag.
+ *  Idempotent: returns the badge only the first time it's granted. */
+export function grantEvent(userId: string, tag: string): { id: string; icon: string } | null {
+  const def = EVENT_ACHIEVEMENTS[tag]
+  if (!def) return null
+  const res = db
+    .prepare('INSERT OR IGNORE INTO achievements (user_id, achievement_id, earned_at) VALUES (?, ?, ?)')
+    .run(userId, def.id, Date.now())
+  return res.changes > 0 ? { id: def.id, icon: def.icon } : null
+}
+
 export interface AchievementRow {
   id: string
   icon: string
@@ -104,10 +152,11 @@ export function listForUser(userId: string): AchievementRow[] {
       earned_at: number
     }[]).map((r) => [r.achievement_id, r.earned_at]),
   )
-  return ACHIEVEMENTS.map((def) => ({
+  const toRow = (def: { id: string; icon: string }): AchievementRow => ({
     id: def.id,
     icon: def.icon,
     earned: earned.has(def.id),
     earned_at: earned.get(def.id) ?? null,
-  }))
+  })
+  return [...ACHIEVEMENTS.map(toRow), ...EVENT_DEFS.map(toRow)]
 }

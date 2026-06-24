@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 import { shuffle } from '../_cards'
 
 interface Question {
@@ -31,6 +31,7 @@ export interface TriviaState {
   turn: PlayerId
   scores: Record<PlayerId, number>
   pending: { chosen: number } | null
+  events: GameEvent[]
 }
 
 export type TriviaAction = { type: 'answer'; option: number } | { type: 'next' }
@@ -76,6 +77,7 @@ export const triviaEngine: GameEngine<TriviaState, TriviaAction, TriviaView> = {
       turn: p1.id,
       scores: { [p1.id]: 0, [p2.id]: 0 },
       pending: null,
+      events: [],
     }
   },
 
@@ -98,7 +100,22 @@ export const triviaEngine: GameEngine<TriviaState, TriviaAction, TriviaView> = {
     if (action.type === 'next') {
       if (!state.pending) throw new Error('Prvo odgovori')
       const other = state.order.find((id) => id !== playerId) as PlayerId
-      return { ...state, index: state.index + 1, pending: null, turn: other }
+      const nextIndex = state.index + 1
+      let events = state.events
+      if (nextIndex >= state.questions.length) {
+        // game over — players alternate, so order[0] answered ceil, order[1] floor
+        const total = state.questions.length
+        const [a, b] = state.order
+        const answered: Record<PlayerId, number> = {
+          [a]: Math.ceil(total / 2),
+          [b]: Math.floor(total / 2),
+        }
+        const perfect = state.order
+          .filter((id) => answered[id] > 0 && (state.scores[id] ?? 0) === answered[id])
+          .map((id) => ({ player: id, tag: 'tq.perfect' }))
+        if (perfect.length) events = [...state.events, ...perfect]
+      }
+      return { ...state, index: nextIndex, pending: null, turn: other, events }
     }
 
     throw new Error('Nepoznata akcija')

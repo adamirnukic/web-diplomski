@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 const START_DICE = 5
 
@@ -25,6 +25,7 @@ export interface PerudoState {
     bidderWasTruthful: boolean
   } | null
   message: string
+  events: GameEvent[]
 }
 
 export type PerudoAction =
@@ -121,6 +122,7 @@ export const perudoEngine: GameEngine<PerudoState, PerudoAction, PerudoView> = {
       bid: null,
       lastRound: null,
       message: `${names[order[0]]} otvara licitaciju`,
+      events: [],
     }
   },
 
@@ -159,10 +161,15 @@ export const perudoEngine: GameEngine<PerudoState, PerudoAction, PerudoView> = {
     const alive = { ...s.alive }
     if (dice[loser].length === 0) alive[loser] = false
 
+    // challenger correctly called a bluff (the bid was a lie)
+    const events = !bidderWasTruthful
+      ? [...s.events, { player: p, tag: 'pd.caught' }]
+      : s.events
+
     const lastRound = { revealed, bid: s.bid, actual, loser, bidderWasTruthful }
     const aliveCount = s.order.filter((id) => alive[id]).length
     if (aliveCount <= 1) {
-      return { ...s, dice, alive, phase: 'matchover', bid: null, lastRound, message: 'Kraj!' }
+      return { ...s, dice, alive, phase: 'matchover', bid: null, lastRound, message: 'Kraj!', events }
     }
 
     const starter = alive[loser] ? loser : nextAlive(s.order, alive, loser)
@@ -177,6 +184,7 @@ export const perudoEngine: GameEngine<PerudoState, PerudoAction, PerudoView> = {
       turn: starter,
       lastRound,
       message: msg,
+      events,
     }
   },
 

@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 export type Piece = 'r' | 'R' | 'b' | 'B'
 export type Color = 'r' | 'b'
@@ -15,6 +15,7 @@ export interface CheckersState {
   order: [PlayerId, PlayerId] // [red, black]
   turn: PlayerId
   mustContinue: number | null // square that must keep capturing
+  events: GameEvent[]
 }
 
 export type CheckersAction = { type: 'move'; from: number; to: number }
@@ -133,7 +134,7 @@ export const checkersEngine: GameEngine<CheckersState, CheckersAction, CheckersV
       if (r < 3) board[i] = 'b'
       else if (r > 4) board[i] = 'r'
     }
-    return { board, order: [p1.id, p2.id], turn: p1.id, mustContinue: null }
+    return { board, order: [p1.id, p2.id], turn: p1.id, mustContinue: null, events: [] }
   },
 
   applyAction(state, playerId, action) {
@@ -171,7 +172,13 @@ export const checkersEngine: GameEngine<CheckersState, CheckersAction, CheckersV
       turn = state.order.find((id) => id !== playerId) as PlayerId
     }
 
-    return { ...state, board, turn, mustContinue }
+    // a capture made while already mid-chain = a multi-jump combo
+    const events =
+      move.capture && state.mustContinue !== null
+        ? [...state.events, { player: playerId, tag: 'ck.combo' }]
+        : state.events
+
+    return { ...state, board, turn, mustContinue, events }
   },
 
   getView(state, playerId) {
