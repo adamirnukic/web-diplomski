@@ -1,4 +1,4 @@
-import type { GameEngine, GameResult, PlayerId } from '../../types'
+import type { GameEngine, GameEvent, GameResult, PlayerId } from '../../types'
 
 const MAX_WRONG = 6
 
@@ -8,6 +8,8 @@ export interface HangmanState {
   word: string // uppercase, letters/spaces
   guessed: string[]
   wrong: number
+  /** event-based achievement signals collected during the match */
+  events: GameEvent[]
 }
 
 export type HangmanAction =
@@ -58,7 +60,7 @@ export const hangmanEngine: GameEngine<HangmanState, HangmanAction, HangmanView>
   createInitialState(players) {
     if (players.length !== 2) throw new Error('Vješalo zahtijeva 2 igrača')
     const [p1, p2] = players
-    return { order: [p1.id, p2.id], phase: 'setup', word: '', guessed: [], wrong: 0 }
+    return { order: [p1.id, p2.id], phase: 'setup', word: '', guessed: [], wrong: 0, events: [] }
   },
 
   applyAction(state, playerId, action) {
@@ -82,7 +84,13 @@ export const hangmanEngine: GameEngine<HangmanState, HangmanAction, HangmanView>
       if (state.guessed.includes(letter)) throw new Error('Slovo je već pokušano')
       const guessed = [...state.guessed, letter]
       const wrong = state.word.includes(letter) ? state.wrong : state.wrong + 1
-      return { ...state, guessed, wrong }
+      const events = [...state.events]
+      // solved the word on the last life left (one more wrong = a loss)
+      const solved = uniqueLetters(state.word).every((l) => guessed.includes(l))
+      if (solved && wrong === MAX_WRONG - 1) {
+        events.push({ player: guesser, tag: 'hm.clutch' })
+      }
+      return { ...state, guessed, wrong, events }
     }
 
     throw new Error('Nepoznata akcija')

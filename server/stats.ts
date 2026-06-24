@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { db } from './db'
-import { awardAchievements } from './achievements'
+import { awardAchievements, grantEvent } from './achievements'
 import { emitToUser } from './presence'
-import type { GameResult, PlayerId } from '../shared/types'
+import type { GameEvent, GameResult, PlayerId } from '../shared/types'
 
 const XP_WIN = 30
 const XP_DRAW = 12
@@ -11,6 +11,8 @@ const XP_LOSS = 5
 interface MinimalRoom {
   gameId: string
   players: Map<string, { id: PlayerId }>
+  /** authoritative engine state; read for event-based achievements */
+  state?: unknown
 }
 
 /** Update per-player game_stats and append a match row. Online results only. */
@@ -63,10 +65,21 @@ export function recordMatchResult(room: MinimalRoom, result: GameResult): void {
     'INSERT INTO matches (id, game_id, mode, result, created_at) VALUES (?, ?, ?, ?, ?)',
   ).run(matchId, room.gameId, 'online', JSON.stringify(result), ts)
 
-  // hand out any newly-earned achievements and notify the players
+  // hand out any newly-earned stat-based achievements and notify the players
   for (const player of room.players.values()) {
     for (const ach of awardAchievements(player.id)) {
       emitToUser(player.id, 'achievement:earned', ach)
+    }
+  }
+
+  // hand out event-based achievements the engine recorded during the match
+  const state = room.state as { events?: GameEvent[] } | undefined
+  if (state?.events?.length) {
+    const userIds = new Set([...room.players.values()].map((p) => p.id))
+    for (const ev of state.events) {
+      if (!userIds.has(ev.player)) continue // ignore bots / stale ids
+      const ach = grantEvent(ev.player, ev.tag)
+      if (ach) emitToUser(ev.player, 'achievement:earned', ach)
     }
   }
 }

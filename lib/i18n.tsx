@@ -392,6 +392,12 @@ const bs: Dict = {
   'ach.coup_win.desc': 'Pobijedi u igri Coup.',
   'ach.poker_win.name': 'Kockar',
   'ach.poker_win.desc': 'Pobijedi u pokeru.',
+  'ach.coup_bluff.name': 'Majstor blefa',
+  'ach.coup_bluff.desc': 'Izvedi blef u Coup-u koji niko ne izazove.',
+  'ach.coup_flawless.name': 'Netaknut',
+  'ach.coup_flawless.desc': 'Pobijedi u Coup-u bez izgubljenog uticaja.',
+  'ach.hm_clutch.name': 'Za dlaku',
+  'ach.hm_clutch.desc': 'Pogodi riječ u Vješalu s posljednjim životom.',
 }
 
 const en: Dict = {
@@ -780,6 +786,12 @@ const en: Dict = {
   'ach.coup_win.desc': 'Win a game of Coup.',
   'ach.poker_win.name': 'Gambler',
   'ach.poker_win.desc': 'Win a game of poker.',
+  'ach.coup_bluff.name': 'Master Bluffer',
+  'ach.coup_bluff.desc': 'Pull off a bluff in Coup that nobody challenges.',
+  'ach.coup_flawless.name': 'Untouchable',
+  'ach.coup_flawless.desc': 'Win a game of Coup without losing any influence.',
+  'ach.hm_clutch.name': 'Nail-Biter',
+  'ach.hm_clutch.desc': 'Guess the Hangman word on your last life.',
 }
 
 const DICTS: Record<Lang, Dict> = { bs, en }
