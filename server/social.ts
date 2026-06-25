@@ -1,6 +1,7 @@
 import type { Server, Socket } from 'socket.io'
 import { addSocket, emitToUser, isOnline, onlineFriendIds, removeSocket } from './presence'
 import { areFriends, friendIds } from './friends'
+import { addNotification } from './notifications'
 
 type Ack = (response: unknown) => void
 
@@ -36,6 +37,7 @@ export function registerSocialHandlers(_io: Server, socket: Socket) {
         gameId,
         code,
       })
+      addNotification(toUserId, 'game_invite', { fromName: user.username, gameId, code })
       ack?.({ ok: true })
     },
   )

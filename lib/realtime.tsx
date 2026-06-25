@@ -11,7 +11,14 @@ import {
 } from 'react'
 import type { Socket } from 'socket.io-client'
 import { createSocket } from './socket'
-import { apiFriends, getToken, type FriendUser } from './api'
+import {
+  apiFriends,
+  apiMarkNotificationsRead,
+  apiNotifications,
+  getToken,
+  type FriendUser,
+  type NotificationRow,
+} from './api'
 import { useAuth } from './auth'
 
 export interface GameInvite {
@@ -34,6 +41,9 @@ interface RealtimeValue {
   incomingCount: number
   invites: GameInvite[]
   achievements: AchievementPop[]
+  notifications: NotificationRow[]
+  unreadCount: number
+  markNotificationsRead: () => void
   sendInvite: (toUserId: string, gameId: string, code: string) => void
   dismissInvite: (id: string) => void
   dismissAchievement: (key: string) => void
@@ -54,6 +64,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   const [incomingCount, setIncomingCount] = useState(0)
   const [invites, setInvites] = useState<GameInvite[]>([])
   const [achievements, setAchievements] = useState<AchievementPop[]>([])
+  const [notifications, setNotifications] = useState<NotificationRow[]>([])
 
   const refreshSocial = useCallback(() => {
     apiFriends()
@@ -62,6 +73,17 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
         setIncomingCount(d.incoming.length)
       })
       .catch(() => {})
+  }, [])
+
+  const refreshNotifications = useCallback(() => {
+    apiNotifications()
+      .then((d) => setNotifications(d.notifications))
+      .catch(() => {})
+  }, [])
+
+  const markNotificationsRead = useCallback(() => {
+    setNotifications((prev) => prev.map((n) => (n.read ? n : { ...n, read: true })))
+    apiMarkNotificationsRead().catch(() => {})
   }, [])
 
   const uid = user?.id
@@ -74,9 +96,11 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       setIncomingCount(0)
       setInvites([])
       setAchievements([])
+      setNotifications([])
       return
     }
     refreshSocial()
+    refreshNotifications()
     const token = getToken()
     if (!token) return
     const socket = createSocket(token)
@@ -99,12 +123,15 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     socket.on('achievement:earned', ({ id, icon }: { id: string; icon: string }) =>
       setAchievements((prev) => [...prev, { key: `${Date.now()}-${Math.random()}`, id, icon }]),
     )
+    socket.on('notification:new', (n: NotificationRow) =>
+      setNotifications((prev) => [n, ...prev].slice(0, 30)),
+    )
 
     return () => {
       socket.close()
       socketRef.current = null
     }
-  }, [uid, refreshSocial])
+  }, [uid, refreshSocial, refreshNotifications])
 
   const sendInvite = useCallback((toUserId: string, gameId: string, code: string) => {
     socketRef.current?.emit('invite:send', { toUserId, gameId, code }, () => {})
@@ -120,6 +147,8 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const unreadCount = notifications.reduce((n, x) => n + (x.read ? 0 : 1), 0)
+
   return (
     <Ctx.Provider
       value={{
@@ -128,6 +157,9 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
         incomingCount,
         invites,
         achievements,
+        notifications,
+        unreadCount,
+        markNotificationsRead,
         sendInvite,
         dismissInvite,
         dismissAchievement,

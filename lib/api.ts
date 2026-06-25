@@ -7,6 +7,9 @@ export interface AuthUser {
   username: string
   avatar: string | null
   friend_code: string
+  bio?: string | null
+  favorite_game?: string | null
+  created_at?: number | null
 }
 
 export interface GameStatRow {
@@ -100,6 +103,9 @@ export interface PublicProfile {
   id: string
   username: string
   avatar: string | null
+  bio: string | null
+  favorite_game: string | null
+  created_at: number | null
 }
 
 export function apiUserProfile(id: string) {
@@ -158,11 +164,32 @@ export function apiResetPassword(token: string, password: string) {
   })
 }
 
-export function apiUpdateProfile(updates: { username?: string; avatar?: string | null }) {
+export function apiUpdateProfile(updates: {
+  username?: string
+  avatar?: string | null
+  bio?: string | null
+  favorite_game?: string | null
+}) {
   return request<{ user: AuthUser; token: string }>('/api/profile', {
     method: 'PATCH',
     body: JSON.stringify(updates),
   })
+}
+
+export interface NotificationRow {
+  id: string
+  type: 'friend_request' | 'friend_accepted' | 'game_invite'
+  data: { fromName?: string; byName?: string; gameId?: string; code?: string }
+  read: boolean
+  created_at: number
+}
+
+export function apiNotifications() {
+  return request<{ notifications: NotificationRow[] }>('/api/notifications')
+}
+
+export function apiMarkNotificationsRead() {
+  return request<{ ok: true }>('/api/notifications/read', { method: 'POST' })
 }
 
 export function apiFriends() {

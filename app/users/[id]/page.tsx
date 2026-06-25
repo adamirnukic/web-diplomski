@@ -81,6 +81,22 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
           <div className={styles.headMain}>
             <h1 className={styles.name}>{user.username}</h1>
             <p className={styles.level}>{t('prof.level', { level, xp: totalXp })}</p>
+            <div className={styles.metaLines}>
+              {user.favorite_game && getGameMeta(user.favorite_game) && (
+                <span className={styles.metaLine}>
+                  ⭐ {t('prof.favorite')}: {t(`game.${user.favorite_game}.name`)}
+                </span>
+              )}
+              {user.created_at != null && (
+                <span className={styles.metaLine}>
+                  🗓️ {t('prof.memberSince', { date: new Date(user.created_at).toLocaleDateString() })}
+                </span>
+              )}
+              {earned.length > 0 && (
+                <span className={styles.metaLine}>🏅 {t('prof.badgesEarned', { n: earned.length })}</span>
+              )}
+            </div>
+            {user.bio && <p className={styles.bio}>{user.bio}</p>}
           </div>
         </div>
 

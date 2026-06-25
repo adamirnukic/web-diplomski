@@ -72,10 +72,21 @@ db.exec(`
     FOREIGN KEY (requester) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (recipient) REFERENCES users(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS notifications (
+    id          TEXT PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    type        TEXT NOT NULL,
+    data        TEXT NOT NULL,
+    read        INTEGER NOT NULL DEFAULT 0,
+    created_at  INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at);
 `)
 
-// Migrate older databases that predate the avatar / friend_code columns.
-for (const col of ['avatar TEXT', 'friend_code TEXT']) {
+// Migrate older databases that predate newer user columns.
+for (const col of ['avatar TEXT', 'friend_code TEXT', 'bio TEXT', 'favorite_game TEXT']) {
   try {
     db.exec(`ALTER TABLE users ADD COLUMN ${col}`)
   } catch {

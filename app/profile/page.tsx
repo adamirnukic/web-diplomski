@@ -16,7 +16,7 @@ import {
   type GameStatRow,
   type MatchRow,
 } from '@/lib/api'
-import { getGameMeta } from '@/lib/games-catalog'
+import { GAMES, getGameMeta } from '@/lib/games-catalog'
 import { useRealtime } from '@/lib/realtime'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -72,6 +72,8 @@ export default function ProfilePage() {
   const [openBadge, setOpenBadge] = useState<string | null>(null)
 
   const [username, setUsername] = useState('')
+  const [bio, setBio] = useState('')
+  const [favoriteGame, setFavoriteGame] = useState('')
   const [profileMsg, setProfileMsg] = useState<{ ok?: string; err?: string }>({})
   const [pw, setPw] = useState({ current: '', next: '' })
   const [pwMsg, setPwMsg] = useState<{ ok?: string; err?: string }>({})
@@ -83,7 +85,11 @@ export default function ProfilePage() {
   }, [loading, user, router])
 
   useEffect(() => {
-    if (user) setUsername(user.username)
+    if (user) {
+      setUsername(user.username)
+      setBio(user.bio ?? '')
+      setFavoriteGame(user.favorite_game ?? '')
+    }
   }, [user])
 
   useEffect(() => {
@@ -119,6 +125,7 @@ export default function ProfilePage() {
   const totalWins = stats.reduce((s, r) => s + r.wins, 0)
   const totalGames = stats.reduce((s, r) => s + r.games_played, 0)
   const level = Math.floor(totalXp / 100) + 1
+  const earnedCount = achievements.filter((a) => a.earned).length
 
   const saveUsername = async () => {
     setProfileMsg({})
@@ -127,6 +134,20 @@ export default function ProfilePage() {
       const r = await apiUpdateProfile({ username })
       applySession(r.user, r.token)
       setProfileMsg({ ok: t('prof.savedUsername') })
+    } catch (e) {
+      setProfileMsg({ err: (e as Error).message })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const saveDetails = async () => {
+    setProfileMsg({})
+    setBusy(true)
+    try {
+      const r = await apiUpdateProfile({ bio, favorite_game: favoriteGame || null })
+      applySession(r.user, r.token)
+      setProfileMsg({ ok: t('prof.savedDetails') })
     } catch (e) {
       setProfileMsg({ err: (e as Error).message })
     } finally {
@@ -217,6 +238,22 @@ export default function ProfilePage() {
               </button>
               {copied && <span className={styles.ok}>{t('common.copied')}</span>}
             </span>
+            <div className={styles.metaLines}>
+              {user.favorite_game && getGameMeta(user.favorite_game) && (
+                <span className={styles.metaLine}>
+                  ⭐ {t('prof.favorite')}: {t(`game.${user.favorite_game}.name`)}
+                </span>
+              )}
+              {user.created_at != null && (
+                <span className={styles.metaLine}>
+                  🗓️ {t('prof.memberSince', { date: new Date(user.created_at).toLocaleDateString() })}
+                </span>
+              )}
+              {earnedCount > 0 && (
+                <span className={styles.metaLine}>🏅 {t('prof.badgesEarned', { n: earnedCount })}</span>
+              )}
+            </div>
+            {user.bio && <p className={styles.bio}>{user.bio}</p>}
           </div>
           <Button variant="outline" size="sm" onClick={() => setEditing((v) => !v)}>
             <Pencil size={15} /> {editing ? t('prof.close') : t('prof.edit')}
@@ -258,6 +295,56 @@ export default function ProfilePage() {
               </div>
               {profileMsg.ok && <span className={styles.ok}>{profileMsg.ok}</span>}
               {profileMsg.err && <span className={styles.err}>{profileMsg.err}</span>}
+            </div>
+
+            <div className={styles.editBlock}>
+              <h3>{t('prof.detailsSection')}</h3>
+              <label style={{ display: 'grid', gap: '0.3rem', fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>
+                {t('prof.bio')}
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  maxLength={280}
+                  rows={3}
+                  placeholder={t('prof.bioPlaceholder')}
+                  style={{
+                    background: 'var(--secondary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 8,
+                    padding: '0.5rem 0.6rem',
+                    color: 'inherit',
+                    font: 'inherit',
+                    resize: 'vertical',
+                  }}
+                />
+              </label>
+              <div className={styles.editRow}>
+                <label>
+                  {t('prof.favorite')}
+                  <select
+                    value={favoriteGame}
+                    onChange={(e) => setFavoriteGame(e.target.value)}
+                    style={{
+                      background: 'var(--secondary)',
+                      color: 'inherit',
+                      border: '1px solid var(--border)',
+                      borderRadius: 8,
+                      padding: '0.45rem 0.6rem',
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    <option value="">—</option>
+                    {GAMES.filter((g) => g.implemented).map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {t(`game.${g.id}.name`)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <Button onClick={saveDetails} disabled={busy} className="neon-glow-cyan">
+                  {t('common.save')}
+                </Button>
+              </div>
             </div>
 
             <div className={styles.editBlock}>
