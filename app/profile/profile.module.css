@@ -142,6 +142,26 @@
   color: var(--neon-magenta);
 }
 
+.metaLines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  margin-top: 0.45rem;
+}
+
+.metaLine {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.bio {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .sectionRow {
   display: flex;
   align-items: center;

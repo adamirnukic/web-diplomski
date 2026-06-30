@@ -79,6 +79,9 @@ export function getUserById(id: string): AuthUser | null {
 export interface UserProfile extends AuthUser {
   avatar: string | null
   friend_code: string
+  bio: string | null
+  favorite_game: string | null
+  created_at: number | null
 }
 
 interface ProfileRow {
@@ -87,11 +90,16 @@ interface ProfileRow {
   username: string
   avatar: string | null
   friend_code: string | null
+  bio: string | null
+  favorite_game: string | null
+  created_at: number | null
 }
 
 export function publicUser(id: string): UserProfile | null {
   const row = db
-    .prepare('SELECT id, email, username, avatar, friend_code FROM users WHERE id = ?')
+    .prepare(
+      'SELECT id, email, username, avatar, friend_code, bio, favorite_game, created_at FROM users WHERE id = ?',
+    )
     .get(id) as ProfileRow | undefined
   if (!row) return null
   return {
@@ -100,16 +108,35 @@ export function publicUser(id: string): UserProfile | null {
     username: row.username,
     avatar: row.avatar,
     friend_code: row.friend_code ?? ensureFriendCode(id),
+    bio: row.bio,
+    favorite_game: row.favorite_game,
+    created_at: row.created_at,
   }
 }
 
+export interface PublicProfile {
+  id: string
+  username: string
+  avatar: string | null
+  bio: string | null
+  favorite_game: string | null
+  created_at: number | null
+}
+
 /** Public-facing profile of any user — no email or friend code exposed. */
-export function publicProfile(id: string): { id: string; username: string; avatar: string | null } | null {
+export function publicProfile(id: string): PublicProfile | null {
   const row = db
-    .prepare('SELECT id, username, avatar FROM users WHERE id = ?')
-    .get(id) as { id: string; username: string; avatar: string | null } | undefined
+    .prepare('SELECT id, username, avatar, bio, favorite_game, created_at FROM users WHERE id = ?')
+    .get(id) as Omit<PublicProfile, never> | undefined
   if (!row) return null
-  return { id: row.id, username: row.username, avatar: row.avatar }
+  return {
+    id: row.id,
+    username: row.username,
+    avatar: row.avatar,
+    bio: row.bio,
+    favorite_game: row.favorite_game,
+    created_at: row.created_at,
+  }
 }
 
 export function changePassword(userId: string, currentPassword: string, newPassword: string): void {
@@ -163,9 +190,16 @@ export function resetPassword(token: string, newPassword: string): AuthUser {
 
 const MAX_AVATAR_LEN = 400_000 // ~300 KB encoded as a data URL
 
+const MAX_BIO_LEN = 280
+
 export function updateProfile(
   userId: string,
-  updates: { username?: string; avatar?: string | null },
+  updates: {
+    username?: string
+    avatar?: string | null
+    bio?: string | null
+    favorite_game?: string | null
+  },
 ): UserProfile {
   if (typeof updates.username === 'string') {
     const username = updates.username.trim()
@@ -175,6 +209,14 @@ export function updateProfile(
       .get(username, userId)
     if (clash) throw new Error('Korisničko ime je već zauzeto')
     db.prepare('UPDATE users SET username = ? WHERE id = ?').run(username, userId)
+  }
+  if (updates.bio !== undefined) {
+    const bio = updates.bio === null ? null : String(updates.bio).trim().slice(0, MAX_BIO_LEN) || null
+    db.prepare('UPDATE users SET bio = ? WHERE id = ?').run(bio, userId)
+  }
+  if (updates.favorite_game !== undefined) {
+    const fav = updates.favorite_game ? String(updates.favorite_game).slice(0, 40) : null
+    db.prepare('UPDATE users SET favorite_game = ? WHERE id = ?').run(fav, userId)
   }
   if (updates.avatar !== undefined) {
     const avatar = updates.avatar

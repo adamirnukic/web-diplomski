@@ -29,6 +29,7 @@ import {
 } from './friends'
 import { getLeaderboard, getMatchHistory, getStatsForUser } from './stats'
 import { listForUser as listAchievements } from './achievements'
+import { addNotification, listNotifications, markAllRead } from './notifications'
 import { registerRoomHandlers } from './rooms'
 import { registerSocialHandlers } from './social'
 import { emitToUser, setIO } from './presence'
@@ -132,8 +133,8 @@ app.patch('/api/profile', (req: Request, res: Response) => {
   const u = requireAuth(req, res)
   if (!u) return
   try {
-    const { username, avatar } = req.body ?? {}
-    const profile = updateProfile(u.id, { username, avatar })
+    const { username, avatar, bio, favorite_game } = req.body ?? {}
+    const profile = updateProfile(u.id, { username, avatar, bio, favorite_game })
     // Re-issue the token so a new username flows through to Socket.IO auth too.
     const token = signToken({ id: profile.id, email: profile.email, username: profile.username })
     res.json({ user: profile, token })
@@ -169,6 +170,19 @@ app.get('/api/achievements', (req: Request, res: Response) => {
   res.json({ achievements: listAchievements(u.id) })
 })
 
+app.get('/api/notifications', (req: Request, res: Response) => {
+  const u = requireAuth(req, res)
+  if (!u) return
+  res.json({ notifications: listNotifications(u.id) })
+})
+
+app.post('/api/notifications/read', (req: Request, res: Response) => {
+  const u = requireAuth(req, res)
+  if (!u) return
+  markAllRead(u.id)
+  res.json({ ok: true })
+})
+
 app.get('/api/leaderboard', (req: Request, res: Response) => {
   const gameId = typeof req.query.game === 'string' ? req.query.game : undefined
   if (req.query.scope === 'friends') {
@@ -197,8 +211,10 @@ app.post('/api/friends/request', (req: Request, res: Response) => {
     const result = sendFriendRequest(u.id, req.body?.query)
     if (result.status === 'sent') {
       emitToUser(result.targetId, 'friend:request:new', { fromName: u.username })
+      addNotification(result.targetId, 'friend_request', { fromName: u.username })
     } else {
       emitToUser(result.targetId, 'friend:accepted', { byName: u.username })
+      addNotification(result.targetId, 'friend_accepted', { byName: u.username })
     }
     res.json({ ok: true, status: result.status })
   } catch (e) {
@@ -211,7 +227,10 @@ app.post('/api/friends/respond', (req: Request, res: Response) => {
   if (!u) return
   try {
     const r = respondFriendRequest(u.id, req.body?.requestId, Boolean(req.body?.accept))
-    if (r.accepted) emitToUser(r.requesterId, 'friend:accepted', { byName: u.username })
+    if (r.accepted) {
+      emitToUser(r.requesterId, 'friend:accepted', { byName: u.username })
+      addNotification(r.requesterId, 'friend_accepted', { byName: u.username })
+    }
     res.json({ ok: true })
   } catch (e) {
     res.status(400).json({ error: (e as Error).message })

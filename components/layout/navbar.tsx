@@ -4,17 +4,16 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Gamepad2, LogOut, User } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
-import { useRealtime } from '@/lib/realtime'
 import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { LangToggle } from '@/components/ui/lang-toggle'
 import { SoundToggle } from '@/components/ui/sound-toggle'
+import { NotificationsBell } from '@/components/NotificationsBell'
 import styles from './navbar.module.css'
 
 export function Navbar() {
   const { user, logout } = useAuth()
-  const { incomingCount } = useRealtime()
   const { t } = useT()
   const router = useRouter()
   const pathname = usePathname()
@@ -52,24 +51,6 @@ export function Navbar() {
               className={cn(styles.link, isActive('/friends') && styles.linkActive)}
             >
               {t('nav.friends')}
-              {incomingCount > 0 && (
-                <span
-                  style={{
-                    marginLeft: '0.35rem',
-                    background: 'var(--neon-magenta)',
-                    color: '#0a0a1a',
-                    borderRadius: '999px',
-                    fontSize: '0.7rem',
-                    fontWeight: 800,
-                    padding: '0 0.4rem',
-                    minWidth: '1.1rem',
-                    display: 'inline-block',
-                    textAlign: 'center',
-                  }}
-                >
-                  {incomingCount}
-                </span>
-              )}
             </Link>
           )}
         </div>
@@ -79,6 +60,7 @@ export function Navbar() {
           <LangToggle />
           {user ? (
             <>
+              <NotificationsBell />
               <Link href="/profile" className={styles.userChip}>
                 {user.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
