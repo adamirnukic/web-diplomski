@@ -1,0 +1,327 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+}
+
+.seats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 600px;
+}
+
+.seat {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.seatTurn {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.18);
+}
+
+.seatYou .seatName {
+  color: var(--neon-cyan);
+}
+
+.seatName {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.seatInfo {
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+}
+
+.trioChips {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin-top: 0.1rem;
+}
+
+.trioChip {
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 6px;
+  background: var(--primary-soft);
+  color: var(--neon-cyan);
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.trioSeven {
+  background: var(--neon-magenta);
+  color: #0a0a1a;
+}
+
+.middleWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.middleLabel {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.middle {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 420px;
+}
+
+.cell {
+  display: grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.9rem;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.cellDown {
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.cellDown:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.cellDown:not(:disabled):hover {
+  border-color: var(--neon-cyan);
+  transform: translateY(-2px);
+  transition: transform 0.12s ease;
+}
+
+.cellUp {
+  border: 1px solid var(--neon-cyan);
+  background: var(--primary-soft);
+  color: var(--neon-cyan);
+  animation: flip 0.3s ease;
+}
+
+.cellTaken {
+  border: 1px dashed var(--border);
+  background: transparent;
+  opacity: 0.35;
+}
+
+@keyframes flip {
+  from {
+    transform: rotateY(90deg);
+  }
+  to {
+    transform: rotateY(0);
+  }
+}
+
+.revealed {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--muted-foreground);
+}
+
+.revChip {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 6px;
+  background: var(--neon-cyan);
+  color: #0a0a1a;
+  font-weight: 800;
+}
+
+.lastTurn {
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.lastGood {
+  color: var(--neon-green);
+  font-weight: 700;
+}
+
+.lastBad {
+  color: var(--muted-foreground);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.msg {
+  font-weight: 600;
+  text-align: center;
+}
+
+.revealControls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.revRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.revName {
+  flex: 1;
+  font-size: 0.85rem;
+}
+
+.hint {
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.wait {
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.yourHand {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-soft);
+  width: 100%;
+  max-width: 560px;
+}
+
+.yourHandLabel {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  margin-right: 0.3rem;
+}
+
+.handCard {
+  display: grid;
+  place-items: center;
+  min-width: 1.7rem;
+  height: 2rem;
+  padding: 0 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--secondary);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.modeChoices {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.modeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 200px;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    transform 0.12s ease;
+}
+
+.modeCard:hover {
+  border-color: var(--neon-cyan);
+  transform: translateY(-2px);
+}
+
+.modeSpicy:hover {
+  border-color: var(--neon-magenta);
+}
+
+.modeName {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.modeDesc {
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  line-height: 1.3;
+}
+
+.spicyBar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 560px;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  font-size: 0.82rem;
+}
+
+.spicyTag {
+  font-weight: 800;
+  color: var(--neon-magenta);
+}
+
+.spicyRule {
+  color: var(--muted-foreground);
+}
+
+.spicyNeed {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--neon-cyan);
+  font-weight: 700;
+}
+
+.big {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.loading {
+  color: var(--muted-foreground);
+}
