@@ -18,6 +18,7 @@ import {
   Skull as SkullIcon,
   Swords,
   Layers,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -322,6 +323,20 @@ export const GAMES: GameMeta[] = [
     hasOnline: true,
     implemented: true,
     secret: true,
+    aiLocal: true,
+  },
+  {
+    id: 'flip-7',
+    name: 'Flip 7',
+    description: 'Riskiraj i vuci karte — skupi 7 različitih brojeva, ali ne ponovi ni jedan! 2-6, botovi.',
+    category: 'cards',
+    minPlayers: 2,
+    maxPlayers: 6,
+    icon: Sparkles,
+    color: 'cyan',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
     aiLocal: true,
   },
 ]

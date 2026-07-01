@@ -18,6 +18,7 @@ import { CantStopBoard } from './cant-stop/CantStop'
 import { SkullBoard } from './skull/Skull'
 import { CoupTable } from './coup/Coup'
 import { SixNimmtBoard } from './six-nimmt/SixNimmt'
+import { Flip7Board } from './flip-7/Flip7'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface GameBoardProps {
@@ -51,6 +52,7 @@ export const GAME_COMPONENTS: Record<string, ComponentType<GameBoardProps>> = {
   skull: SkullBoard,
   coup: CoupTable,
   'six-nimmt': SixNimmtBoard,
+  'flip-7': Flip7Board,
 }
 
 export function getGameComponent(id: string): ComponentType<GameBoardProps> | undefined {

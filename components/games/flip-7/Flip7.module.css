@@ -1,0 +1,182 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.seats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 620px;
+}
+
+.seat {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.seatTurn {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.18);
+}
+
+.seatYou .seatName {
+  color: var(--neon-cyan);
+}
+
+.seatBusted {
+  opacity: 0.6;
+}
+
+.seatStayed {
+  opacity: 0.85;
+}
+
+.seatHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.seatName {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.seatScore {
+  font-weight: 800;
+  color: var(--neon-green);
+}
+
+.seatCards {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  min-height: 2rem;
+  align-items: center;
+}
+
+.numCard {
+  display: grid;
+  place-items: center;
+  min-width: 1.7rem;
+  height: 1.9rem;
+  padding: 0 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--secondary);
+  font-weight: 800;
+  font-size: 0.9rem;
+  animation: pop 0.25s ease;
+}
+
+.modCard {
+  display: grid;
+  place-items: center;
+  min-width: 1.7rem;
+  height: 1.9rem;
+  padding: 0 0.2rem;
+  border: 1px solid var(--neon-magenta);
+  border-radius: 6px;
+  color: var(--neon-magenta);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.second {
+  font-size: 1.1rem;
+}
+
+.empty {
+  color: var(--muted-foreground);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0.3;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.seatFoot {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.uniq {
+  color: var(--neon-cyan);
+  font-weight: 700;
+}
+
+.bustTag {
+  color: #ff6b6b;
+  font-weight: 700;
+}
+
+.stayTag {
+  color: var(--neon-green);
+  font-weight: 700;
+}
+
+.lastCard {
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.targets {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.msg {
+  font-weight: 600;
+  text-align: center;
+}
+
+.hint {
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.wait {
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.big {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.loading {
+  color: var(--muted-foreground);
+}
