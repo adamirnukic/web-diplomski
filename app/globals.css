@@ -74,6 +74,11 @@
 html,
 body {
   min-height: 100%;
+  /* Prevent any accidental horizontal scrolling app-wide. `clip` (not `hidden`)
+     stops the scroll without creating a scroll container, so position: sticky
+     on the navbar keeps working. */
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body {
@@ -100,8 +105,8 @@ button {
 
 .app-body {
   min-height: 100vh;
-  /* guard against accidental horizontal scrolling on small screens */
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 .container {

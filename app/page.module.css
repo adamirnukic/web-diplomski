@@ -38,7 +38,10 @@
 
 .navActions {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .hero {
@@ -52,7 +55,13 @@
     padding: 3rem 1rem 3.5rem;
   }
   .navInner {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 64px;
     gap: 0.5rem;
+  }
+  .brandText {
+    font-size: 1rem;
   }
 }
 
@@ -109,9 +118,15 @@
 
 .features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  grid-template-columns: 1fr;
   gap: 1.25rem;
   padding-bottom: 4rem;
+}
+
+@media (min-width: 720px) {
+  .features {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .featureCard {
