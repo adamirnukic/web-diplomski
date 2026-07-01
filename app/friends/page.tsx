@@ -30,7 +30,7 @@ function Avatar({ u }: { u: FriendUser }) {
 
 export default function FriendsPage() {
   const { user, loading } = useAuth()
-  const { online, refreshSocial } = useRealtime()
+  const { online, refreshSocial, socialVersion } = useRealtime()
   const { t } = useT()
   const router = useRouter()
   const [data, setData] = useState<FriendsData | null>(null)
@@ -48,9 +48,10 @@ export default function FriendsPage() {
     if (!loading && !user) router.push('/login')
   }, [loading, user, router])
 
+  // re-fetch on mount and whenever a friend request/accept arrives over the socket
   useEffect(() => {
     if (user) load()
-  }, [user, load])
+  }, [user, load, socialVersion])
 
   if (loading || !user) {
     return (
@@ -133,7 +134,7 @@ export default function FriendsPage() {
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="npr. AB7K9Q ili marko"
+              placeholder={t('fr.addPlaceholder')}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') add()
               }}

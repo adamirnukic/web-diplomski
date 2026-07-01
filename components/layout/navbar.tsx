@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Gamepad2, LogOut, User } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
+import { useRealtime } from '@/lib/realtime'
 import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ import styles from './navbar.module.css'
 
 export function Navbar() {
   const { user, logout } = useAuth()
+  const { incomingCount } = useRealtime()
   const { t } = useT()
   const router = useRouter()
   const pathname = usePathname()
@@ -51,6 +53,7 @@ export function Navbar() {
               className={cn(styles.link, isActive('/friends') && styles.linkActive)}
             >
               {t('nav.friends')}
+              {incomingCount > 0 && <span className={styles.reqBadge}>{incomingCount}</span>}
             </Link>
           )}
         </div>

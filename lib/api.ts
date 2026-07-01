@@ -213,3 +213,10 @@ export function apiFriendRespond(requestId: string, accept: boolean) {
 export function apiRemoveFriend(friendId: string) {
   return request<{ ok: true }>(`/api/friends/${friendId}`, { method: 'DELETE' })
 }
+
+export function apiDeleteAccount(password: string) {
+  return request<{ ok: true }>('/api/account', {
+    method: 'DELETE',
+    body: JSON.stringify({ password }),
+  })
+}
