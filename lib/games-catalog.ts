@@ -199,7 +199,7 @@ export const GAMES: GameMeta[] = [
   },
   {
     id: 'rock-paper-scissors',
-    name: 'Kamen-Papir-Makaze',
+    name: 'List-kamen-makaze',
     description: 'Najbolji od 5 rundi. Biraj mudro i nadmudri protivnika.',
     category: 'classic',
     minPlayers: 2,
@@ -343,7 +343,7 @@ export const GAMES: GameMeta[] = [
   {
     id: 'trio',
     name: 'Trio',
-    description: 'Otkrivaj najnižu/najvišu kartu i lovi tri iste. Prvi do 3 tria (ili trio sedmica) pobjeđuje. 3-6, botovi.',
+    description: 'Otkrivaj najnižu/najvišu kartu i lovi tri iste. Jednostavan ili Ljuti (Spicy) mod. 3-6, botovi.',
     category: 'cards',
     minPlayers: 3,
     maxPlayers: 6,

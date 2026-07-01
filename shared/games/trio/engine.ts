@@ -1,11 +1,16 @@
 import type { GameEngine, GameResult, LogLine, PlayerId } from '../../types'
 
 /**
- * Trio (3-6) — Simple mode. Collect three-of-a-kind ("trios"). On your turn you
- * reveal cards one at a time — the LOWEST or HIGHEST of any player's hand, or a
- * face-down card from the middle. Keep revealing while they match; a mismatch
- * ends your turn (cards go back), three matches wins the trio. First to 3 trios
- * wins — or grab the 7-trio for an instant win.
+ * Trio (3-6). Collect three-of-a-kind ("trios"). On your turn you reveal cards
+ * one at a time — the LOWEST or HIGHEST of any player's hand, or a face-down card
+ * from the middle. Keep revealing while they match; a mismatch ends your turn
+ * (cards go back), three matches wins the trio.
+ *
+ * The host picks a mode at the start (phase 'mode'):
+ *  - Simple: first to 3 trios wins.
+ *  - Spicy:  win with two *connected* trios — numbers whose sum is 7 or whose
+ *            difference is 7 (e.g. 2 connects to 5 and 9). See trioConnected().
+ * Grabbing the 7-trio is an instant win in either mode.
  */
 
 const DEAL: Record<number, { hand: number; middle: number }> = {
@@ -15,6 +20,18 @@ const DEAL: Record<number, { hand: number; middle: number }> = {
   6: { hand: 5, middle: 6 },
 }
 const TRIOS_TO_WIN = 3
+
+/** Two trio numbers are "connected" (Spicy mode) when they sum to 7 or differ by 7. */
+export function trioConnected(a: number, b: number): boolean {
+  return a !== b && (a + b === 7 || Math.abs(a - b) === 7)
+}
+
+/** Numbers 1-12 that connect to `n` (for the Spicy-mode hint). */
+export function trioConnections(n: number): number[] {
+  const out: number[] = []
+  for (let m = 1; m <= 12; m++) if (trioConnected(n, m)) out.push(m)
+  return out
+}
 
 type Reveal =
   | { kind: 'hand'; owner: PlayerId; value: number }
@@ -32,12 +49,14 @@ export interface TrioState {
   revealed: Reveal[] // cards revealed so far this turn
   lastTurn: { by: PlayerId; values: number[]; matched: boolean; trio: number | null } | null
   turn: PlayerId
-  phase: 'reveal' | 'over'
+  spicy: boolean // Spicy mode: win with two *connected* trios (sum 7 or diff 7)
+  phase: 'mode' | 'reveal' | 'over'
   winnerId: PlayerId | null
   message: LogLine
 }
 
 export type TrioAction =
+  | { type: 'setMode'; spicy: boolean }
   | { type: 'revealHand'; owner: PlayerId; end: 'low' | 'high' }
   | { type: 'revealMiddle'; index: number }
 
@@ -61,6 +80,8 @@ export interface TrioView {
   lastTurn: TrioState['lastTurn']
   yourTurn: boolean
   triosToWin: number
+  spicy: boolean
+  phase: TrioState['phase']
   message: LogLine
   result: GameResult | null
 }
@@ -114,12 +135,25 @@ function endTurnMismatch(s: TrioState) {
   passTurn(s)
 }
 
+/** Did the player who just completed `num` win? 7-trio always wins. */
+function hasWon(s: TrioState, num: number): boolean {
+  if (num === 7) return true
+  const mine = s.trios[s.turn]
+  if (s.spicy) {
+    for (let i = 0; i < mine.length; i++)
+      for (let j = i + 1; j < mine.length; j++)
+        if (trioConnected(mine[i], mine[j])) return true
+    return false
+  }
+  return mine.length >= TRIOS_TO_WIN
+}
+
 function completeTrio(s: TrioState, num: number) {
   s.trios[s.turn].push(num)
   for (const r of s.revealed) if (r.kind === 'middle') s.middleTaken[r.index] = true
   s.lastTurn = { by: s.turn, values: s.revealed.map((r) => r.value), matched: true, trio: num }
   s.revealed = []
-  if (num === 7 || s.trios[s.turn].length >= TRIOS_TO_WIN) {
+  if (hasWon(s, num)) {
     s.winnerId = s.turn
     s.phase = 'over'
     s.message = { k: 'trio.msg.win', p: { name: nm(s, s.turn), num } }
@@ -186,9 +220,10 @@ export const trioEngine: GameEngine<TrioState, TrioAction, TrioView> = {
       revealed: [],
       lastTurn: null,
       turn: order[0],
-      phase: 'reveal',
+      spicy: false,
+      phase: 'mode',
       winnerId: null,
-      message: { k: 'trio.msg.turn', p: { name: names[order[0]] } },
+      message: { k: 'trio.msg.chooseMode', p: { name: names[order[0]] } },
     }
   },
 
@@ -196,6 +231,14 @@ export const trioEngine: GameEngine<TrioState, TrioAction, TrioView> = {
     const s: TrioState = structuredClone(prev)
     if (s.phase === 'over') throw new Error('Igra je završena')
     if (getCurrent(s) !== playerId) throw new Error('Nije tvoj red')
+
+    if (s.phase === 'mode') {
+      if (action.type !== 'setMode') throw new Error('Izaberi mod igre')
+      s.spicy = action.spicy
+      s.phase = 'reveal'
+      s.message = { k: 'trio.msg.turn', p: { name: nm(s, s.turn) } }
+      return s
+    }
 
     if (action.type === 'revealHand') {
       const hand = s.hands[action.owner]
@@ -239,6 +282,8 @@ export const trioEngine: GameEngine<TrioState, TrioAction, TrioView> = {
       lastTurn: s.lastTurn,
       yourTurn: getCurrent(s) === playerId,
       triosToWin: TRIOS_TO_WIN,
+      spicy: s.spicy,
+      phase: s.phase,
       message: s.message,
       result: getResult(s),
     }

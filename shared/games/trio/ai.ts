@@ -15,6 +15,8 @@ export function trioAI(
   difficulty: Difficulty = 'normal',
 ): TrioAction | null {
   if (state.phase === 'over' || state.turn !== playerId) return null
+  // If a bot ever has to pick the mode (host is normally human), default to Simple.
+  if (state.phase === 'mode') return { type: 'setMode', spicy: false }
   const me = playerId
   const myHand = state.hands[me] ?? []
   const faceDown = state.middle.map((_, i) => i).filter((i) => !state.middleTaken[i] && !state.middleUp[i])

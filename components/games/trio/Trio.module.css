@@ -243,6 +243,80 @@
   font-size: 0.9rem;
 }
 
+.modeChoices {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.modeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 200px;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    transform 0.12s ease;
+}
+
+.modeCard:hover {
+  border-color: var(--neon-cyan);
+  transform: translateY(-2px);
+}
+
+.modeSpicy:hover {
+  border-color: var(--neon-magenta);
+}
+
+.modeName {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.modeDesc {
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  line-height: 1.3;
+}
+
+.spicyBar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 560px;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  font-size: 0.82rem;
+}
+
+.spicyTag {
+  font-weight: 800;
+  color: var(--neon-magenta);
+}
+
+.spicyRule {
+  color: var(--muted-foreground);
+}
+
+.spicyNeed {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--neon-cyan);
+  font-weight: 700;
+}
+
 .big {
   font-size: 1.4rem;
   font-weight: 800;

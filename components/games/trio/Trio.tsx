@@ -4,7 +4,7 @@ import { RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useT } from '@/lib/i18n'
-import type { TrioView } from '@shared/games/trio/engine'
+import { trioConnections, type TrioView } from '@shared/games/trio/engine'
 import type { GameBoardProps } from '../registry'
 import styles from './Trio.module.css'
 
@@ -13,6 +13,8 @@ export function TrioBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
   const v = view as TrioView | null
   if (!v) return <div className={styles.loading}>{t('common.loading')}</div>
   const nameOf = (id?: string) => v.seats.find((s) => s.id === id)?.name ?? ''
+  const modeSelect = v.phase === 'mode'
+  const myTrios = v.seats.find((s) => s.id === v.you)?.trios ?? []
 
   return (
     <div className={styles.root}>
@@ -52,8 +54,8 @@ export function TrioBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
                 key={i}
                 type="button"
                 className={cn(styles.cell, styles.cellDown)}
-                disabled={!v.yourTurn}
-                onClick={v.yourTurn ? () => onAction({ type: 'revealMiddle', index: i }) : undefined}
+                disabled={!v.yourTurn || modeSelect}
+                onClick={v.yourTurn && !modeSelect ? () => onAction({ type: 'revealMiddle', index: i }) : undefined}
               >
                 ?
               </button>
@@ -79,6 +81,18 @@ export function TrioBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
         </div>
       ) : null}
 
+      {v.spicy && !modeSelect && !v.result && (
+        <div className={styles.spicyBar}>
+          <span className={styles.spicyTag}>🌶️ {t('trio.mode.spicy')}</span>
+          <span className={styles.spicyRule}>{t('trio.spicyRule')}</span>
+          {myTrios.map((n, i) => (
+            <span key={i} className={styles.spicyNeed}>
+              {t('trio.spicyNeed', { num: n, conns: trioConnections(n).join(' / ') })}
+            </span>
+          ))}
+        </div>
+      )}
+
       {v.result ? (
         <div className={styles.panel}>
           <p className={styles.big}>
@@ -96,6 +110,32 @@ export function TrioBoard({ view, onAction, onRestart, mode }: GameBoardProps) {
             </Button>
           )}
         </div>
+      ) : modeSelect ? (
+        v.yourTurn ? (
+          <div className={styles.panel}>
+            <p className={styles.msg}>{t('trio.mode.title')}</p>
+            <div className={styles.modeChoices}>
+              <button
+                type="button"
+                className={styles.modeCard}
+                onClick={() => onAction({ type: 'setMode', spicy: false })}
+              >
+                <span className={styles.modeName}>{t('trio.mode.simple')}</span>
+                <span className={styles.modeDesc}>{t('trio.mode.simpleDesc')}</span>
+              </button>
+              <button
+                type="button"
+                className={cn(styles.modeCard, styles.modeSpicy)}
+                onClick={() => onAction({ type: 'setMode', spicy: true })}
+              >
+                <span className={styles.modeName}>🌶️ {t('trio.mode.spicy')}</span>
+                <span className={styles.modeDesc}>{t('trio.mode.spicyDesc')}</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className={styles.wait}>{t(v.message.k, v.message.p)}</p>
+        )
       ) : v.yourTurn ? (
         <div className={styles.panel}>
           <p className={styles.msg}>
