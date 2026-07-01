@@ -17,6 +17,7 @@ import { perudoEngine } from './perudo/engine'
 import { cantStopEngine } from './cant-stop/engine'
 import { skullEngine } from './skull/engine'
 import { coupEngine } from './coup/engine'
+import { sixNimmtEngine } from './six-nimmt/engine'
 
 /**
  * Authoritative engine registry. The server uses this to run online games and
@@ -41,6 +42,7 @@ export const ENGINES: Record<string, GameEngine<any, any, any>> = {
   'cant-stop': cantStopEngine,
   skull: skullEngine,
   coup: coupEngine,
+  'six-nimmt': sixNimmtEngine,
 }
 
 export function getEngine(id: string): GameEngine<any, any, any> | undefined {

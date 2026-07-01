@@ -1,0 +1,166 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.scores {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.score {
+  color: var(--muted-foreground);
+}
+
+.leader {
+  color: var(--neon-green);
+  font-weight: 700;
+}
+
+.roundPen {
+  color: #ff9a3c;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 520px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 3.4rem;
+  padding: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  cursor: default;
+}
+
+.rowClickable {
+  cursor: pointer;
+  border-color: var(--neon-cyan);
+}
+
+.rowClickable:hover {
+  background: var(--primary-soft);
+}
+
+.rowCards {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.take {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--neon-cyan);
+  font-weight: 700;
+}
+
+.tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 3rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--secondary);
+  animation: cardDeal 0.3s ease;
+}
+
+.tileBtn {
+  cursor: pointer;
+}
+
+.tileBtn:hover {
+  border-color: var(--neon-cyan);
+  transform: translateY(-3px);
+  transition: transform 0.12s ease;
+}
+
+.tileNum {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.heads {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.55rem;
+  font-weight: 700;
+}
+
+@keyframes cardDeal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.hand {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 560px;
+}
+
+.msg {
+  color: var(--foreground);
+  font-weight: 600;
+  text-align: center;
+}
+
+.hint {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.wait {
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.roundSummary {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+.big {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.loading {
+  color: var(--muted-foreground);
+}

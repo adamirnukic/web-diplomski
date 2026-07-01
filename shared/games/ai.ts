@@ -11,6 +11,7 @@ import { yahtzeeAI } from './yahtzee/ai'
 import { battleshipsAI } from './battleships/ai'
 import { loveLetterAI } from './love-letter/ai'
 import { coupAI } from './coup/ai'
+import { sixNimmtAI } from './six-nimmt/ai'
 import type { Difficulty } from '../types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -31,6 +32,7 @@ export const AI_DECISIONS: Record<string, AiFn> = {
   battleships: battleshipsAI,
   'love-letter': loveLetterAI,
   coup: coupAI,
+  'six-nimmt': sixNimmtAI,
 }
 
 export function aiDecide(

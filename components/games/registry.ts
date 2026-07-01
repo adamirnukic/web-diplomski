@@ -17,6 +17,7 @@ import { PerudoTable } from './perudo/Perudo'
 import { CantStopBoard } from './cant-stop/CantStop'
 import { SkullBoard } from './skull/Skull'
 import { CoupTable } from './coup/Coup'
+import { SixNimmtBoard } from './six-nimmt/SixNimmt'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface GameBoardProps {
@@ -49,6 +50,7 @@ export const GAME_COMPONENTS: Record<string, ComponentType<GameBoardProps>> = {
   'cant-stop': CantStopBoard,
   skull: SkullBoard,
   coup: CoupTable,
+  'six-nimmt': SixNimmtBoard,
 }
 
 export function getGameComponent(id: string): ComponentType<GameBoardProps> | undefined {
