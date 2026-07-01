@@ -61,6 +61,21 @@
   color: var(--neon-cyan);
 }
 
+.reqBadge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.3rem;
+  margin-left: 0.35rem;
+  border-radius: 999px;
+  background: var(--neon-magenta);
+  color: #0a0a1a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  vertical-align: middle;
+}
+
 .actions {
   display: flex;
   align-items: center;

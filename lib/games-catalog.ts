@@ -85,7 +85,7 @@ export const GAMES: GameMeta[] = [
   },
   {
     id: 'dots-and-boxes',
-    name: 'Točkice i kvadratići',
+    name: 'Tačkice i kvadratići',
     description: 'Povlači ivice i zatvaraj kvadrate; ko zatvori — igra ponovo.',
     category: 'strategy',
     minPlayers: 2,

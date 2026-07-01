@@ -54,14 +54,22 @@
   .hero {
     padding: 3rem 1rem 3.5rem;
   }
+  /* Too narrow for one line: brand stays on top, the actions drop to their own
+     full-width row below it — spaced out (language left, buttons right) with
+     comfortable vertical padding so it reads as a deliberate two-tier header. */
   .navInner {
     flex-wrap: wrap;
     height: auto;
-    min-height: 64px;
-    gap: 0.5rem;
+    padding-block: 0.8rem;
+    gap: 0.7rem 0.5rem;
+  }
+  .navActions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.4rem;
   }
   .brandText {
-    font-size: 1rem;
+    font-size: 1.05rem;
   }
 }
 

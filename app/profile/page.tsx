@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Copy, Pencil } from 'lucide-react'
+import { Copy, Pencil, Trash2 } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { useAuth } from '@/lib/auth'
 import { useT } from '@/lib/i18n'
 import {
   apiAchievements,
   apiChangePassword,
+  apiDeleteAccount,
   apiHistory,
   apiStats,
   apiUpdateProfile,
@@ -60,7 +61,7 @@ const RES_COLOR: Record<MatchRow['outcome'], string> = {
 }
 
 export default function ProfilePage() {
-  const { user, loading, applySession } = useAuth()
+  const { user, loading, applySession, logout } = useAuth()
   const { t } = useT()
   const { achievements: achPops } = useRealtime()
   const router = useRouter()
@@ -79,6 +80,9 @@ export default function ProfilePage() {
   const [pwMsg, setPwMsg] = useState<{ ok?: string; err?: string }>({})
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [delOpen, setDelOpen] = useState(false)
+  const [delPw, setDelPw] = useState('')
+  const [delErr, setDelErr] = useState('')
 
   useEffect(() => {
     if (!loading && !user) router.push('/login')
@@ -195,6 +199,19 @@ export default function ProfilePage() {
     } catch (e) {
       setPwMsg({ err: (e as Error).message })
     } finally {
+      setBusy(false)
+    }
+  }
+
+  const deleteAcct = async () => {
+    setDelErr('')
+    setBusy(true)
+    try {
+      await apiDeleteAccount(delPw)
+      logout()
+      router.push('/')
+    } catch (e) {
+      setDelErr((e as Error).message)
       setBusy(false)
     }
   }
@@ -364,6 +381,56 @@ export default function ProfilePage() {
               </div>
               {pwMsg.ok && <span className={styles.ok}>{pwMsg.ok}</span>}
               {pwMsg.err && <span className={styles.err}>{pwMsg.err}</span>}
+            </div>
+
+            <div className={styles.editBlock}>
+              <h3 style={{ color: '#ff6b6b' }}>{t('prof.dangerZone')}</h3>
+              <p className={styles.muted} style={{ fontSize: '0.85rem' }}>
+                {t('prof.deleteWarn')}
+              </p>
+              {!delOpen ? (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDelOpen(true)
+                    setDelErr('')
+                  }}
+                  style={{ color: '#ff6b6b', borderColor: '#ff6b6b', alignSelf: 'flex-start' }}
+                >
+                  <Trash2 size={15} /> {t('prof.deleteAccount')}
+                </Button>
+              ) : (
+                <div className={styles.editRow}>
+                  <label>
+                    {t('prof.deletePrompt')}
+                    <Input
+                      type="password"
+                      value={delPw}
+                      onChange={(e) => setDelPw(e.target.value)}
+                      autoComplete="current-password"
+                    />
+                  </label>
+                  <Button
+                    onClick={deleteAcct}
+                    disabled={busy || !delPw}
+                    style={{ background: '#ff6b6b', color: '#0a0a1a' }}
+                  >
+                    <Trash2 size={15} /> {t('prof.deleteConfirm')}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setDelOpen(false)
+                      setDelPw('')
+                      setDelErr('')
+                    }}
+                    disabled={busy}
+                  >
+                    {t('prof.deleteCancel')}
+                  </Button>
+                </div>
+              )}
+              {delErr && <span className={styles.err}>{delErr}</span>}
             </div>
           </div>
         )}

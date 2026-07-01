@@ -7,6 +7,7 @@ import './db'
 import {
   type AuthUser,
   changePassword,
+  deleteAccount,
   loginUser,
   publicProfile,
   publicUser,
@@ -93,6 +94,17 @@ app.post('/api/auth/change-password', (req: Request, res: Response) => {
   try {
     const { currentPassword, newPassword } = req.body ?? {}
     changePassword(u.id, currentPassword, newPassword)
+    res.json({ ok: true })
+  } catch (e) {
+    res.status(400).json({ error: (e as Error).message })
+  }
+})
+
+app.delete('/api/account', (req: Request, res: Response) => {
+  const u = requireAuth(req, res)
+  if (!u) return
+  try {
+    deleteAccount(u.id, req.body?.password)
     res.json({ ok: true })
   } catch (e) {
     res.status(400).json({ error: (e as Error).message })

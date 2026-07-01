@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import { Check, UserPlus } from 'lucide-react'
 import { useRealtime } from '@/lib/realtime'
+import { useT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 
 /** In-lobby panel to invite online friends into the current room. */
 export function InviteFriends({ gameId, code }: { gameId: string; code: string }) {
   const { friends, online, sendInvite } = useRealtime()
+  const { t } = useT()
   const [invited, setInvited] = useState<Set<string>>(new Set())
   const onlineFriends = friends.filter((f) => online.has(f.id))
 
@@ -24,10 +26,10 @@ export function InviteFriends({ gameId, code }: { gameId: string; code: string }
         maxWidth: '420px',
       }}
     >
-      <p style={{ fontWeight: 600, marginBottom: '0.6rem' }}>Pozovi prijatelja</p>
+      <p style={{ fontWeight: 600, marginBottom: '0.6rem' }}>{t('invite.panelTitle')}</p>
       {onlineFriends.length === 0 ? (
         <p style={{ color: 'var(--muted-foreground)', fontSize: '0.88rem' }}>
-          Nijedan prijatelj nije trenutno online.
+          {t('invite.noneOnline')}
         </p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
@@ -49,11 +51,11 @@ export function InviteFriends({ gameId, code }: { gameId: string; code: string }
               >
                 {invited.has(f.id) ? (
                   <>
-                    <Check size={15} /> Pozvan
+                    <Check size={15} /> {t('invite.sent')}
                   </>
                 ) : (
                   <>
-                    <UserPlus size={15} /> Pozovi
+                    <UserPlus size={15} /> {t('invite.send')}
                   </>
                 )}
               </Button>

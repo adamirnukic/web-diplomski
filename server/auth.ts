@@ -151,6 +151,22 @@ export function changePassword(userId: string, currentPassword: string, newPassw
   db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(bcrypt.hashSync(newPassword, 10), userId)
 }
 
+/** Permanently delete a user and all their data. Requires the current password. */
+export function deleteAccount(userId: string, password: string): void {
+  const row = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(userId) as
+    | { password_hash: string }
+    | undefined
+  if (!row) throw new Error('Korisnik ne postoji')
+  if (!bcrypt.compareSync(String(password ?? ''), row.password_hash)) {
+    throw new Error('Lozinka nije tačna')
+  }
+  // Tables without an ON DELETE CASCADE FK to users need manual cleanup first.
+  db.prepare('DELETE FROM match_players WHERE user_id = ?').run(userId)
+  db.prepare('DELETE FROM achievements WHERE user_id = ?').run(userId)
+  // Deleting the user cascades to game_stats, friendships, notifications, password_resets.
+  db.prepare('DELETE FROM users WHERE id = ?').run(userId)
+}
+
 const RESET_TTL_MS = 60 * 60 * 1000 // 1h
 
 /** Returns the reset token + user, or null when no account matches (stay vague). */

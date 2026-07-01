@@ -7,7 +7,7 @@ import { useT } from '@/lib/i18n'
 import type { ChatMessage } from '@/lib/useRoom'
 import styles from './ChatBox.module.css'
 
-const EMOJIS = ['👍', '😂', '🔥', '😮', '😢', '🎉', '🤔', '👋']
+const EMOJIS = ['👍', '❤️', '😂', '🔥', '😮', '😢', '🎉', '🤔', '👋']
 
 export function ChatBox({
   messages,

@@ -39,6 +39,8 @@ interface RealtimeValue {
   online: Set<string>
   friends: FriendUser[]
   incomingCount: number
+  /** bumped on every friend request / accept so pages can live-refresh their lists */
+  socialVersion: number
   invites: GameInvite[]
   achievements: AchievementPop[]
   notifications: NotificationRow[]
@@ -62,6 +64,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   const [online, setOnline] = useState<Set<string>>(new Set())
   const [friends, setFriends] = useState<FriendUser[]>([])
   const [incomingCount, setIncomingCount] = useState(0)
+  const [socialVersion, setSocialVersion] = useState(0)
   const [invites, setInvites] = useState<GameInvite[]>([])
   const [achievements, setAchievements] = useState<AchievementPop[]>([])
   const [notifications, setNotifications] = useState<NotificationRow[]>([])
@@ -118,8 +121,12 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     socket.on('invite:received', (inv: Omit<GameInvite, 'id'>) =>
       setInvites((prev) => [...prev, { ...inv, id: `${Date.now()}-${Math.random()}` }]),
     )
-    socket.on('friend:request:new', refreshSocial)
-    socket.on('friend:accepted', refreshSocial)
+    const onSocialEvent = () => {
+      refreshSocial()
+      setSocialVersion((v) => v + 1) // signal pages (e.g. Friends) to re-fetch
+    }
+    socket.on('friend:request:new', onSocialEvent)
+    socket.on('friend:accepted', onSocialEvent)
     socket.on('achievement:earned', ({ id, icon }: { id: string; icon: string }) =>
       setAchievements((prev) => [...prev, { key: `${Date.now()}-${Math.random()}`, id, icon }]),
     )
@@ -155,6 +162,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
         online,
         friends,
         incomingCount,
+        socialVersion,
         invites,
         achievements,
         notifications,
