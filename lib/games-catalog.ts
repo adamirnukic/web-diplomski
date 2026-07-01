@@ -19,6 +19,7 @@ import {
   Swords,
   Layers,
   Sparkles,
+  Copy,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -337,6 +338,21 @@ export const GAMES: GameMeta[] = [
     hasLocal: true,
     hasOnline: true,
     implemented: true,
+    aiLocal: true,
+  },
+  {
+    id: 'trio',
+    name: 'Trio',
+    description: 'Otkrivaj najnižu/najvišu kartu i lovi tri iste. Prvi do 3 tria (ili trio sedmica) pobjeđuje. 3-6, botovi.',
+    category: 'cards',
+    minPlayers: 3,
+    maxPlayers: 6,
+    icon: Copy,
+    color: 'green',
+    hasLocal: true,
+    hasOnline: true,
+    implemented: true,
+    secret: true,
     aiLocal: true,
   },
 ]
