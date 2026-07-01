@@ -12,10 +12,12 @@ import {
 import type { Socket } from 'socket.io-client'
 import { createSocket } from './socket'
 import {
+  apiConversations,
   apiFriends,
   apiMarkNotificationsRead,
   apiNotifications,
   getToken,
+  type DirectMessage,
   type FriendUser,
   type NotificationRow,
 } from './api'
@@ -41,6 +43,11 @@ interface RealtimeValue {
   incomingCount: number
   /** bumped on every friend request / accept so pages can live-refresh their lists */
   socialVersion: number
+  /** total unread direct messages (for the navbar badge) */
+  dmUnread: number
+  /** the most recent incoming direct message, for live-appending to an open thread */
+  lastDm: DirectMessage | null
+  refreshDm: () => void
   invites: GameInvite[]
   achievements: AchievementPop[]
   notifications: NotificationRow[]
@@ -65,6 +72,8 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   const [friends, setFriends] = useState<FriendUser[]>([])
   const [incomingCount, setIncomingCount] = useState(0)
   const [socialVersion, setSocialVersion] = useState(0)
+  const [dmUnread, setDmUnread] = useState(0)
+  const [lastDm, setLastDm] = useState<DirectMessage | null>(null)
   const [invites, setInvites] = useState<GameInvite[]>([])
   const [achievements, setAchievements] = useState<AchievementPop[]>([])
   const [notifications, setNotifications] = useState<NotificationRow[]>([])
@@ -84,6 +93,12 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       .catch(() => {})
   }, [])
 
+  const refreshDm = useCallback(() => {
+    apiConversations()
+      .then((d) => setDmUnread(d.unread))
+      .catch(() => {})
+  }, [])
+
   const markNotificationsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => (n.read ? n : { ...n, read: true })))
     apiMarkNotificationsRead().catch(() => {})
@@ -100,10 +115,13 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       setInvites([])
       setAchievements([])
       setNotifications([])
+      setDmUnread(0)
+      setLastDm(null)
       return
     }
     refreshSocial()
     refreshNotifications()
+    refreshDm()
     const token = getToken()
     if (!token) return
     const socket = createSocket(token)
@@ -133,12 +151,16 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     socket.on('notification:new', (n: NotificationRow) =>
       setNotifications((prev) => [n, ...prev].slice(0, 30)),
     )
+    socket.on('dm:new', (msg: DirectMessage) => {
+      setLastDm(msg)
+      setDmUnread((n) => n + 1)
+    })
 
     return () => {
       socket.close()
       socketRef.current = null
     }
-  }, [uid, refreshSocial, refreshNotifications])
+  }, [uid, refreshSocial, refreshNotifications, refreshDm])
 
   const sendInvite = useCallback((toUserId: string, gameId: string, code: string) => {
     socketRef.current?.emit('invite:send', { toUserId, gameId, code }, () => {})
@@ -163,6 +185,9 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
         friends,
         incomingCount,
         socialVersion,
+        dmUnread,
+        lastDm,
+        refreshDm,
         invites,
         achievements,
         notifications,

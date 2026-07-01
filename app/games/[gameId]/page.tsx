@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Globe, Monitor } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { getGameMeta } from '@/lib/games-catalog'
+import { HowToPlay } from '@/components/HowToPlay'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useT } from '@/lib/i18n'
@@ -50,6 +51,9 @@ export default function GameDetailPage({
           <div>
             <h1 className={styles.title}>{t(`game.${game.id}.name`)}</h1>
             <p className={styles.desc}>{t(`game.${game.id}.desc`)}</p>
+            <div className={styles.headActions}>
+              <HowToPlay gameId={game.id} gameName={t(`game.${game.id}.name`)} />
+            </div>
           </div>
         </div>
 

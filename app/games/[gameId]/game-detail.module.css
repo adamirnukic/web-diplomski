@@ -46,6 +46,10 @@
   max-width: 50ch;
 }
 
+.headActions {
+  margin-top: 0.85rem;
+}
+
 .modes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
