@@ -98,32 +98,45 @@
 }
 
 @media (max-width: 640px) {
+  /* Two-tier header: brand + compact controls on top, nav links on their own
+     full-width row below. `padding-block` keeps the container's horizontal
+     padding intact (a plain `padding` shorthand here would zero it out) and
+     gives the rows room to breathe so it reads as a deliberate layout. */
   .inner {
     flex-wrap: wrap;
     height: auto;
-    padding: 0.5rem 0;
+    padding-block: 0.7rem;
+    row-gap: 0.65rem;
+    column-gap: 0.4rem;
+  }
+  /* controls get their own full-width row, grouped under the logo */
+  .actions {
+    order: 2;
+    width: 100%;
+    margin: 0;
+    justify-content: flex-start;
     gap: 0.5rem;
   }
-  /* links drop to their own full-width row below brand + actions */
+  /* nav links on a full-width row below, evenly spread */
   .links {
     order: 3;
     width: 100%;
     margin: 0;
-    justify-content: center;
-  }
-  .actions {
-    margin-left: auto;
-  }
-  .brandText {
-    font-size: 1rem;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.35rem;
   }
   .link {
     padding: 0.4rem 0.6rem;
     font-size: 0.9rem;
   }
-}
-
-@media (max-width: 380px) {
+  .brandText {
+    font-size: 1.05rem;
+  }
+  /* show just the avatar so the controls stay compact beside the logo */
+  .userChip {
+    padding: 0.35rem;
+  }
   .userChip span {
     display: none;
   }
