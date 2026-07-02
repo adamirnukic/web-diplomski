@@ -1,9 +1,9 @@
 'use client'
 
-import { Suspense, use, useEffect, useRef } from 'react'
+import { Suspense, use, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Check, Copy } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { getGameMeta } from '@/lib/games-catalog'
 import { getEngine } from '@shared/games/registry'
@@ -29,6 +29,18 @@ function OnlineRunner({ gameId }: { gameId: string }) {
   const router = useRouter()
   const room = useRoom(gameId)
   const setupDone = useRef(false)
+  const [copied, setCopied] = useState(false)
+
+  const copyCode = async () => {
+    if (!room.lobby) return
+    try {
+      await navigator.clipboard.writeText(room.lobby.code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      /* clipboard may be unavailable */
+    }
+  }
 
   useEffect(() => {
     if (!room.connected || setupDone.current) return
@@ -90,6 +102,13 @@ function OnlineRunner({ gameId }: { gameId: string }) {
 
       {room.lobby && status !== 'lobby' && (
         <div className={styles.gameWrap}>
+          <div className={styles.codeBar}>
+            <span className={styles.codeBarLabel}>{t('room.code')}</span>
+            <span className={`${styles.codeBarVal} neon-text-cyan`}>{room.lobby.code}</span>
+            <Button variant="outline" size="icon-sm" onClick={copyCode} aria-label={t('room.copyCode')}>
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+            </Button>
+          </div>
           <Comp
             view={room.view}
             onAction={(a: unknown) => {

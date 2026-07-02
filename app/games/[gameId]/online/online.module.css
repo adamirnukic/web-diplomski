@@ -50,6 +50,28 @@
   gap: 1.5rem;
 }
 
+/* room code shown during play so nobody loses it mid-game */
+.codeBar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem 0.4rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+}
+
+.codeBarLabel {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.codeBarVal {
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  font-size: 1.05rem;
+}
+
 .result {
   display: flex;
   flex-direction: column;

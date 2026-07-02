@@ -274,8 +274,11 @@ function leaveRoom(io: Server, socket: Socket, disconnected: boolean) {
 
   const p = room.players.get(user.id)
   if (p) {
-    if (disconnected) {
-      // keep the slot so the player can reconnect with the same code
+    // Keep the slot when the connection just dropped, OR when the player
+    // explicitly leaves an already-started game — so they can rejoin with the
+    // same code and pick up where they left off (their engine seat is intact).
+    // Only a real leave from the lobby removes them from the room.
+    if (disconnected || room.status !== 'lobby') {
       p.connected = false
     } else {
       room.players.delete(user.id)
