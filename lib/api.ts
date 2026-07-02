@@ -220,3 +220,35 @@ export function apiDeleteAccount(password: string) {
     body: JSON.stringify({ password }),
   })
 }
+
+export interface DirectMessage {
+  id: string
+  fromId: string
+  toId: string
+  text: string
+  read: boolean
+  created_at: number
+}
+
+export interface ConversationSummary {
+  friendId: string
+  lastText: string
+  lastAt: number
+  fromMe: boolean
+  unread: number
+}
+
+export function apiConversations() {
+  return request<{ conversations: ConversationSummary[]; unread: number }>('/api/messages')
+}
+
+export function apiConversation(friendId: string) {
+  return request<{ messages: DirectMessage[] }>(`/api/messages/${friendId}`)
+}
+
+export function apiSendMessage(friendId: string, text: string) {
+  return request<{ message: DirectMessage }>(`/api/messages/${friendId}`, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  })
+}

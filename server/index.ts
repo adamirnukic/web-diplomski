@@ -31,6 +31,13 @@ import {
 import { getLeaderboard, getMatchHistory, getStatsForUser } from './stats'
 import { listForUser as listAchievements } from './achievements'
 import { addNotification, listNotifications, markAllRead } from './notifications'
+import {
+  getConversation,
+  listConversations,
+  markConversationRead,
+  sendMessage,
+  unreadCount as dmUnreadCount,
+} from './messages'
 import { registerRoomHandlers } from './rooms'
 import { registerSocialHandlers } from './social'
 import { emitToUser, setIO } from './presence'
@@ -193,6 +200,32 @@ app.post('/api/notifications/read', (req: Request, res: Response) => {
   if (!u) return
   markAllRead(u.id)
   res.json({ ok: true })
+})
+
+app.get('/api/messages', (req: Request, res: Response) => {
+  const u = requireAuth(req, res)
+  if (!u) return
+  res.json({ conversations: listConversations(u.id), unread: dmUnreadCount(u.id) })
+})
+
+app.get('/api/messages/:friendId', (req: Request, res: Response) => {
+  const u = requireAuth(req, res)
+  if (!u) return
+  const messages = getConversation(u.id, req.params.friendId)
+  markConversationRead(u.id, req.params.friendId) // opening the thread reads it
+  res.json({ messages })
+})
+
+app.post('/api/messages/:friendId', (req: Request, res: Response) => {
+  const u = requireAuth(req, res)
+  if (!u) return
+  try {
+    const message = sendMessage(u.id, req.params.friendId, req.body?.text)
+    emitToUser(message.toId, 'dm:new', message) // live-deliver to the recipient
+    res.json({ message })
+  } catch (e) {
+    res.status(400).json({ error: (e as Error).message })
+  }
 })
 
 app.get('/api/leaderboard', (req: Request, res: Response) => {

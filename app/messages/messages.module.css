@@ -1,0 +1,278 @@
+.page {
+  min-height: 100vh;
+}
+
+.main {
+  padding: 1.5rem 1rem 2rem;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1rem;
+  height: min(70vh, 640px);
+}
+
+/* conversation list */
+.list {
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.convo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.6rem;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: background 0.12s ease;
+}
+
+.convo:hover {
+  background: var(--secondary);
+}
+
+.convoActive {
+  background: var(--primary-soft);
+}
+
+.convoAvatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.convoMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.convoName {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.convoPreview {
+  color: var(--muted-foreground);
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unread {
+  display: grid;
+  place-items: center;
+  min-width: 1.3rem;
+  height: 1.3rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--neon-magenta);
+  color: #0a0a1a;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.avatar,
+.avatarImg {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--neon-cyan);
+  font-weight: 800;
+}
+
+.avatarImg {
+  object-fit: cover;
+}
+
+.onlineDot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--neon-green);
+  border: 2px solid var(--card);
+}
+
+/* thread pane */
+.thread {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  overflow: hidden;
+}
+
+.placeholder {
+  margin: auto;
+  color: var(--muted-foreground);
+  padding: 2rem;
+  text-align: center;
+}
+
+.threadHead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.threadName {
+  font-weight: 700;
+}
+
+.backBtn {
+  display: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.backBtn:hover {
+  background: var(--secondary);
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.emptyThread {
+  margin: auto;
+  color: var(--muted-foreground);
+}
+
+.bubble {
+  max-width: 78%;
+  padding: 0.5rem 0.7rem;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.mine {
+  align-self: flex-end;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-border);
+  border-bottom-right-radius: 4px;
+}
+
+.theirs {
+  align-self: flex-start;
+  background: var(--secondary);
+  border-bottom-left-radius: 4px;
+}
+
+.bubbleText {
+  line-height: 1.4;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.bubbleTime {
+  align-self: flex-end;
+  font-size: 0.68rem;
+  color: var(--muted-foreground);
+}
+
+.inputRow {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.input {
+  flex: 1;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--secondary);
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--neon-cyan);
+}
+
+.send {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  color: #0a0a1a;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.send:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (max-width: 720px) {
+  .layout {
+    grid-template-columns: 1fr;
+    height: calc(100vh - 190px);
+  }
+  /* one pane at a time on mobile */
+  .layout.threadOpen .list {
+    display: none;
+  }
+  .layout:not(.threadOpen) .thread {
+    display: none;
+  }
+  .backBtn {
+    display: grid;
+  }
+}

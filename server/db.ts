@@ -83,6 +83,19 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
   CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at);
+
+  CREATE TABLE IF NOT EXISTS messages (
+    id          TEXT PRIMARY KEY,
+    from_user   TEXT NOT NULL,
+    to_user     TEXT NOT NULL,
+    text        TEXT NOT NULL,
+    read        INTEGER NOT NULL DEFAULT 0,
+    created_at  INTEGER NOT NULL,
+    FOREIGN KEY (from_user) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (to_user) REFERENCES users(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_messages_pair ON messages(from_user, to_user, created_at);
+  CREATE INDEX IF NOT EXISTS idx_messages_unread ON messages(to_user, read);
 `)
 
 // Migrate older databases that predate newer user columns.

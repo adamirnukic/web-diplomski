@@ -15,7 +15,7 @@ import styles from './navbar.module.css'
 
 export function Navbar() {
   const { user, logout } = useAuth()
-  const { incomingCount } = useRealtime()
+  const { incomingCount, dmUnread } = useRealtime()
   const { t } = useT()
   const router = useRouter()
   const pathname = usePathname()
@@ -54,6 +54,15 @@ export function Navbar() {
             >
               {t('nav.friends')}
               {incomingCount > 0 && <span className={styles.reqBadge}>{incomingCount}</span>}
+            </Link>
+          )}
+          {user && (
+            <Link
+              href="/messages"
+              className={cn(styles.link, isActive('/messages') && styles.linkActive)}
+            >
+              {t('nav.messages')}
+              {dmUnread > 0 && <span className={styles.reqBadge}>{dmUnread}</span>}
             </Link>
           )}
         </div>

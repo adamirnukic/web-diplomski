@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Gamepad2, Globe, Monitor, Trophy, ArrowRight, Zap, User } from 'lucide-react'
+import { Gamepad2, Users, Sofa, TrendingUp, ArrowRight, Zap, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LangToggle } from '@/components/ui/lang-toggle'
 import { useAuth } from '@/lib/auth'
@@ -10,9 +10,9 @@ import { GAMES } from '@/lib/games-catalog'
 import styles from './page.module.css'
 
 const FEATURES = [
-  { icon: Globe, titleKey: 'land.f1t', textKey: 'land.f1x', color: 'text-neon-cyan' },
-  { icon: Monitor, titleKey: 'land.f2t', textKey: 'land.f2x', color: 'text-neon-magenta' },
-  { icon: Trophy, titleKey: 'land.f3t', textKey: 'land.f3x', color: 'text-neon-green' },
+  { icon: Users, titleKey: 'land.f1t', textKey: 'land.f1x', accent: 'cyan' },
+  { icon: Sofa, titleKey: 'land.f2t', textKey: 'land.f2x', accent: 'magenta' },
+  { icon: TrendingUp, titleKey: 'land.f3t', textKey: 'land.f3x', accent: 'green' },
 ]
 
 export default function LandingPage() {
@@ -24,14 +24,14 @@ export default function LandingPage() {
     <div className={styles.page}>
       <nav className={styles.nav}>
         <div className={`container ${styles.navInner}`}>
-          <div className={styles.brand}>
+          <Link href="/" className={styles.brand}>
             <span className={`${styles.logo} neon-glow-cyan`}>
               <Gamepad2 size={20} />
             </span>
             <span className={styles.brandText}>
               Game<span className="neon-text-cyan">Vault</span>
             </span>
-          </div>
+          </Link>
           <div className={styles.navActions}>
             <LangToggle />
             {!loading &&
@@ -91,8 +91,10 @@ export default function LandingPage() {
 
       <section className={`container ${styles.features}`}>
         {FEATURES.map((f) => (
-          <div key={f.titleKey} className={styles.featureCard}>
-            <f.icon className={f.color} size={28} />
+          <div key={f.titleKey} className={styles.featureCard} data-accent={f.accent}>
+            <span className={styles.featureIcon}>
+              <f.icon size={24} />
+            </span>
             <h3 className={styles.featureTitle}>{t(f.titleKey)}</h3>
             <p className={styles.featureText}>{t(f.textKey)}</p>
           </div>
@@ -104,7 +106,7 @@ export default function LandingPage() {
           <span className={styles.footerBrand}>
             <Gamepad2 size={18} /> GameVault
           </span>
-          <span className={styles.footerNote}>{t('land.footer')}</span>
+          <span className={styles.footerNote}>© {new Date().getFullYear()} GameVault</span>
         </div>
       </footer>
     </div>

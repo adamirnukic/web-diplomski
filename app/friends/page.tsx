@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Check, Copy, UserPlus, X } from 'lucide-react'
+import { Check, Copy, MessageCircle, UserPlus, X } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { useAuth } from '@/lib/auth'
 import {
@@ -201,6 +201,11 @@ export default function FriendsPage() {
                       }}
                     />
                   )}
+                </Link>
+                <Link href={`/messages?to=${f.id}`}>
+                  <Button size="sm" variant="outline" aria-label={t('nav.messages')}>
+                    <MessageCircle size={15} />
+                  </Button>
                 </Link>
                 <Button size="sm" variant="ghost" onClick={() => remove(f.id)} disabled={busy}>
                   {t('fr.remove')}
